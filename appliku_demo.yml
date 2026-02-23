@@ -1,0 +1,21 @@
+build_settings:
+  build_image: python-3.13-node-20.18
+  build_command: npm i && npm run tailwind:build
+  environment_variables:
+    - name: APPLIKU
+      value: 'true'
+    - name: DEFAULT_ADMIN_PASSWORD
+      value: 'adminadmin'
+    - name: DEMO_MODE
+      value: 'true'
+
+services:
+  - name: web
+    command: bash web.sh
+
+  - name: release
+    command: bash release.sh
+
+databases:
+  - type: postgresql_17
+  - type: redis_7
