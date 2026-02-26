@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Tạo buổi học - LCMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-calendar-plus me-2"></i>Tạo buổi học mới</h1>
+    <p class="mb-0">{{ class_obj.class_code }} - {{ class_obj.class_name }}</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="sb-card">
+            <div class="sb-card-header">
+                <i class="fas fa-info-circle me-2"></i>Thông tin buổi học
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Ngày học <span class="text-danger">*</span></label>
+                        <input type="date" name="scheduled_date" class="form-control" required>
+                    </div>
+                    
+                    {% if class_obj.start_time and class_obj.end_time %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-clock me-2"></i>
+                        Giờ học mặc định: {{ class_obj.start_time|time:"H:i" }} - {{ class_obj.end_time|time:"H:i" }}
+                    </div>
+                    <input type="hidden" name="scheduled_start" value="{{ class_obj.start_time|time:'H:i' }}">
+                    <input type="hidden" name="scheduled_end" value="{{ class_obj.end_time|time:'H:i' }}">
+                    {% else %}
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label class="form-label">Giờ bắt đầu</label>
+                                <input type="time" name="scheduled_start" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label class="form-label">Giờ kết thúc</label>
+                                <input type="time" name="scheduled_end" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Tạo buổi học
+                        </button>
+                        <a href="{% url 'attendance:session_list' class_obj.id %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-1"></i> Hủy
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

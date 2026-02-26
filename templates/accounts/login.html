@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block login_content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 p-4">
+    <!-- Animated background -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+    </div>
+    
+    <div class="relative w-full max-w-md">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-lg mb-4">
+                <i class="fas fa-graduation-cap text-primary-600 text-2xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-white">LCMS</h1>
+            <p class="text-primary-200 mt-2">Learning Center Management System</p>
+        </div>
+        
+        <!-- Login Card -->
+        <div class="bg-white rounded-2xl shadow-2xl p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Đăng nhập</h2>
+            <p class="text-gray-500 mb-6">Nhập thông tin tài khoản để tiếp tục</p>
+            
+            {% if messages %}
+            {% for message in messages %}
+            <div class="mb-4 p-4 rounded-lg flex items-center gap-3 
+                {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-green-50 text-green-700 border border-green-200{% endif %}">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+            {% endif %}
+            
+            <form method="post" class="space-y-5">
+                {% csrf_token %}
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <div class="relative">
+                        <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input 
+                            type="email" 
+                            name="login" 
+                            class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                            placeholder="admin@lcms.com"
+                            required
+                        >
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Mật khẩu</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input 
+                            type="password" 
+                            name="password" 
+                            class="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                            placeholder="••••••••"
+                            required
+                        >
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center">
+                        <input type="checkbox" class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+                        <span class="ml-2 text-sm text-gray-600">Ghi nhớ đăng nhập</span>
+                    </label>
+                    <a href="#" class="text-sm text-primary-600 hover:text-primary-700">Quên mật khẩu?</a>
+                </div>
+                
+                <button 
+                    type="submit"
+                    class="w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 active:scale-95 transition-all duration-200"
+                >
+                    Đăng nhập
+                </button>
+            </form>
+            
+            <div class="mt-6 pt-6 border-t border-gray-100 text-center">
+                <p class="text-gray-500 text-sm">
+                    Tài khoản demo: <span class="font-mono text-primary-600">admin@lcms.com / admin123</span>
+                </p>
+            </div>
+        </div>
+        
+        <p class="text-center text-primary-200 text-sm mt-6">
+            © 2024 LCMS. All rights reserved.
+        </p>
+    </div>
+</div>
+{% endblock %}

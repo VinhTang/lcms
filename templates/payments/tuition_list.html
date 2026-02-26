@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Danh sách học phí - LCMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-money-bill-wave me-2"></i>Quản lý học phí</h1>
+    <p class="mb-0">Danh sách học phí của tất cả học sinh</p>
+</div>
+
+<div class="sb-card">
+    <div class="sb-card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-list me-2"></i>Danh sách học phí</span>
+        <a href="{% url 'payments:tuition_create' %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> Tạo học phí
+        </a>
+    </div>
+    <div class="card-body">
+        <form method="get" class="mb-4">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control" placeholder="Tìm kiếm..." value="{{ search }}">
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-select">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Đã thanh toán</option>
+                        <option value="unpaid" {% if status_filter == 'unpaid' %}selected{% endif %}>Chưa thanh toán</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i> Tìm
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Học sinh</th>
+                        <th>Lớp</th>
+                        <th>Loại</th>
+                        <th>Tháng/Khóa</th>
+                        <th>Số tiền</th>
+                        <th>Đến hạn</th>
+                        <th>Trạng thái</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tuition in page_obj %}
+                    <tr>
+                        <td class="fw-bold">{{ tuition.enrollment.student.full_name }}</td>
+                        <td>{{ tuition.enrollment.class_enrolled.class_name }}</td>
+                        <td>
+                            {% if tuition.tuition_type == 'monthly' %}
+                            <span class="badge bg-info">Theo tháng</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">Theo khóa</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ tuition.month|default:tuition.course_name }}</td>
+                        <td class="fw-bold">{{ tuition.amount|floatformat:0 }} VNĐ</td>
+                        <td>{{ tuition.due_date|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if tuition.paid %}
+                            <span class="badge bg-success">Đã thanh toán</span>
+                            {% else %}
+                            <span class="badge bg-danger">Chưa thanh toán</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'payments:tuition_detail' tuition.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">Không có dữ liệu</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page=1">Đầu</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Trước</a></li>
+                {% endif %}
+                <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Sau</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Cuối</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

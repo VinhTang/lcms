@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}{% if edit_user %}Sửa{% else %}Thêm{% endif %} người dùng - LCMS{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">
+                <i class="fas fa-{% if edit_user %}edit{% else %}plus{% endif %} text-primary-500 mr-2"></i>
+                {% if edit_user %}Sửa{% else %}Thêm{% endif %} người dùng
+            </h1>
+            <p class="text-gray-500 mt-1">
+                {% if edit_user %}Cập nhật thông tin người dùng{% else %}Tạo tài khoản người dùng mới{% endif %}
+            </p>
+        </div>
+        <a href="{% url 'users:list' %}" 
+           hx-get="{% url 'users:list' %}"
+           hx-target="#main-content"
+           hx-push-url="true"
+           class="btn-secondary inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Form -->
+        <div class="lg:col-span-2">
+            <div class="card">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-800">
+                        <i class="fas fa-user text-primary-500 mr-2"></i>Thông tin người dùng
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Họ <span class="text-red-500">*</span></label>
+                                <input 
+                                    type="text" 
+                                    name="last_name" 
+                                    class="input-field" 
+                                    value="{{ edit_user.last_name|default:'' }}" 
+                                    required
+                                    placeholder="Ví dụ: Nguyễn"
+                                >
+                                <p class="text-xs text-gray-500 mt-1">Không có khoảng trắng</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tên <span class="text-red-500">*</span></label>
+                                <input 
+                                    type="text" 
+                                    name="first_name" 
+                                    class="input-field" 
+                                    value="{{ edit_user.first_name|default:'' }}" 
+                                    required
+                                    placeholder="Ví dụ: Văn Nam"
+                                >
+                                <p class="text-xs text-gray-500 mt-1">Không có số hoặc ký tự đặc biệt</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input 
+                                    type="email" 
+                                    name="email" 
+                                    class="input-field pl-11" 
+                                    value="{{ edit_user.email|default:'' }}" 
+                                    required
+                                    placeholder="email@example.com"
+                                >
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Số điện thoại</label>
+                                <div class="relative">
+                                    <i class="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <input 
+                                        type="text" 
+                                        name="phone" 
+                                        class="input-field pl-11" 
+                                        value="{{ edit_user.phone|default:'' }}"
+                                        placeholder="0123456789"
+                                    >
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Giới tính</label>
+                                <select name="gender" class="input-field">
+                                    <option value="">-- Chọn --</option>
+                                    <option value="male" {% if edit_user.gender == 'male' %}selected{% endif %}>Nam</option>
+                                    <option value="female" {% if edit_user.gender == 'female' %}selected{% endif %}>Nữ</option>
+                                    <option value="other" {% if edit_user.gender == 'other' %}selected{% endif %}>Khác</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Vai trò <span class="text-red-500">*</span></label>
+                            <select name="role" class="input-field" required>
+                                <option value="">-- Chọn vai trò --</option>
+                                <option value="admin" {% if edit_user.role == 'admin' %}selected{% endif %}>Quản trị viên</option>
+                                <option value="teacher" {% if edit_user.role == 'teacher' %}selected{% endif %}>Giáo viên</option>
+                                <option value="assistant" {% if edit_user.role == 'assistant' %}selected{% endif %}>Trợ giảng</option>
+                                <option value="parent" {% if edit_user.role == 'parent' %}selected{% endif %}>Phụ huynh</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                {% if edit_user %}Mật khẩu mới{% else %}Mật khẩu{% endif %}
+                            </label>
+                            <div class="relative">
+                                <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input 
+                                    type="password" 
+                                    name="password" 
+                                    class="input-field pl-11"
+                                    placeholder="{% if edit_user %}Để trống nếu không đổi{% else %}Mật khẩu mặc định: Lcms@123{% endif %}"
+                                >
+                            </div>
+                            {% if edit_user %}
+                            <p class="text-xs text-gray-500 mt-1">Để trống nếu không muốn đổi mật khẩu</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                            <a href="{% url 'users:list' %}" 
+                               hx-get="{% url 'users:list' %}"
+                               hx-target="#main-content"
+                               hx-push-url="true"
+                               class="btn-secondary px-6 py-2.5">Hủy</a>
+                            <button type="submit" class="btn-primary px-6 py-2.5">
+                                <i class="fas fa-save mr-2"></i>Lưu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <div class="card">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                        <i class="fas fa-info-circle mr-2"></i>Lưu ý
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-3 text-sm text-gray-600">
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-500"></i> Họ không có khoảng trắng
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-500"></i> Tên không có số hoặc ký tự đặc biệt
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-500"></i> Domain được tạo tự động
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-lightbulb text-amber-500"></i>
+                            Ví dụ: Nguyễn Văn Nam → <code class="px-1.5 py-0.5 bg-gray-100 rounded text-xs">nguyenvannam</code>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            {% if edit_user %}
+            <div class="card">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                        <i class="fas fa-user-circle mr-2"></i>Thông tin
+                    </h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <p class="text-xs text-gray-500">Domain</p>
+                        <code class="px-2 py-1 bg-gray-100 rounded text-sm">{{ edit_user.domain }}</code>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Ngày tạo</p>
+                        <p class="font-medium">{{ edit_user.date_joined|date:"d/m/Y H:i" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Đăng nhập cuối</p>
+                        <p class="font-medium">{% if edit_user.last_login %}{{ edit_user.last_login|date:"d/m/Y H:i" }}{% else %}Chưa đăng nhập{% endif %}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

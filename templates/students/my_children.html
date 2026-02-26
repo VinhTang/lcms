@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Con của tôi - LCMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h2 mb-1"><i class="fas fa-child me-2"></i>Con của tôi</h1>
+            <p class="mb-0 opacity-75">Danh sách con được liên kết với tài khoản</p>
+        </div>
+    </div>
+</div>
+
+{% if children %}
+<div class="row g-4">
+    {% for child in children %}
+    <div class="col-lg-6">
+        <div class="card sb-card h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0 fw-bold">{{ child.student.full_name }}</h5>
+                    <small class="text-muted">Domain: <code>{{ child.student.domain }}</code></small>
+                </div>
+                <span class="badge bg-info">{{ child.get_relationship_display }}</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <small class="text-muted d-block">Giới tính</small>
+                        <span class="fw-bold">{{ child.student.get_gender_display|default:"-" }}</span>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <small class="text-muted d-block">SDT khẩn cấp</small>
+                        <span class="fw-bold">{{ child.student.emergency_call|default:"-" }}</span>
+                    </div>
+                </div>
+                
+                <h6 class="fw-bold mt-3 mb-2"><i class="fas fa-school me-2 text-primary"></i>Lớp học</h6>
+                {% with student_enrollments=child.student.enrollments.all %}
+                {% if student_enrollments %}
+                <table class="table table-sm mb-0">
+                    <tbody>
+                        {% for enrollment in student_enrollments %}
+                        <tr>
+                            <td>{{ enrollment.class_enrolled.class_name }}</td>
+                            <td>{{ enrollment.class_enrolled.subject.subject_name }}</td>
+                            <td>
+                                {% if enrollment.status == 'active' %}
+                                <span class="badge bg-success">Hoạt động</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Đã rời</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted mb-0">Chưa tham gia lớp nào</p>
+                {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card sb-card">
+    <div class="card-body text-center py-5">
+        <div class="empty-state">
+            <i class="fas fa-child d-block mb-3" style="font-size: 4rem; color: #d1d3e2;"></i>
+            <h5>Chưa có con nào được liên kết</h5>
+            <p class="text-muted">Liên hệ quản trị viên để liên kết tài khoản con</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

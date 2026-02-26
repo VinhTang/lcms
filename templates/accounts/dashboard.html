@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - LCMS{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-800">Xin chào, {{ user.get_full_name|default:user.username }}!</h1>
+        <p class="text-gray-500 mt-1">Chào mừng đến với hệ thống quản lý trung tâm học tập</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {% if user.role == 'admin' %}
+        <div class="bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-primary-100 text-sm font-medium">TỔNG NGƯỜI DÙNG</p>
+                    <p class="text-3xl font-bold mt-1">{{ total_users|default:"0" }}</p>
+                </div>
+                <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-users text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-green-500 to-green-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-green-100 text-sm font-medium">HỌC SINH</p>
+                    <p class="text-3xl font-bold mt-1">{{ total_students|default:"0" }}</p>
+                </div>
+                <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-user-graduate text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-amber-100 text-sm font-medium">LỚP HỌC</p>
+                    <p class="text-3xl font-bold mt-1">{{ total_classes|default:"0" }}</p>
+                </div>
+                <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-school text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-red-500 to-red-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-red-100 text-sm font-medium">HỌC PHÍ CHƯA THU</p>
+                    <p class="text-3xl font-bold mt-1">{{ unpaid_tuition|default:"0" }}</p>
+                </div>
+                <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-money-bill-wave text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if user.role == 'teacher' or user.role == 'assistant' %}
+        <div class="bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-primary-100 text-sm font-medium">LỚP HỌC CỦA TÔI</p>
+                    <p class="text-3xl font-bold mt-1">{{ my_classes_count|default:"0" }}</p>
+                </div>
+                <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-chalkboard-teacher text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-green-500 to-green-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-green-100 text-sm font-medium">BUỔI ĐÃ ĐIỂM DANH</p>
+                    <p class="text-3xl font-bold mt-1">{{ sessions_count|default:"0" }}</p>
+                </div>
+                <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-calendar-check text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-amber-100 text-sm font-medium">HỌC SINH</p>
+                    <p class="text-3xl font-bold mt-1">{{ my_students_count|default:"0" }}</p>
+                </div>
+                <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-users text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if user.role == 'parent' %}
+        <div class="bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-primary-100 text-sm font-medium">CON CỦA BẠN</p>
+                    <p class="text-3xl font-bold mt-1">{{ children_count|default:"0" }}</p>
+                </div>
+                <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-child text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-green-500 to-green-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-green-100 text-sm font-medium">HỌC PHÍ ĐÃ ĐÓNG</p>
+                    <p class="text-3xl font-bold mt-1">{{ paid_tuition|default:"0" }}</p>
+                </div>
+                <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-check-circle text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h3 class="text-lg font-semibold text-gray-800">
+                <i class="fas fa-bolt text-primary-500 mr-2"></i>Thao tác nhanh
+            </h3>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {% if user.role == 'admin' %}
+                <a href="{% url 'users:list' %}" 
+                   hx-get="{% url 'users:list' %}" 
+                   hx-target="#main-content"
+                   hx-push-url="true"
+                   class="group p-4 rounded-xl border border-gray-200 hover:border-primary-500 hover:bg-primary-50 transition-all duration-200 cursor-pointer">
+                    <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 mb-3 group-hover:bg-primary-600 group-hover:text-white transition-all duration-200">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-800">Người dùng</h4>
+                    <p class="text-sm text-gray-500 mt-1">Quản lý tài khoản</p>
+                </a>
+                
+                <a href="{% url 'students:list' %}" 
+                   hx-get="{% url 'students:list' %}" 
+                   hx-target="#main-content"
+                   hx-push-url="true"
+                   class="group p-4 rounded-xl border border-gray-200 hover:border-green-500 hover:bg-green-50 transition-all duration-200 cursor-pointer">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 mb-3 group-hover:bg-green-600 group-hover:text-white transition-all duration-200">
+                        <i class="fas fa-user-graduate text-xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-800">Học sinh</h4>
+                    <p class="text-sm text-gray-500 mt-1">Thông tin học sinh</p>
+                </a>
+                
+                <a href="{% url 'classes:list' %}" 
+                   hx-get="{% url 'classes:list' %}" 
+                   hx-target="#main-content"
+                   hx-push-url="true"
+                   class="group p-4 rounded-xl border border-gray-200 hover:border-amber-500 hover:bg-amber-50 transition-all duration-200 cursor-pointer">
+                    <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 mb-3 group-hover:bg-amber-600 group-hover:text-white transition-all duration-200">
+                        <i class="fas fa-school text-xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-800">Lớp học</h4>
+                    <p class="text-sm text-gray-500 mt-1">Quản lý lớp</p>
+                </a>
+                
+                <a href="{% url 'payments:tuition_list' %}" 
+                   hx-get="{% url 'payments:tuition_list' %}" 
+                   hx-target="#main-content"
+                   hx-push-url="true"
+                   class="group p-4 rounded-xl border border-gray-200 hover:border-red-500 hover:bg-red-50 transition-all duration-200 cursor-pointer">
+                    <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-red-600 mb-3 group-hover:bg-red-600 group-hover:text-white transition-all duration-200">
+                        <i class="fas fa-money-bill-wave text-xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-800">Học phí</h4>
+                    <p class="text-sm text-gray-500 mt-1">Quản lý thu tiền</p>
+                </a>
+                {% endif %}
+                
+                {% if user.role == 'teacher' or user.role == 'assistant' %}
+                <a href="{% url 'classes:my_classes' %}" 
+                   hx-get="{% url 'classes:my_classes' %}" 
+                   hx-target="#main-content"
+                   hx-push-url="true"
+                   class="group p-4 rounded-xl border border-gray-200 hover:border-primary-500 hover:bg-primary-50 transition-all duration-200 cursor-pointer">
+                    <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 mb-3 group-hover:bg-primary-600 group-hover:text-white transition-all duration-200">
+                        <i class="fas fa-chalkboard-teacher text-xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-800">Lớp của tôi</h4>
+                    <p class="text-sm text-gray-500 mt-1">Xem lớp được phân công</p>
+                </a>
+                
+                <a href="{% url 'attendance:my_sessions' %}" 
+                   hx-get="{% url 'attendance:my_sessions' %}" 
+                   hx-target="#main-content"
+                   hx-push-url="true"
+                   class="group p-4 rounded-xl border border-gray-200 hover:border-green-500 hover:bg-green-50 transition-all duration-200 cursor-pointer">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 mb-3 group-hover:bg-green-600 group-hover:text-white transition-all duration-200">
+                        <i class="fas fa-calendar-check text-xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-800">Buổi học</h4>
+                    <p class="text-sm text-gray-500 mt-1">Điểm danh hàng ngày</p>
+                </a>
+                {% endif %}
+                
+                {% if user.role == 'parent' %}
+                <a href="{% url 'students:my_children' %}" 
+                   hx-get="{% url 'students:my_children' %}" 
+                   hx-target="#main-content"
+                   hx-push-url="true"
+                   class="group p-4 rounded-xl border border-gray-200 hover:border-primary-500 hover:bg-primary-50 transition-all duration-200 cursor-pointer">
+                    <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 mb-3 group-hover:bg-primary-600 group-hover:text-white transition-all duration-200">
+                        <i class="fas fa-child text-xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-800">Con của tôi</h4>
+                    <p class="text-sm text-gray-500 mt-1">Xem thông tin con</p>
+                </a>
+                
+                <a href="{% url 'payments:my_tuitions' %}" 
+                   hx-get="{% url 'payments:my_tuitions' %}" 
+                   hx-target="#main-content"
+                   hx-push-url="true"
+                   class="group p-4 rounded-xl border border-gray-200 hover:border-green-500 hover:bg-green-50 transition-all duration-200 cursor-pointer">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 mb-3 group-hover:bg-green-600 group-hover:text-white transition-all duration-200">
+                        <i class="fas fa-money-bill-wave text-xl"></i>
+                    </div>
+                    <h4 class="font-semibold text-gray-800">Học phí</h4>
+                    <p class="text-sm text-gray-500 mt-1">Xem học phí con</p>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Buổi học của tôi - LCMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-calendar-check me-2"></i>Buổi học của tôi</h1>
+    <p class="mb-0">Danh sách các buổi học sắp tới và đã diễn ra</p>
+</div>
+
+<div class="sb-card">
+    <div class="sb-card-header">
+        <i class="fas fa-list me-2"></i>Lịch sử buổi học
+    </div>
+    <div class="card-body">
+        {% if sessions %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Ngày</th>
+                        <th>Thời gian</th>
+                        <th>Lớp</th>
+                        <th>Môn học</th>
+                        <th>Trạng thái</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in sessions %}
+                    <tr>
+                        <td>{{ session.scheduled_date|date:"d/m/Y" }}</td>
+                        <td>{{ session.scheduled_start|time:"H:i" }} - {{ session.scheduled_end|time:"H:i" }}</td>
+                        <td class="fw-bold">{{ session.class_enrolled.class_name }}</td>
+                        <td>{{ session.class_enrolled.subject.subject_name }}</td>
+                        <td>
+                            {% if session.status == 'not_started' %}
+                            <span class="badge bg-secondary">Chưa bắt đầu</span>
+                            {% elif session.status == 'in_progress' %}
+                            <span class="badge bg-success">Đang diễn ra</span>
+                            {% else %}
+                            <span class="badge bg-danger">Đã kết thúc</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'attendance:session_detail' session.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i> Xem
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-calendar-times"></i>
+            <h5>Chưa có buổi học nào</h5>
+            <p>Bạn chưa được phân công giảng dạy lớp nào.</p>
+            <a href="{% url 'classes:my_classes' %}" class="btn btn-primary">
+                <i class="fas fa-school me-1"></i> Xem lớp của tôi
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
