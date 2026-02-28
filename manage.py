@@ -2,6 +2,11 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+from pathlib import Path
+
+# Thêm thư mục apps vào danh sách đường dẫn tìm kiếm mặc định
+# Nhờ vậy ta có thể import `accounts.models` thay vì `apps.accounts.models`
+sys.path.insert(0, str(Path(__file__).resolve().parent / "apps"))
 
 
 def main():
