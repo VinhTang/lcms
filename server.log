@@ -1,0 +1,94 @@
+INFO 2026-02-28 14:14:15,584 autoreload Watching for file changes with StatReloader
+System check identified some issues:
+
+WARNINGS:
+?: settings.ACCOUNT_AUTHENTICATION_METHOD is deprecated, use: settings.ACCOUNT_LOGIN_METHODS = {'email'}
+?: settings.ACCOUNT_EMAIL_REQUIRED is deprecated, use: settings.ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+?: settings.ACCOUNT_USERNAME_REQUIRED is deprecated, use: settings.ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+
+System check identified 3 issues (0 silenced).
+INFO 2026-02-28 14:14:24,260 log "GET /users/ HTTP/1.1" 200 40877
+INFO 2026-02-28 14:14:35,731 log "GET / HTTP/1.1" 302 0
+INFO 2026-02-28 14:14:35,738 log "GET /accounts/login/ HTTP/1.1" 200 12624
+INFO 2026-02-28 14:14:41,022 log "POST /accounts/login/ HTTP/1.1" 200 12954
+INFO 2026-02-28 14:14:57,902 log "GET /users/create/ HTTP/1.1" 200 25613
+INFO 2026-02-28 14:15:39,619 autoreload /Users/vinh.tang/Documents/1-Project/LCMS/lcms-portal/lcms/settings.py changed, reloading.
+Performing system checks...
+
+February 28, 2026 - 14:14:15
+Django version 6.0.2, using settings 'lcms.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+
+WARNING: This is a development server. Do not use it in a production setting. Use a production WSGI or ASGI server instead.
+For more information on production servers see: https://docs.djangoproject.com/en/6.0/howto/deployment/
+INFO 2026-02-28 14:15:41,697 autoreload Watching for file changes with StatReloader
+System check identified some issues:
+
+WARNINGS:
+?: settings.ACCOUNT_AUTHENTICATION_METHOD is deprecated, use: settings.ACCOUNT_LOGIN_METHODS = {'email'}
+?: settings.ACCOUNT_EMAIL_REQUIRED is deprecated, use: settings.ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+?: settings.ACCOUNT_USERNAME_REQUIRED is deprecated, use: settings.ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+
+System check identified 3 issues (0 silenced).
+INFO 2026-02-28 14:16:35,482 log "GET /users/ HTTP/1.1" 200 40877
+INFO 2026-02-28 14:21:44,639 log "GET /users/ HTTP/1.1" 200 40877
+INFO 2026-02-28 14:22:04,935 log "POST /accounts/login/ HTTP/1.1" 200 12981
+INFO 2026-02-28 14:22:18,155 log "POST /accounts/login/ HTTP/1.1" 200 12981
+INFO 2026-02-28 14:22:38,350 log "GET /users/create/ HTTP/1.1" 200 25613
+INFO 2026-02-28 14:23:07,279 log "POST /users/create/ HTTP/1.1" 302 0
+INFO 2026-02-28 14:23:07,290 log "GET /users/ HTTP/1.1" 200 45673
+INFO 2026-02-28 14:23:19,446 log "POST /accounts/login/ HTTP/1.1" 200 12981
+INFO 2026-02-28 14:23:31,075 log "POST /accounts/login/ HTTP/1.1" 200 12981
+INFO 2026-02-28 14:23:53,318 log "POST /accounts/login/ HTTP/1.1" 200 12981
+INFO 2026-02-28 14:24:38,940 log "GET /users/create/ HTTP/1.1" 200 25613
+INFO 2026-02-28 14:27:11,482 autoreload /Users/vinh.tang/Documents/1-Project/LCMS/lcms-portal/users/views.py changed, reloading.
+Performing system checks...
+
+February 28, 2026 - 14:15:42
+Django version 6.0.2, using settings 'lcms.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CONTROL-C.
+
+WARNING: This is a development server. Do not use it in a production setting. Use a production WSGI or ASGI server instead.
+For more information on production servers see: https://docs.djangoproject.com/en/6.0/howto/deployment/
+INFO 2026-02-28 14:27:11,997 autoreload Watching for file changes with StatReloader
+System check identified some issues:
+
+WARNINGS:
+?: settings.ACCOUNT_AUTHENTICATION_METHOD is deprecated, use: settings.ACCOUNT_LOGIN_METHODS = {'email'}
+?: settings.ACCOUNT_EMAIL_REQUIRED is deprecated, use: settings.ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+?: settings.ACCOUNT_USERNAME_REQUIRED is deprecated, use: settings.ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+
+System check identified 3 issues (0 silenced).
+INFO 2026-02-28 14:28:52,593 log "GET /users/create/ HTTP/1.1" 200 25647
+WARNING 2026-02-28 14:28:53,329 log Not Found: /favicon.ico
+WARNING 2026-02-28 14:28:53,329 log "GET /favicon.ico HTTP/1.1" 404 10393
+INFO 2026-02-28 14:28:54,086 log "GET /users/create/ HTTP/1.1" 200 25647
+WARNING 2026-02-28 14:28:54,474 log Not Found: /favicon.ico
+WARNING 2026-02-28 14:28:54,474 log "GET /favicon.ico HTTP/1.1" 404 10393
+INFO 2026-02-28 14:29:01,576 log "GET /users/ HTTP/1.1" 200 43833
+INFO 2026-02-28 14:29:13,264 log "POST /accounts/login/ HTTP/1.1" 302 0
+INFO 2026-02-28 14:29:13,279 log "GET /accounts/dashboard/ HTTP/1.1" 200 20367
+INFO 2026-02-28 14:29:46,146 log "GET /my-classes/ HTTP/1.1" 200 16417
+INFO 2026-02-28 14:29:47,894 log "GET /my-sessions/ HTTP/1.1" 200 17063
+INFO 2026-02-28 14:29:48,987 log "GET /my-classes/ HTTP/1.1" 200 16417
+INFO 2026-02-28 14:29:51,293 log "GET /students/ HTTP/1.1" 200 23093
+INFO 2026-02-28 14:29:51,792 log "GET /classes/ HTTP/1.1" 200 25362
+INFO 2026-02-28 14:29:54,154 log "GET /classes/2/edit/ HTTP/1.1" 200 30332
+INFO 2026-02-28 14:29:58,592 log "POST /classes/2/edit/ HTTP/1.1" 302 0
+INFO 2026-02-28 14:29:58,639 log "GET /classes/ HTTP/1.1" 200 27178
+INFO 2026-02-28 14:30:00,755 log "GET /my-classes/ HTTP/1.1" 200 18005
+INFO 2026-02-28 14:30:04,220 log "GET /accounts/dashboard/ HTTP/1.1" 200 20367
+INFO 2026-02-28 14:30:07,149 log "GET /my-classes/ HTTP/1.1" 200 18005
+INFO 2026-02-28 14:30:10,960 log "GET /class/2/sessions/ HTTP/1.1" 200 17887
+INFO 2026-02-28 14:30:12,512 log "GET /class/2/sessions/create/ HTTP/1.1" 200 18277
+INFO 2026-02-28 14:30:22,906 log "POST /class/2/sessions/create/ HTTP/1.1" 302 0
+INFO 2026-02-28 14:30:22,950 log "GET /session/1/ HTTP/1.1" 200 24785
+INFO 2026-02-28 14:30:28,823 log "POST /session/1/open/ HTTP/1.1" 200 65
+INFO 2026-02-28 14:30:28,855 log "GET /session/1/ HTTP/1.1" 200 22959
+INFO 2026-02-28 14:30:35,891 log "GET /students/ HTTP/1.1" 200 23093
+INFO 2026-02-28 14:30:38,142 log "GET /students/5/edit/ HTTP/1.1" 200 23505
+INFO 2026-02-28 14:30:41,972 log "GET /classes/ HTTP/1.1" 200 25368
+INFO 2026-02-28 14:30:42,722 log "GET /students/ HTTP/1.1" 200 23093
+INFO 2026-02-28 14:30:43,148 log "GET /users/ HTTP/1.1" 200 43833

@@ -13,16 +13,8 @@ def login_view(request):
         login_input = request.POST.get("login")
         password = request.POST.get("password")
         
-        # Try to find user by email or username
-        user = None
-        if "@" in login_input:
-            try:
-                user_obj = User.objects.get(email=login_input)
-                user = authenticate(request, username=user_obj.username, password=password)
-            except User.DoesNotExist:
-                pass
-        else:
-            user = authenticate(request, username=login_input, password=password)
+        # Pass directly to authenticate - the custom EmailDomainBackend handles resolving email vs domain
+        user = authenticate(request, username=login_input, password=password)
         
         if user is not None:
             login(request, user)

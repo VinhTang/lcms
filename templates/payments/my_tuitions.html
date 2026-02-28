@@ -23,31 +23,31 @@
             <table class="w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Con</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Lớp</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Loại</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Tháng/Khóa</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Số tiền</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Đến hạn</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Con</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Lớp</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Loại</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Tháng/Khóa</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Số tiền</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Đến hạn</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     {% for tuition in tuitions %}
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4 font-bold text-gray-800">{{ tuition.enrollment.student.full_name }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-600">{{ tuition.enrollment.class_enrolled.class_name }}</td>
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-1.5 font-bold text-gray-800">{{ tuition.enrollment.student.full_name }}</td>
+                        <td class="px-4 py-1.5 text-sm text-gray-600">{{ tuition.enrollment.class_enrolled.class_name }}</td>
+                        <td class="px-4 py-1.5">
                             {% if tuition.tuition_type == 'monthly' %}
                             <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Theo tháng</span>
                             {% else %}
                             <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">Theo khóa</span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">{{ tuition.month|default:tuition.course_name }}</td>
-                        <td class="px-6 py-4 font-bold text-primary-600">{{ tuition.amount|floatformat:0 }} VNĐ</td>
-                        <td class="px-6 py-4 text-sm text-gray-600">{{ tuition.due_date|date:"d/m/Y" }}</td>
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-1.5 text-sm text-gray-600">{{ tuition.month|default:tuition.course_name }}</td>
+                        <td class="px-4 py-1.5 font-bold text-primary-600">{{ tuition.amount|floatformat:0 }} VNĐ</td>
+                        <td class="px-4 py-1.5 text-sm text-gray-600">{{ tuition.due_date|date:"d/m/Y" }}</td>
+                        <td class="px-4 py-1.5">
                             {% if tuition.paid %}
                             <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 flex items-center gap-1 w-max"><i class="fas fa-check-circle"></i> Đã đóng</span>
                             {% else %}

@@ -116,16 +116,16 @@
         }
         
         .sidebar-link {
-            @apply flex items-center gap-3 px-4 py-3 text-gray-600 bg-white border border-gray-100 shadow-[0_2px_4px_rgba(0,0,0,0.02)] rounded-xl transition-all duration-200 font-medium hover:border-primary-200 hover:shadow-md hover:text-primary-600 hover:-translate-y-px;
+            @apply flex items-center gap-3 px-4 py-2.5 text-primary-100 bg-transparent rounded-xl transition-all duration-200 text-[13px] font-medium hover:bg-white/10 hover:text-white hover:shadow-sm;
         }
         .sidebar-link.active {
-            @apply bg-primary-50 border-primary-200 text-primary-700 font-bold shadow-md ring-1 ring-primary-500/20 translate-y-0;
+            @apply bg-white/20 text-white font-bold shadow-md ring-1 ring-white/30;
         }
         .sidebar-group {
-            @apply mb-5;
+            @apply mb-4;
         }
         .sidebar-group-title {
-            @apply px-4 mb-2 text-[11px] font-bold text-gray-400 uppercase tracking-widest;
+            @apply px-4 mb-1.5 text-[10px] font-bold text-primary-300 uppercase tracking-widest;
         }
         
         .card {
@@ -156,20 +156,20 @@
     
     {% block extra_css %}{% endblock %}
 </head>
-<body class="h-full bg-gray-50 text-gray-800" x-data="appData()">
+<body class="h-full bg-gray-50 text-gray-800 text-[14px]" x-data="appData()">
     {% if user.is_authenticated %}
     <div class="h-full flex overflow-hidden">
         <!-- Sidebar -->
         <aside 
-            class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 lg:translate-x-0 flex flex-col"
+            class="fixed inset-y-0 left-0 z-50 w-64 bg-primary-900 border-r border-primary-800 transform transition-transform duration-300 lg:translate-x-0 flex flex-col"
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
         >
             <!-- Logo -->
-            <div class="h-16 flex items-center gap-3 px-6 border-b border-gray-100 bg-white">
-                <div class="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center shadow-md">
-                    <i class="fas fa-graduation-cap text-white text-lg"></i>
+            <div class="h-16 flex items-center gap-3 px-6 border-b border-primary-800 bg-primary-900">
+                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md">
+                    <i class="fas fa-graduation-cap text-primary-600 text-lg"></i>
                 </div>
-                <span class="text-gray-800 text-xl font-bold">LCMS</span>
+                <span class="text-white text-xl font-bold tracking-tight">LCMS</span>
             </div>
             
             <!-- Navigation -->
@@ -277,20 +277,20 @@
             </nav>
             
             <!-- User Info -->
-            <div class="h-20 bg-gray-50 border-t border-gray-200 px-4 flex items-center gap-3">
-                <div class="w-10 h-10 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center font-bold">
+            <div class="h-20 bg-primary-800 border-t border-primary-700 px-4 flex items-center gap-3">
+                <div class="w-10 h-10 bg-white/20 text-white rounded-full flex items-center justify-center font-bold shadow-inner">
                     {{ user.first_name|default:user.username|make_list|first|upper }}
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold text-gray-800 truncate">{{ user.get_full_name|default:user.username }}</p>
-                    <p class="text-xs text-gray-500 truncate">
+                    <p class="text-[13px] font-bold text-white truncate">{{ user.get_full_name|default:user.username }}</p>
+                    <p class="text-[11px] text-primary-200 truncate">
                         {% if user.role == 'admin' %}Quản trị viên
                         {% elif user.role == 'teacher' %}Giáo viên
                         {% elif user.role == 'assistant' %}Trợ giảng
                         {% else %}Phụ huynh{% endif %}
                     </p>
                 </div>
-                <a href="{% url 'logout' %}" class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors" title="Đăng xuất">
+                <a href="{% url 'logout' %}" class="w-8 h-8 flex items-center justify-center rounded-lg text-primary-200 hover:text-white hover:bg-white/10 transition-colors" title="Đăng xuất">
                     <i class="fas fa-sign-out-alt"></i>
                 </a>
             </div>
@@ -306,10 +306,10 @@
         <!-- Main Content -->
         <div class="flex-1 lg:ml-64 flex flex-col h-screen overflow-hidden">
             <!-- Top Header -->
-            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-8 shrink-0 z-30">
+            <header class="h-16 bg-primary-600 border-b border-primary-700 flex items-center justify-between px-4 lg:px-8 shrink-0 z-30 shadow-md">
                 <button 
                     @click="sidebarOpen = !sidebarOpen"
-                    class="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100"
+                    class="lg:hidden p-2 rounded-lg text-white/80 hover:bg-white/10"
                 >
                     <i class="fas fa-bars"></i>
                 </button>
@@ -321,10 +321,10 @@
                     <div class="relative" x-data="{ open: false }">
                         <button 
                             @click="open = !open"
-                            class="w-10 h-10 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-500 hover:text-primary-600 hover:border-primary-200 hover:bg-primary-50 transition-colors"
+                            class="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors shadow-sm"
                             title="Màu giao diện"
                         >
-                            <i class="fas fa-palette"></i>
+                            <i class="fas fa-palette text-[15px]"></i>
                         </button>
                         
                         <div x-show="open" @click.away="open = false" x-transition x-cloak class="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 p-3 z-50">
@@ -339,9 +339,9 @@
                     </div>
 
                     <!-- Notifications -->
-                    <button class="relative w-10 h-10 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-500 hover:text-primary-600 hover:border-primary-200 hover:bg-primary-50 transition-colors">
-                        <i class="fas fa-bell"></i>
-                        <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 border-2 border-white rounded-full"></span>
+                    <button class="relative w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors shadow-sm">
+                        <i class="fas fa-bell text-[15px]"></i>
+                        <span class="absolute top-[6px] right-[6px] w-[8px] h-[8px] bg-red-400 border-2 border-primary-600 rounded-full"></span>
                     </button>
                 </div>
             </header>

@@ -35,7 +35,7 @@ def tuition_list(request):
     elif status_filter == 'unpaid':
         tuitions = tuitions.filter(paid=False)
     
-    paginator = Paginator(tuitions, 20)
+    paginator = Paginator(tuitions, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     

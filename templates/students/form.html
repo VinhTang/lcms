@@ -37,7 +37,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Họ và tên <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                <input type="text" name="full_name" class="input-field pl-11"
+                                <input type="text" name="full_name" class="input-field !pl-11"
                                        value="{{ student.full_name|default:'' }}" required
                                        placeholder="VD: Nguyễn Văn Nam">
                             </div>
@@ -58,7 +58,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Năm sinh</label>
                                 <div class="relative">
                                     <i class="fas fa-calendar absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                    <input type="number" name="birth_year" class="input-field pl-11"
+                                    <input type="number" name="birth_year" class="input-field !pl-11"
                                            value="{{ student.birth_year|default:'' }}"
                                            placeholder="VD: 2010" min="2000" max="2030">
                                 </div>
@@ -76,7 +76,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Trường học</label>
                             <div class="relative">
                                 <i class="fas fa-school absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                <input type="text" name="school" class="input-field pl-11"
+                                <input type="text" name="school" class="input-field !pl-11"
                                        value="{{ student.school|default:'' }}"
                                        placeholder="VD: THPT Chuyên Nguyễn Tất Thành">
                             </div>
@@ -86,7 +86,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Số điện thoại khẩn cấp</label>
                             <div class="relative">
                                 <i class="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                <input type="text" name="emergency_call" class="input-field pl-11"
+                                <input type="text" name="emergency_call" class="input-field !pl-11"
                                        value="{{ student.emergency_call|default:'' }}"
                                        placeholder="0123456789">
                             </div>

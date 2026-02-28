@@ -90,17 +90,17 @@
                     <table class="w-full">
                         <thead class="bg-gray-50 border-b border-gray-200">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Ngày thanh toán</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Số tiền</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Phương thức</th>
+                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Ngày thanh toán</th>
+                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Số tiền</th>
+                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Phương thức</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             {% for history in payment_histories %}
                             <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 text-sm text-gray-600">{{ history.paid_at|date:"d/m/Y H:i" }}</td>
-                                <td class="px-6 py-4 font-bold text-primary-600">{{ history.amount|floatformat:0 }} VNĐ</td>
-                                <td class="px-6 py-4">
+                                <td class="px-4 py-1.5 text-sm text-gray-600">{{ history.paid_at|date:"d/m/Y H:i" }}</td>
+                                <td class="px-4 py-1.5 font-bold text-primary-600">{{ history.amount|floatformat:0 }} VNĐ</td>
+                                <td class="px-4 py-1.5">
                                     {% if history.payment_method == 'cash' %}
                                     <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Tiền mặt</span>
                                     {% elif history.payment_method == 'transfer' %}

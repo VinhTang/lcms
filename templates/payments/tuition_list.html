@@ -31,7 +31,7 @@
                         <input 
                             type="text" 
                             name="search" 
-                            class="input-field pl-10" 
+                            class="input-field !pl-10" 
                             placeholder="Tìm kiếm..."
                             value="{{ search }}"
                         >
@@ -62,39 +62,39 @@
             <table class="w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Học sinh</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Lớp</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Loại</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tháng/Khóa</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Số tiền</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Đến hạn</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Thao tác</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Học sinh</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Lớp</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Loại</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tháng/Khóa</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Số tiền</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Đến hạn</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                        <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     {% for tuition in page_obj %}
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4 font-bold text-gray-800">{{ tuition.enrollment.student.full_name }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-600">{{ tuition.enrollment.class_enrolled.class_name }}</td>
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-1.5 font-bold text-gray-800">{{ tuition.enrollment.student.full_name }}</td>
+                        <td class="px-4 py-1.5 text-sm text-gray-600">{{ tuition.enrollment.class_enrolled.class_name }}</td>
+                        <td class="px-4 py-1.5">
                             {% if tuition.tuition_type == 'monthly' %}
                             <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Theo tháng</span>
                             {% else %}
                             <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">Theo khóa</span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">{{ tuition.month|default:tuition.course_name }}</td>
-                        <td class="px-6 py-4 font-bold text-primary-600">{{ tuition.amount|floatformat:0 }} VNĐ</td>
-                        <td class="px-6 py-4 text-sm text-gray-600">{{ tuition.due_date|date:"d/m/Y" }}</td>
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-1.5 text-sm text-gray-600">{{ tuition.month|default:tuition.course_name }}</td>
+                        <td class="px-4 py-1.5 font-bold text-primary-600">{{ tuition.amount|floatformat:0 }} VNĐ</td>
+                        <td class="px-4 py-1.5 text-sm text-gray-600">{{ tuition.due_date|date:"d/m/Y" }}</td>
+                        <td class="px-4 py-1.5">
                             {% if tuition.paid %}
                             <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700"><i class="fas fa-check-circle mr-1"></i> Đã thanh toán</span>
                             {% else %}
                             <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700"><i class="fas fa-clock mr-1"></i> Chưa thanh toán</span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 text-right">
+                        <td class="px-4 py-1.5 text-right">
                             <a href="{% url 'payments:tuition_detail' tuition.id %}" 
                                hx-get="{% url 'payments:tuition_detail' tuition.id %}"
                                hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"

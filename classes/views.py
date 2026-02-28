@@ -23,7 +23,7 @@ def class_list(request):
             models.Q(teacher__last_name__icontains=search)
         )
     
-    paginator = Paginator(classes, 20)
+    paginator = Paginator(classes, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     

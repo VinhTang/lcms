@@ -28,7 +28,7 @@ def user_list(request):
     if role_filter:
         users = users.filter(role=role_filter)
     
-    paginator = Paginator(users, 20)
+    paginator = Paginator(users, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
@@ -47,12 +47,15 @@ def user_create(request):
     
     if request.method == 'POST':
         first_name = request.POST.get('first_name', '').strip()
-        last_name = request.POST.get('last_name', '').strip().replace(' ', '')
+        last_name = request.POST.get('last_name', '').strip()
         email = request.POST.get('email', '').strip()
         phone = request.POST.get('phone', '').strip()
         gender = request.POST.get('gender', '')
         role = request.POST.get('role', 'teacher')
-        password = request.POST.get('password', 'Lcms@123')
+        
+        password = request.POST.get('password', '').strip()
+        if not password:
+            password = 'Lcms@123'
         
         if not first_name or not last_name:
             messages.error(request, 'Họ và tên không được để trống.')
@@ -89,7 +92,7 @@ def user_edit(request, user_id):
     
     if request.method == 'POST':
         user.first_name = request.POST.get('first_name', '').strip()
-        user.last_name = request.POST.get('last_name', '').strip().replace(' ', '')
+        user.last_name = request.POST.get('last_name', '').strip()
         user.email = request.POST.get('email', '').strip()
         user.phone = request.POST.get('phone', '').strip()
         user.gender = request.POST.get('gender', '')

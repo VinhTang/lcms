@@ -26,7 +26,7 @@ def student_list(request):
     if status_filter:
         students = students.filter(status=status_filter)
     
-    paginator = Paginator(students, 20)
+    paginator = Paginator(students, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
@@ -46,6 +46,8 @@ def student_create(request):
     if request.method == 'POST':
         full_name = request.POST.get('full_name', '').strip()
         gender = request.POST.get('gender', '')
+        birth_year = request.POST.get('birth_year', '')
+        school = request.POST.get('school', '').strip()
         emergency_call = request.POST.get('emergency_call', '').strip()
         
         if not full_name:
@@ -55,6 +57,8 @@ def student_create(request):
         student = Student.objects.create(
             full_name=full_name,
             gender=gender,
+            birth_year=birth_year if birth_year else None,
+            school=school,
             emergency_call=emergency_call
         )
         
@@ -81,6 +85,9 @@ def student_edit(request, student_id):
     if request.method == 'POST':
         student.full_name = request.POST.get('full_name', '').strip()
         student.gender = request.POST.get('gender', '')
+        birth_year = request.POST.get('birth_year', '')
+        student.birth_year = birth_year if birth_year else None
+        student.school = request.POST.get('school', '').strip()
         student.emergency_call = request.POST.get('emergency_call', '').strip()
         student.status = request.POST.get('status', 'active')
         student.save()

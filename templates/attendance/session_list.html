@@ -41,19 +41,19 @@
             <table class="w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Ngày</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Thời gian</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Điểm danh</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Thao tác</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Ngày</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Thời gian</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Điểm danh</th>
+                        <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     {% for session in sessions %}
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4 font-medium text-gray-800">{{ session.scheduled_date|date:"d/m/Y" }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-600">{{ session.scheduled_start|time:"H:i" }} - {{ session.scheduled_end|time:"H:i" }}</td>
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-1.5 font-medium text-gray-800">{{ session.scheduled_date|date:"d/m/Y" }}</td>
+                        <td class="px-4 py-1.5 text-sm text-gray-600">{{ session.scheduled_start|time:"H:i" }} - {{ session.scheduled_end|time:"H:i" }}</td>
+                        <td class="px-4 py-1.5">
                             {% if session.status == 'not_started' %}
                             <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">Chưa bắt đầu</span>
                             {% elif session.status == 'in_progress' %}
@@ -62,7 +62,7 @@
                             <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Đã kết thúc</span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 text-sm">
+                        <td class="px-4 py-1.5 text-sm">
                             {% if session.status == 'ended' %}
                             {% with session.attendances.all as atts %}
                             {% with atts|length as total %}
@@ -79,7 +79,7 @@
                             <span class="text-gray-400">-</span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 text-right">
+                        <td class="px-4 py-1.5 text-right">
                             <a href="{% url 'attendance:session_detail' session.id %}"
                                hx-get="{% url 'attendance:session_detail' session.id %}"
                                hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"

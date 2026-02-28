@@ -29,7 +29,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Mã lớp <span class="text-red-500">*</span></label>
                                 <div class="relative">
                                     <i class="fas fa-code absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                    <input type="text" name="class_code" class="input-field pl-11" 
+                                    <input type="text" name="class_code" class="input-field !pl-11" 
                                            value="{{ class_obj.class_code|default:'' }}" {% if class_obj %}readonly{% endif %} required
                                            placeholder="VD: TOAN10A1">
                                 </div>
@@ -39,7 +39,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Tên lớp <span class="text-red-500">*</span></label>
                                 <div class="relative">
                                     <i class="fas fa-school absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                    <input type="text" name="class_name" class="input-field pl-11" 
+                                    <input type="text" name="class_name" class="input-field !pl-11" 
                                            value="{{ class_obj.class_name|default:'' }}" required
                                            placeholder="VD: Toán 10A1">
                                 </div>
@@ -51,7 +51,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Môn học <span class="text-red-500">*</span></label>
                                 <div class="relative mb-2">
                                     <i class="fas fa-book absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                    <select name="subject" class="input-field pl-11" id="subjectSelect">
+                                    <select name="subject" class="input-field !pl-11" id="subjectSelect">
                                         <option value="">-- Chọn môn học --</option>
                                         {% for subject in subjects %}
                                         <option value="{{ subject.id }}" {% if class_obj.subject_id == subject.id %}selected{% endif %}>
@@ -62,7 +62,7 @@
                                 </div>
                                 <div class="relative">
                                     <i class="fas fa-plus absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                    <input type="text" name="new_subject" class="input-field pl-11" 
+                                    <input type="text" name="new_subject" class="input-field !pl-11" 
                                            placeholder="Hoặc nhập tên môn mới">
                                 </div>
                                 <p class="text-xs text-gray-500 mt-1">Chọn môn có sẵn hoặc nhập môn mới</p>
@@ -71,7 +71,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Giáo viên <span class="text-red-500">*</span></label>
                                 <div class="relative">
                                     <i class="fas fa-user-graduate absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                    <select name="teacher" class="input-field pl-11" required>
+                                    <select name="teacher" class="input-field !pl-11" required>
                                         <option value="">-- Chọn giáo viên --</option>
                                         {% for teacher in teachers %}
                                         <option value="{{ teacher.id }}" {% if class_obj.teacher_id == teacher.id %}selected{% endif %}>
@@ -129,7 +129,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Giờ bắt đầu</label>
                                 <div class="relative">
                                     <i class="fas fa-clock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                    <input type="time" name="start_time" class="input-field pl-11" 
+                                    <input type="time" name="start_time" class="input-field !pl-11" 
                                            value="{{ class_obj.start_time|default:'' }}">
                                 </div>
                             </div>
@@ -137,7 +137,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Giờ kết thúc</label>
                                 <div class="relative">
                                     <i class="fas fa-clock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                    <input type="time" name="end_time" class="input-field pl-11" 
+                                    <input type="time" name="end_time" class="input-field !pl-11" 
                                            value="{{ class_obj.end_time|default:'' }}">
                                 </div>
                             </div>
@@ -145,7 +145,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Phòng học</label>
                                 <div class="relative">
                                     <i class="fas fa-door-open absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                    <input type="text" name="room" class="input-field pl-11" 
+                                    <input type="text" name="room" class="input-field !pl-11" 
                                            value="{{ class_obj.room|default:'' }}"
                                            placeholder="VD: P101">
                                 </div>
@@ -156,7 +156,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Sĩ số tối đa</label>
                             <div class="relative w-1/3">
                                 <i class="fas fa-users absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                <input type="number" name="max_students" class="input-field pl-11" 
+                                <input type="number" name="max_students" class="input-field !pl-11" 
                                        value="{{ class_obj.max_students|default:30 }}" min="1" max="100">
                             </div>
                         </div>

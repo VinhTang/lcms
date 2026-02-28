@@ -83,19 +83,19 @@
                     <table class="w-full">
                         <thead class="bg-gray-50 border-b border-gray-200">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Lớp</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Môn</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Giáo viên</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
+                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Lớp</th>
+                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Môn</th>
+                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Giáo viên</th>
+                                <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             {% for enrollment in student.enrollments.all %}
                             <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 font-medium text-gray-800">{{ enrollment.class_enrolled.class_name }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-600">{{ enrollment.class_enrolled.subject.subject_name }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-600">{{ enrollment.class_enrolled.teacher.get_full_name }}</td>
-                                <td class="px-6 py-4">
+                                <td class="px-4 py-1.5 font-medium text-gray-800">{{ enrollment.class_enrolled.class_name }}</td>
+                                <td class="px-4 py-1.5 text-sm text-gray-600">{{ enrollment.class_enrolled.subject.subject_name }}</td>
+                                <td class="px-4 py-1.5 text-sm text-gray-600">{{ enrollment.class_enrolled.teacher.get_full_name }}</td>
+                                <td class="px-4 py-1.5">
                                     {% if enrollment.status == 'active' %}
                                     <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Hoạt động</span>
                                     {% else %}

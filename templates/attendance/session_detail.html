@@ -76,20 +76,20 @@
             <table class="w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">STT</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Họ tên</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Ngày sinh</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Ghi chú</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">STT</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Họ tên</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Ngày sinh</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Ghi chú</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     {% for att in attendances %}
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4 text-sm text-gray-500">{{ forloop.counter }}</td>
-                        <td class="px-6 py-4 font-medium text-gray-800">{{ att.enrollment.student.full_name }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-600">{{ att.enrollment.student.birth_year|default:"-" }}</td>
-                        <td class="px-6 py-4">
+                        <td class="px-4 py-1.5 text-sm text-gray-500">{{ forloop.counter }}</td>
+                        <td class="px-4 py-1.5 font-medium text-gray-800">{{ att.enrollment.student.full_name }}</td>
+                        <td class="px-4 py-1.5 text-sm text-gray-600">{{ att.enrollment.student.birth_year|default:"-" }}</td>
+                        <td class="px-4 py-1.5">
                             <div class="relative inline-block w-48">
                                 <select class="input-field py-1.5 pl-3 pr-8 text-sm attendance-select cursor-pointer 
                                     {% if att.status == 'present' %}bg-green-50 border-green-200 text-green-700
@@ -105,7 +105,7 @@
                                 </select>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">{{ att.notes|default:"-" }}</td>
+                        <td class="px-4 py-1.5 text-sm text-gray-600">{{ att.notes|default:"-" }}</td>
                     </tr>
                     {% empty %}
                     <tr>
