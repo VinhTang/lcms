@@ -80,7 +80,7 @@ def dashboard(request):
         
         my_classes = Class.objects.filter(teacher=request.user) if request.user.role == 'teacher' else Class.objects.filter(assistant=request.user)
         context['my_classes_count'] = my_classes.count()
-        context['sessions_count'] = ClassSession.objects.filter(class_obj__in=my_classes, status='ended').count()
+        context['sessions_count'] = ClassSession.objects.filter(class_enrolled__in=my_classes, status='ended').count()
         context['my_students_count'] = Enrollment.objects.filter(class_enrolled__in=my_classes).values('student').distinct().count()
         
     elif request.user.role == 'parent':
