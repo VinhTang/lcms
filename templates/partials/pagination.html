@@ -1,0 +1,58 @@
+{% if page_obj.has_other_pages or page_obj.paginator.count > 0 %}
+<div class="px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+    
+    <!-- Per Page Selector -->
+    <div class="flex items-center gap-2">
+        <label for="per_page" class="text-sm text-gray-500">Hiển thị:</label>
+        <select id="per_page" class="input-field py-1 px-2 text-sm !w-20" onchange="changePerPage(this.value)">
+            <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+            <option value="30" {% if per_page == 30 %}selected{% endif %}>30</option>
+            <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+        </select>
+        <span class="text-sm text-gray-500">/ trang</span>
+    </div>
+
+    <!-- Pagination Info -->
+    <div class="text-sm text-gray-500">
+        Hiển thị {{ page_obj.start_index }} - {{ page_obj.end_index }} trong tổng số {{ page_obj.paginator.count }}
+    </div>
+
+    <!-- Pagination Controls -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex gap-1">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{{ extra_query }}" 
+           class="px-3 py-1.5 text-sm rounded-lg border border-gray-200 hover:bg-gray-50">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span class="px-3 py-1.5 text-sm rounded-lg bg-primary-600 text-white">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}{{ extra_query }}" 
+               class="px-3 py-1.5 text-sm rounded-lg border border-gray-200 hover:bg-gray-50">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{{ extra_query }}" 
+           class="px-3 py-1.5 text-sm rounded-lg border border-gray-200 hover:bg-gray-50">
+            <i class="fas fa-chevron-right"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+    function changePerPage(value) {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('per_page', value);
+        urlParams.set('page', 1); // Reset to page 1
+        window.location.search = urlParams.toString();
+    }
+</script>
+{% endif %}

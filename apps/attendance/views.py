@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from django.http import JsonResponse
+from django.core.paginator import Paginator
 from datetime import datetime, timedelta
 from classes.models import Class, Enrollment
 from .models import ClassSession, Attendance
@@ -12,9 +13,24 @@ from .models import ClassSession, Attendance
 def session_list(request, class_id):
     class_obj = get_object_or_404(Class, id=class_id)
     sessions = class_obj.sessions.all().order_by('-scheduled_date', '-scheduled_start')
+    
+    per_page = request.GET.get('per_page', 30)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 30
+    
+    paginator = Paginator(sessions, per_page)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    extra_query = f'&per_page={per_page}'
+    
     return render(request, 'attendance/session_list.html', {
         'class_obj': class_obj,
-        'sessions': sessions,
+        'page_obj': page_obj,
+        'per_page': per_page,
+        'extra_query': extra_query,
     })
 
 

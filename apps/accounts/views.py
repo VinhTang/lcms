@@ -62,4 +62,33 @@ def register_view(request):
 
 @login_required
 def dashboard(request):
-    return render(request, "accounts/dashboard.html")
+    context = {}
+    if request.user.role == 'admin':
+        from .models import User
+        from students.models import Student
+        from classes.models import Class
+        from payments.models import Tuition
+        
+        context['total_users'] = User.objects.count()
+        context['total_students'] = Student.objects.count()
+        context['total_classes'] = Class.objects.count()
+        context['unpaid_tuition'] = Tuition.objects.filter(paid=False).count()
+        
+    elif request.user.role in ['teacher', 'assistant']:
+        from classes.models import Class, Enrollment
+        from attendance.models import ClassSession
+        
+        my_classes = Class.objects.filter(teacher=request.user) if request.user.role == 'teacher' else Class.objects.filter(assistant=request.user)
+        context['my_classes_count'] = my_classes.count()
+        context['sessions_count'] = ClassSession.objects.filter(class_obj__in=my_classes, status='ended').count()
+        context['my_students_count'] = Enrollment.objects.filter(class_enrolled__in=my_classes).values('student').distinct().count()
+        
+    elif request.user.role == 'parent':
+        from payments.models import Tuition
+        
+        my_children = request.user.children.all()
+        context['my_children_count'] = my_children.count()
+        context['unpaid_tuition'] = Tuition.objects.filter(enrollment__student__in=my_children, paid=False).count()
+        context['paid_tuition'] = Tuition.objects.filter(enrollment__student__in=my_children, paid=True).count()
+
+    return render(request, "accounts/dashboard.html", context)

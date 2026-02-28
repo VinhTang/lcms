@@ -5,6 +5,8 @@ from django.core.paginator import Paginator
 from django.db import models
 from django.views.decorators.http import require_http_methods
 from accounts.models import User
+from django.apps import apps
+from operator import attrgetter
 
 
 @login_required
@@ -13,7 +15,7 @@ def user_list(request):
         messages.error(request, 'Bạn không có quyền truy cập trang này.')
         return redirect('dashboard')
     
-    users = User.objects.all()
+    users = User.objects.filter(is_deleted=False)
     
     search = request.GET.get('search', '')
     if search:
@@ -27,15 +29,28 @@ def user_list(request):
     role_filter = request.GET.get('role', '')
     if role_filter:
         users = users.filter(role=role_filter)
+        
+    per_page = request.GET.get('per_page', 30)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 30
     
-    paginator = Paginator(users, 30)
+    paginator = Paginator(users, per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    
+    extra_query = ''
+    if search: extra_query += f'&search={search}'
+    if role_filter: extra_query += f'&role={role_filter}'
+    extra_query += f'&per_page={per_page}'
     
     return render(request, 'users/list.html', {
         'page_obj': page_obj,
         'search': search,
         'role_filter': role_filter,
+        'per_page': per_page,
+        'extra_query': extra_query,
     })
 
 
@@ -124,8 +139,119 @@ def user_delete(request, user_id):
     
     if request.method == 'POST':
         username = user.get_full_name()
-        user.delete()
-        messages.success(request, f'Đã xóa người dùng {username}.')
+        user.is_deleted = True
+        user.is_active = False 
+        user.save()
+        messages.success(request, f'Đã xóa người dùng {username} ra khỏi hệ thống.')
         return redirect('users:list')
     
     return render(request, 'users/confirm_delete.html', {'delete_user': user})
+
+@login_required
+@require_http_methods(["POST"])
+def user_toggle_lock(request, user_id):
+    if request.user.role != 'admin':
+        messages.error(request, 'Bạn không có quyền truy cập trang này.')
+        return redirect('dashboard')
+    
+    user = get_object_or_404(User, id=user_id, is_deleted=False)
+    
+    if request.user.id == user.id:
+        messages.error(request, 'Bạn không thể tự khóa/mở khóa chính mình.')
+        return redirect('users:list')
+        
+    user.is_active = not user.is_active
+    user.save()
+    
+    status_label = "mở khóa" if user.is_active else "khóa"
+    messages.success(request, f'Đã {status_label} người dùng {user.get_full_name()}.')
+    return redirect('users:list')
+
+@login_required
+def activity_logs(request):
+    if request.user.role != 'admin':
+        messages.error(request, 'Bạn không có quyền truy cập trang này.')
+        return redirect('dashboard')
+        
+    histories = []
+    # Fetch top 100 latest items from each tracked model
+    for model in apps.get_models():
+        if hasattr(model, 'history') and hasattr(model.history, 'all'):
+            logs = model.history.all().select_related('history_user').order_by('-history_date')[:100]
+            clean_name = str(model._meta.verbose_name).title()
+            for log in logs:
+                log.model_name = clean_name
+            histories.extend(logs)
+        
+    # Sort merged lists from all models manually in-memory
+    histories.sort(key=attrgetter('history_date'), reverse=True)
+    
+    per_page = request.GET.get('per_page', 50)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 50
+        
+    paginator = Paginator(histories, per_page)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Calculate diffs only for the current page to avoid excessive queries
+    for log in page_obj.object_list:
+        log.changes = []
+        if log.history_type == '~':
+            try:
+                prev = log.prev_record
+                if prev:
+                    delta = log.diff_against(prev)
+                    for change in delta.changes:
+                        if change.field not in ['history_id', 'history_user', 'history_date', 'history_type', 'history_change_reason']:
+                            log.changes.append(change)
+            except Exception:
+                pass
+    
+    extra_query = f'&per_page={per_page}'
+    
+    return render(request, 'users/activity_logs.html', {
+        'page_obj': page_obj,
+        'per_page': per_page,
+        'extra_query': extra_query,
+    })
+
+@login_required
+def object_history(request, app_label, model_name, object_id):
+    if request.user.role not in ['admin', 'teacher', 'assistant']:
+        messages.error(request, 'Bạn không có quyền xem thông tin này.')
+        return redirect('dashboard')
+        
+    model = apps.get_model(app_label, model_name)
+    instance = get_object_or_404(model, pk=object_id)
+    
+    if not hasattr(instance, 'history'):
+        histories = []
+    else:
+        histories = list(instance.history.all().select_related('history_user').order_by('-history_date'))
+        
+        # Calculate diffs
+        for i, log in enumerate(histories):
+            log.changes = []
+            if log.history_type == '~' and i + 1 < len(histories):
+                prev_log = histories[i + 1]
+                delta = log.diff_against(prev_log)
+                for change in delta.changes:
+                    # Ignore internal simple_history tracking fields if any
+                    if change.field not in ['history_id', 'history_user', 'history_date', 'history_type', 'history_change_reason']:
+                        log.changes.append(change)
+        
+    per_page = 5
+    paginator = Paginator(histories, per_page)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'partials/object_history_modal.html', {
+        'page_obj': page_obj,
+        'app_label': app_label,
+        'model_name': model_name,
+        'object_id': object_id,
+        'instance': instance,
+    })

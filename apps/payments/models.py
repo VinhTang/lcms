@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from classes.models import Enrollment
+from simple_history.models import HistoricalRecords
 
 
 class Tuition(models.Model):
@@ -25,6 +26,8 @@ class Tuition(models.Model):
     payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES, blank=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "tuition"
@@ -63,6 +66,8 @@ class PaymentHistory(models.Model):
     paid_at = models.DateTimeField()
     payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES, blank=True)
     notes = models.TextField(blank=True)
+
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "payment_histories"

@@ -102,6 +102,11 @@
                                class="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors inline-block" title="Chi tiết">
                                 <i class="fas fa-eye"></i>
                             </a>
+                            <button hx-get="{% url 'users:object_history' 'payments' 'tuition' tuition.id %}" 
+                                    hx-target="#history-modal-container"
+                                    class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors inline-block" title="Lịch sử">
+                                <i class="fas fa-history"></i>
+                            </button>
                         </td>
                     </tr>
                     {% empty %}
@@ -116,37 +121,7 @@
             </table>
         </div>
         
-        {% if page_obj.has_other_pages %}
-        <div class="px-6 py-4 border-t border-gray-100">
-            <div class="flex items-center justify-between">
-                <p class="text-sm text-gray-500">Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</p>
-                <div class="flex gap-1">
-                    {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}&search={{ search }}&status={{ status_filter }}" 
-                       class="px-3 py-1.5 text-sm rounded-lg border border-gray-200 hover:bg-gray-50">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
-                    {% endif %}
-                    
-                    {% for num in page_obj.paginator.page_range %}
-                        {% if page_obj.number == num %}
-                        <span class="px-3 py-1.5 text-sm rounded-lg bg-primary-600 text-white">{{ num }}</span>
-                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                        <a href="?page={{ num }}&search={{ search }}&status={{ status_filter }}" 
-                           class="px-3 py-1.5 text-sm rounded-lg border border-gray-200 hover:bg-gray-50">{{ num }}</a>
-                        {% endif %}
-                    {% endfor %}
-                    
-                    {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}&search={{ search }}&status={{ status_filter }}" 
-                       class="px-3 py-1.5 text-sm rounded-lg border border-gray-200 hover:bg-gray-50">
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        {% endif %}
+        {% include 'partials/pagination.html' %}
     </div>
 </div>
 {% endblock %}

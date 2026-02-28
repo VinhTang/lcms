@@ -1,6 +1,7 @@
 import re
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from simple_history.models import HistoricalRecords
 
 
 class User(AbstractUser):
@@ -21,10 +22,20 @@ class User(AbstractUser):
     phone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="teacher")
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="teacher")
+    is_deleted = models.BooleanField(default=False)
+    
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "users"
         ordering = ["-date_joined"]
+
+    def get_full_name(self):
+        """
+        Return the last_name plus the first_name, with a space in between (Vietnamese format).
+        """
+        return f"{self.last_name or ''} {self.first_name or ''}".strip()
 
     def __str__(self):
         return f"{self.get_full_name()} ({self.domain})"

@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from accounts.models import User
 from classes.models import Class, Enrollment
+from simple_history.models import HistoricalRecords
 
 
 class ClassSession(models.Model):
@@ -21,6 +22,8 @@ class ClassSession(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="not_started")
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "class_sessions"
@@ -67,6 +70,8 @@ class Attendance(models.Model):
     marked_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="marked_attendances")
     marked_at = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(blank=True)
+
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "attendance"

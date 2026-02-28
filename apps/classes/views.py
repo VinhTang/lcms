@@ -23,13 +23,25 @@ def class_list(request):
             models.Q(teacher__last_name__icontains=search)
         )
     
-    paginator = Paginator(classes, 30)
+    per_page = request.GET.get('per_page', 30)
+    try:
+        per_page = int(per_page)
+    except ValueError:
+        per_page = 30
+        
+    paginator = Paginator(classes, per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+    
+    extra_query = ''
+    if search: extra_query += f'&search={search}'
+    extra_query += f'&per_page={per_page}'
     
     return render(request, 'classes/list.html', {
         'page_obj': page_obj,
         'search': search,
+        'per_page': per_page,
+        'extra_query': extra_query,
     })
 
 

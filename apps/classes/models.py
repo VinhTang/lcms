@@ -1,12 +1,15 @@
 from django.db import models
 from accounts.models import User
 from students.models import Student
+from simple_history.models import HistoricalRecords
 
 
 class Subject(models.Model):
     subject_name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
+
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "subjects"
@@ -28,7 +31,10 @@ class Class(models.Model):
     room = models.CharField(max_length=100, blank=True)
     max_students = models.IntegerField(default=30)
     is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "classes"
@@ -51,7 +57,10 @@ class Enrollment(models.Model):
     class_enrolled = models.ForeignKey(Class, on_delete=models.CASCADE, related_name="enrollments")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
     enrolled_at = models.DateTimeField(auto_now_add=True)
+    enrolled_at = models.DateTimeField(auto_now_add=True)
     dropped_at = models.DateTimeField(null=True, blank=True)
+
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "enrollments"

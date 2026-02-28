@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Lịch sử hoạt động hệ thống - LCMS{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">
+                <i class="fas fa-history text-indigo-500 mr-2"></i>
+                Lịch sử hoạt động
+            </h1>
+            <p class="text-gray-500 mt-1">Theo dõi thay đổi dữ liệu toàn hệ thống</p>
+        </div>
+    </div>
+
+    <div class="card overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50/50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500">
+                        <th class="px-6 py-4 font-semibold">Thời gian</th>
+                        <th class="px-6 py-4 font-semibold">Người thực hiện</th>
+                        <th class="px-6 py-4 font-semibold">Hành động</th>
+                        <th class="px-6 py-4 font-semibold">Đối tượng</th>
+                        <th class="px-6 py-4 font-semibold">Bản ghi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm">
+                    {% for log in page_obj %}
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-4 text-gray-500 whitespace-nowrap">
+                            {{ log.history_date|date:"H:i d/m/Y" }}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if log.history_user %}
+                                <div class="font-medium text-gray-800">{{ log.history_user.get_full_name|default:log.history_user.email }}</div>
+                                <div class="text-xs text-gray-500">{{ log.history_user.role|title }}</div>
+                            {% else %}
+                                <span class="text-gray-400 italic">Hệ thống</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if log.history_type == '+' %}
+                                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Tạo mới</span>
+                            {% elif log.history_type == '~' %}
+                                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Cập nhật</span>
+                            {% elif log.history_type == '-' %}
+                                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Xoá</span>
+                            {% else %}
+                                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">Không rõ</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="font-medium text-gray-700 bg-gray-100 px-2 py-1 border border-gray-200 rounded text-xs">
+                                {{ log.model_name }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-gray-800 font-medium truncate max-w-xs">{{ log.instance }}</div>
+                            {% if log.changes %}
+                            <div class="mt-2 text-xs">
+                                <ul class="space-y-1">
+                                {% for change in log.changes %}
+                                    <li><span class="font-medium text-gray-700">{{ change.field }}</span>: <span class="text-red-500 line-through">{{ change.old }}</span> &rarr; <span class="text-green-600">{{ change.new }}</span></li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                            <div class="flex flex-col items-center justify-center">
+                                <i class="fas fa-inbox text-4xl mb-3 text-gray-300"></i>
+                                <p>Chưa có dữ liệu lịch sử hoạt động.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% include 'partials/pagination.html' %}
+    </div>
+</div>
+{% endblock %}

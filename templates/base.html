@@ -223,6 +223,14 @@
                             <i class="fas fa-money-bill-wave w-5"></i>
                             <span>Học phí</span>
                         </a>
+                        <a href="{% url 'users:activity_logs' %}" 
+                           class="sidebar-link {% if 'activity-logs' in request.path %}active{% endif %}"
+                           hx-get="{% url 'users:activity_logs' %}" 
+                           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+                           hx-push-url="true">
+                            <i class="fas fa-history w-5"></i>
+                            <span>Lịch sử hoạt động</span>
+                        </a>
                     </div>
                 </div>
                 {% endif %}
@@ -448,6 +456,8 @@
         }
     </style>
     
+    <!-- HTMX Modal Container -->
+    <div id="history-modal-container"></div>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

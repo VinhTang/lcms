@@ -1,0 +1,95 @@
+<div id="history-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/50 backdrop-blur-sm"
+     x-data="{ show: true }"
+     x-show="show"
+     @keydown.escape.window="show = false; setTimeout(() => document.getElementById('history-modal-container').innerHTML='', 200)"
+     x-transition.opacity.duration.200ms>
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden m-4 flex flex-col max-h-[90vh]" 
+         @click.away="show = false; setTimeout(() => document.getElementById('history-modal-container').innerHTML='', 200)">
+        <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 flex-none">
+            <h3 class="text-lg font-bold text-gray-800">
+                <i class="fas fa-history text-indigo-500 mr-2"></i>
+                Lịch sử: {{ instance }}
+            </h3>
+            <button @click="show = false; setTimeout(() => document.getElementById('history-modal-container').innerHTML='', 200)" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="p-0 overflow-y-auto flex-1">
+            <table class="w-full text-left border-collapse text-sm">
+                <thead class="sticky top-0 bg-gray-50/90 backdrop-blur z-10">
+                    <tr class="border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500">
+                        <th class="px-4 py-3 font-semibold">Thời gian</th>
+                        <th class="px-4 py-3 font-semibold">Thao tác</th>
+                        <th class="px-4 py-3 font-semibold">Người thực hiện</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for log in page_obj %}
+                    <tr class="hover:bg-gray-50/50">
+                        <td class="px-4 py-3 text-gray-500 whitespace-nowrap">
+                            {{ log.history_date|date:"H:i d/m/Y" }}
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if log.history_type == '+' %}
+                                <span class="px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">Tạo</span>
+                            {% elif log.history_type == '~' %}
+                                <span class="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 block w-fit mb-1">Sửa</span>
+                                {% if log.changes %}
+                                <div class="mt-2 text-xs">
+                                    <ul class="space-y-1">
+                                    {% for change in log.changes %}
+                                        <li><span class="font-medium text-gray-700">{{ change.field }}</span>: <span class="text-red-500 line-through">{{ change.old }}</span> &rarr; <span class="text-green-600">{{ change.new }}</span></li>
+                                    {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            {% elif log.history_type == '-' %}
+                                <span class="px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">Xoá</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if log.history_user %}
+                                <div class="font-medium text-gray-800">{{ log.history_user.get_full_name|default:log.history_user.email }}</div>
+                            {% else %}
+                                <span class="text-gray-400 italic">Hệ thống</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="px-4 py-8 text-center text-gray-500">
+                            Chưa có dữ liệu lịch sử hoạt động.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="p-4 border-t border-gray-100 bg-white flex-none">
+            {% if page_obj.has_other_pages %}
+            <div class="flex justify-between items-center">
+                <div class="text-xs text-gray-500">
+                    Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                </div>
+                <div class="flex gap-2">
+                    {% if page_obj.has_previous %}
+                    <button hx-get="{% url 'users:object_history' app_label model_name object_id %}?page={{ page_obj.previous_page_number }}"
+                            hx-target="#history-modal-container"
+                            class="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded hover:bg-gray-100 text-sm font-medium transition-colors text-gray-700">
+                        <i class="fas fa-chevron-left mr-1 text-xs"></i> Trước
+                    </button>
+                    {% endif %}
+                    
+                    {% if page_obj.has_next %}
+                    <button hx-get="{% url 'users:object_history' app_label model_name object_id %}?page={{ page_obj.next_page_number }}"
+                            hx-target="#history-modal-container"
+                            class="px-3 py-1.5 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded hover:bg-indigo-100 text-sm font-medium transition-colors">
+                        Sau <i class="fas fa-chevron-right ml-1 text-xs"></i>
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

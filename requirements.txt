@@ -1,22 +1,6 @@
-# Django Core
-Django>=5.0,<6.0
-
-# Django Allauth for authentication
-django-allauth>=0.63.0
-
-# Database
-django-db-geventpool>=4.0.0  # For production
-
-# Production
-gunicorn>=21.0.0
-whitenoise>=6.0.0
-
-# Development
-flake8>=7.0.0
-black>=24.0.0
-
-# Frontend (loaded via CDN - no pip install needed)
-# - TailwindCSS: https://cdn.tailwindcss.com
-# - Alpine.js: https://unpkg.com/alpinejs
-# - HTMX: https://unpkg.com/htmx.org
-# - Font Awesome: https://cdnjs.cloudflare.com/ajax/libs/font-awesome
+asgiref==3.11.1
+Django==6.0.2
+django-allauth==65.14.3
+django-simple-history==3.11.0
+pillow==12.1.1
+sqlparse==0.5.5

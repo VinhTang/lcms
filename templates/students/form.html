@@ -67,7 +67,8 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái</label>
                                 <select name="status" class="input-field">
                                     <option value="active" {% if student.status == 'active' %}selected{% endif %}>Hoạt động</option>
-                                    <option value="inactive" {% if student.status == 'inactive' %}selected{% endif %}>Không hoạt động</option>
+                                    <option value="inactive" {% if student.status == 'inactive' %}selected{% endif %}>Nghỉ</option>
+                                    <option value="deleted" {% if student.status == 'deleted' %}selected{% endif %}>Khoá</option>
                                 </select>
                             </div>
                         </div>

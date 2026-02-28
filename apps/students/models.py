@@ -1,6 +1,7 @@
 import re
 from django.db import models
 from django.utils import timezone
+from simple_history.models import HistoricalRecords
 
 
 class Student(models.Model):
@@ -11,8 +12,8 @@ class Student(models.Model):
     ]
     STATUS_CHOICES = [
         ("active", "Hoạt động"),
-        ("inactive", "Không hoạt động"),
-        ("deleted", "Đã xóa"),
+        ("inactive", "Nghỉ"),
+        ("deleted", "Khoá"),
     ]
 
     domain = models.CharField(max_length=100, unique=True, blank=True)
@@ -24,8 +25,11 @@ class Student(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
     deleted_at = models.DateTimeField(null=True, blank=True)
     restored_at = models.DateTimeField(null=True, blank=True)
+    restored_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "students"
