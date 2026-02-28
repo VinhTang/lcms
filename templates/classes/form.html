@@ -3,193 +3,202 @@
 {% block title %}{% if class_obj %}Sửa{% else %}Thêm{% endif %} lớp học - LCMS{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h1 class="h2 mb-1">
-                <i class="fas fa-{% if class_obj %}edit{% else %}plus{% endif %} me-2"></i>
-                {% if class_obj %}Sửa{% else %}Thêm{% endif %} lớp học
-            </h1>
-            <p class="mb-0 opacity-75">{% if class_obj %}Cập nhật thông tin lớp học{% else %}Tạo lớp học mới{% endif %}</p>
-        </div>
-        <a href="{% url 'classes:list' %}" class="btn btn-light fw-bold">
-            <i class="fas fa-arrow-left me-2"></i>Quay lại
-        </a>
+<div class="fade-in">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">
+            <i class="fas fa-{% if class_obj %}edit{% else %}plus{% endif %} text-amber-500 mr-2"></i>
+            {% if class_obj %}Sửa{% else %}Thêm{% endif %} lớp học
+        </h1>
+        <p class="text-gray-500 mt-1">{% if class_obj %}Cập nhật thông tin lớp học{% else %}Tạo lớp học mới{% endif %}</p>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-lg-8">
-        <div class="card sb-card">
-            <div class="card-header bg-white py-3">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-school me-2 text-primary"></i>Thông tin lớp học</h5>
-            </div>
-            <div class="card-body">
-                <form method="post" id="classForm">
-                    {% csrf_token %}
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Mã lớp <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-code"></i></span>
-                                <input type="text" name="class_code" class="form-control" 
-                                       value="{{ class_obj.class_code|default:'' }}" {% if class_obj %}readonly{% endif %} required
-                                       placeholder="VD: TOAN10A1">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+            <div class="card">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-800">
+                        <i class="fas fa-school text-amber-500 mr-2"></i>Thông tin lớp học
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <form method="post" id="classForm">
+                        {% csrf_token %}
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Mã lớp <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <i class="fas fa-code absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <input type="text" name="class_code" class="input-field pl-11" 
+                                           value="{{ class_obj.class_code|default:'' }}" {% if class_obj %}readonly{% endif %} required
+                                           placeholder="VD: TOAN10A1">
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Mã lớp duy nhất, không khoảng trắng</p>
                             </div>
-                            <small class="text-muted">Mã lớp duy nhất, không khoảng trắng</small>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Tên lớp <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-school"></i></span>
-                                <input type="text" name="class_name" class="form-control" 
-                                       value="{{ class_obj.class_name|default:'' }}" required
-                                       placeholder="VD: Toán 10A1">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Môn học <span class="text-danger">*</span></label>
-                            <div class="input-group mb-2">
-                                <span class="input-group-text"><i class="fas fa-book"></i></span>
-                                <select name="subject" class="form-select" id="subjectSelect">
-                                    <option value="">-- Chọn môn học --</option>
-                                    {% for subject in subjects %}
-                                    <option value="{{ subject.id }}" {% if class_obj.subject_id == subject.id %}selected{% endif %}>
-                                        {{ subject.subject_name }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-plus"></i></span>
-                                <input type="text" name="new_subject" class="form-control" 
-                                       placeholder="Hoặc nhập tên môn mới">
-                            </div>
-                            <small class="text-muted">Chọn môn có sẵn hoặc nhập môn mới</small>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Giáo viên <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-user-graduate"></i></span>
-                                <select name="teacher" class="form-select" required>
-                                    <option value="">-- Chọn giáo viên --</option>
-                                    {% for teacher in teachers %}
-                                    <option value="{{ teacher.id }}" {% if class_obj.teacher_id == teacher.id %}selected{% endif %}>
-                                        {{ teacher.get_full_name }} ({{ teacher.domain }})
-                                    </option>
-                                    {% endfor %}
-                                </select>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tên lớp <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <i class="fas fa-school absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <input type="text" name="class_name" class="input-field pl-11" 
+                                           value="{{ class_obj.class_name|default:'' }}" required
+                                           placeholder="VD: Toán 10A1">
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Ngày học trong tuần</label>
-                        <div class="d-flex flex-wrap gap-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="schedule_days" value="2" id="day2"
-                                       {% if class_obj and '2' in class_obj.schedule_days %}checked{% endif %}>
-                                <label class="form-check-label" for="day2">Thứ 2</label>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Môn học <span class="text-red-500">*</span></label>
+                                <div class="relative mb-2">
+                                    <i class="fas fa-book absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <select name="subject" class="input-field pl-11" id="subjectSelect">
+                                        <option value="">-- Chọn môn học --</option>
+                                        {% for subject in subjects %}
+                                        <option value="{{ subject.id }}" {% if class_obj.subject_id == subject.id %}selected{% endif %}>
+                                            {{ subject.subject_name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="relative">
+                                    <i class="fas fa-plus absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <input type="text" name="new_subject" class="input-field pl-11" 
+                                           placeholder="Hoặc nhập tên môn mới">
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Chọn môn có sẵn hoặc nhập môn mới</p>
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="schedule_days" value="3" id="day3"
-                                       {% if class_obj and '3' in class_obj.schedule_days %}checked{% endif %}>
-                                <label class="form-check-label" for="day3">Thứ 3</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="schedule_days" value="4" id="day4"
-                                       {% if class_obj and '4' in class_obj.schedule_days %}checked{% endif %}>
-                                <label class="form-check-label" for="day4">Thứ 4</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="schedule_days" value="5" id="day5"
-                                       {% if class_obj and '5' in class_obj.schedule_days %}checked{% endif %}>
-                                <label class="form-check-label" for="day5">Thứ 5</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="schedule_days" value="6" id="day6"
-                                       {% if class_obj and '6' in class_obj.schedule_days %}checked{% endif %}>
-                                <label class="form-check-label" for="day6">Thứ 6</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="schedule_days" value="7" id="day7"
-                                       {% if class_obj and '7' in class_obj.schedule_days %}checked{% endif %}>
-                                <label class="form-check-label" for="day7">Thứ 7</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="schedule_days" value="1" id="day1"
-                                       {% if class_obj and '1' in class_obj.schedule_days %}checked{% endif %}>
-                                <label class="form-check-label" for="day1">Chủ nhật</label>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Giáo viên <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <i class="fas fa-user-graduate absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <select name="teacher" class="input-field pl-11" required>
+                                        <option value="">-- Chọn giáo viên --</option>
+                                        {% for teacher in teachers %}
+                                        <option value="{{ teacher.id }}" {% if class_obj.teacher_id == teacher.id %}selected{% endif %}>
+                                            {{ teacher.get_full_name }} ({{ teacher.domain }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Giờ bắt đầu</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-clock"></i></span>
-                                <input type="time" name="start_time" class="form-control" 
-                                       value="{{ class_obj.start_time|default:'' }}">
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Ngày học trong tuần</label>
+                            <div class="flex flex-wrap gap-4">
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="schedule_days" value="2" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+                                           {% if class_obj and '2' in class_obj.schedule_days %}checked{% endif %}>
+                                    <span class="ml-2 text-sm text-gray-700">Thứ 2</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="schedule_days" value="3" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+                                           {% if class_obj and '3' in class_obj.schedule_days %}checked{% endif %}>
+                                    <span class="ml-2 text-sm text-gray-700">Thứ 3</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="schedule_days" value="4" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+                                           {% if class_obj and '4' in class_obj.schedule_days %}checked{% endif %}>
+                                    <span class="ml-2 text-sm text-gray-700">Thứ 4</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="schedule_days" value="5" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+                                           {% if class_obj and '5' in class_obj.schedule_days %}checked{% endif %}>
+                                    <span class="ml-2 text-sm text-gray-700">Thứ 5</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="schedule_days" value="6" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+                                           {% if class_obj and '6' in class_obj.schedule_days %}checked{% endif %}>
+                                    <span class="ml-2 text-sm text-gray-700">Thứ 6</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="schedule_days" value="7" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+                                           {% if class_obj and '7' in class_obj.schedule_days %}checked{% endif %}>
+                                    <span class="ml-2 text-sm text-gray-700">Thứ 7</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="schedule_days" value="1" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+                                           {% if class_obj and '1' in class_obj.schedule_days %}checked{% endif %}>
+                                    <span class="ml-2 text-sm text-gray-700">Chủ nhật</span>
+                                </label>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Giờ kết thúc</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-clock"></i></span>
-                                <input type="time" name="end_time" class="form-control" 
-                                       value="{{ class_obj.end_time|default:'' }}">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Giờ bắt đầu</label>
+                                <div class="relative">
+                                    <i class="fas fa-clock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <input type="time" name="start_time" class="input-field pl-11" 
+                                           value="{{ class_obj.start_time|default:'' }}">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Giờ kết thúc</label>
+                                <div class="relative">
+                                    <i class="fas fa-clock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <input type="time" name="end_time" class="input-field pl-11" 
+                                           value="{{ class_obj.end_time|default:'' }}">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Phòng học</label>
+                                <div class="relative">
+                                    <i class="fas fa-door-open absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <input type="text" name="room" class="input-field pl-11" 
+                                           value="{{ class_obj.room|default:'' }}"
+                                           placeholder="VD: P101">
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Phòng học</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-door-open"></i></span>
-                                <input type="text" name="room" class="form-control" 
-                                       value="{{ class_obj.room|default:'' }}"
-                                       placeholder="VD: P101">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">Sĩ số tối đa</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-users"></i></span>
-                                <input type="number" name="max_students" class="form-control" 
+                        
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Sĩ số tối đa</label>
+                            <div class="relative w-1/3">
+                                <i class="fas fa-users absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="number" name="max_students" class="input-field pl-11" 
                                        value="{{ class_obj.max_students|default:30 }}" min="1" max="100">
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="d-flex gap-2 justify-content-end pt-3 border-top">
-                        <a href="{% url 'classes:list' %}" class="btn btn-secondary btn-lg px-4">Hủy</a>
-                        <button type="submit" class="btn btn-primary btn-lg px-4">
-                            <i class="fas fa-save me-2"></i>Lưu
-                        </button>
-                    </div>
-                </form>
+                        
+                        <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                            <a href="{% url 'classes:list' %}"
+                               hx-get="{% url 'classes:list' %}"
+                               hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+                               hx-push-url="true"
+                               class="btn-secondary px-6 py-2.5">Hủy</a>
+                            <button type="submit" class="btn-primary px-6 py-2.5">
+                                <i class="fas fa-save mr-2"></i>Lưu
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div class="col-lg-4">
-        <div class="card sb-card">
-            <div class="card-header bg-white py-3">
-                <h6 class="mb-0 fw-bold"><i class="fas fa-info-circle me-2 text-primary"></i>Lưu ý</h6>
-            </div>
-            <div class="card-body">
-                <ul class="mb-0 small">
-                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Mã lớp duy nhất trong hệ thống</li>
-                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Chọn ngày học trong tuần</li>
-                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Giờ học: bắt đầu và kết thúc</li>
-                    <li><i class="fas fa-check text-success me-2"></i>Thời gian mở lớp: 15p trước giờ học</li>
-                </ul>
+        
+        <div class="space-y-6">
+            <div class="card">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                        <i class="fas fa-info-circle mr-2"></i>Lưu ý
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-3 text-sm text-gray-600">
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-500"></i> Mã lớp duy nhất trong hệ thống
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-500"></i> Chọn ngày học trong tuần
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-500"></i> Giờ học: bắt đầu và kết thúc
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-500"></i> Thời gian mở lớp: 15p trước giờ học
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

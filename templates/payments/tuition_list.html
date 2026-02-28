@@ -3,104 +3,149 @@
 {% block title %}Danh sách học phí - LCMS{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1><i class="fas fa-money-bill-wave me-2"></i>Quản lý học phí</h1>
-    <p class="mb-0">Danh sách học phí của tất cả học sinh</p>
-</div>
-
-<div class="sb-card">
-    <div class="sb-card-header d-flex justify-content-between align-items-center">
-        <span><i class="fas fa-list me-2"></i>Danh sách học phí</span>
-        <a href="{% url 'payments:tuition_create' %}" class="btn btn-primary btn-sm">
-            <i class="fas fa-plus me-1"></i> Tạo học phí
+<div class="fade-in">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">
+                <i class="fas fa-money-bill-wave text-green-500 mr-2"></i>Quản lý học phí
+            </h1>
+            <p class="text-gray-500 mt-1">Danh sách học phí của tất cả học sinh</p>
+        </div>
+        <a href="{% url 'payments:tuition_create' %}" 
+           hx-get="{% url 'payments:tuition_create' %}"
+           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+           hx-push-url="true"
+           class="btn-primary inline-flex items-center gap-2">
+            <i class="fas fa-plus"></i> Tạo học phí
         </a>
     </div>
-    <div class="card-body">
-        <form method="get" class="mb-4">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <input type="text" name="search" class="form-control" placeholder="Tìm kiếm..." value="{{ search }}">
+
+    <!-- Filters -->
+    <div class="card mb-6">
+        <div class="p-4">
+            <form method="get" class="flex flex-wrap gap-4">
+                <div class="flex-1 min-w-[200px]">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input 
+                            type="text" 
+                            name="search" 
+                            class="input-field pl-10" 
+                            placeholder="Tìm kiếm..."
+                            value="{{ search }}"
+                        >
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <select name="status" class="form-select">
+                <div class="w-48">
+                    <select name="status" class="input-field">
                         <option value="">Tất cả trạng thái</option>
                         <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Đã thanh toán</option>
                         <option value="unpaid" {% if status_filter == 'unpaid' %}selected{% endif %}>Chưa thanh toán</option>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-search me-1"></i> Tìm
+                <div class="flex gap-2">
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-search mr-1"></i> Tìm
                     </button>
+                    <a href="{% url 'payments:tuition_list' %}" class="btn-secondary">
+                        <i class="fas fa-redo mr-1"></i> Reset
+                    </a>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
+    </div>
 
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
+    <!-- Table -->
+    <div class="card overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th>Học sinh</th>
-                        <th>Lớp</th>
-                        <th>Loại</th>
-                        <th>Tháng/Khóa</th>
-                        <th>Số tiền</th>
-                        <th>Đến hạn</th>
-                        <th>Trạng thái</th>
-                        <th></th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Học sinh</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Lớp</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Loại</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tháng/Khóa</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Số tiền</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Đến hạn</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-100">
                     {% for tuition in page_obj %}
-                    <tr>
-                        <td class="fw-bold">{{ tuition.enrollment.student.full_name }}</td>
-                        <td>{{ tuition.enrollment.class_enrolled.class_name }}</td>
-                        <td>
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 font-bold text-gray-800">{{ tuition.enrollment.student.full_name }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ tuition.enrollment.class_enrolled.class_name }}</td>
+                        <td class="px-6 py-4">
                             {% if tuition.tuition_type == 'monthly' %}
-                            <span class="badge bg-info">Theo tháng</span>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Theo tháng</span>
                             {% else %}
-                            <span class="badge bg-warning text-dark">Theo khóa</span>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">Theo khóa</span>
                             {% endif %}
                         </td>
-                        <td>{{ tuition.month|default:tuition.course_name }}</td>
-                        <td class="fw-bold">{{ tuition.amount|floatformat:0 }} VNĐ</td>
-                        <td>{{ tuition.due_date|date:"d/m/Y" }}</td>
-                        <td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ tuition.month|default:tuition.course_name }}</td>
+                        <td class="px-6 py-4 font-bold text-primary-600">{{ tuition.amount|floatformat:0 }} VNĐ</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ tuition.due_date|date:"d/m/Y" }}</td>
+                        <td class="px-6 py-4">
                             {% if tuition.paid %}
-                            <span class="badge bg-success">Đã thanh toán</span>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700"><i class="fas fa-check-circle mr-1"></i> Đã thanh toán</span>
                             {% else %}
-                            <span class="badge bg-danger">Chưa thanh toán</span>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700"><i class="fas fa-clock mr-1"></i> Chưa thanh toán</span>
                             {% endif %}
                         </td>
-                        <td>
-                            <a href="{% url 'payments:tuition_detail' tuition.id %}" class="btn btn-sm btn-outline-primary">
+                        <td class="px-6 py-4 text-right">
+                            <a href="{% url 'payments:tuition_detail' tuition.id %}" 
+                               hx-get="{% url 'payments:tuition_detail' tuition.id %}"
+                               hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+                               hx-push-url="true"
+                               class="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors inline-block" title="Chi tiết">
                                 <i class="fas fa-eye"></i>
                             </a>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="8" class="text-center py-4 text-muted">Không có dữ liệu</td>
+                        <td colspan="8" class="px-6 py-12 text-center text-gray-400">
+                            <i class="fas fa-receipt text-5xl mb-4 opacity-50 block"></i>
+                            <h3 class="text-lg font-medium text-gray-600">Không có dữ liệu</h3>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-
+        
         {% if page_obj.has_other_pages %}
-        <nav>
-            <ul class="pagination justify-content-center">
-                {% if page_obj.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page=1">Đầu</a></li>
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Trước</a></li>
-                {% endif %}
-                <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
-                {% if page_obj.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Sau</a></li>
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Cuối</a></li>
-                {% endif %}
-            </ul>
-        </nav>
+        <div class="px-6 py-4 border-t border-gray-100">
+            <div class="flex items-center justify-between">
+                <p class="text-sm text-gray-500">Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</p>
+                <div class="flex gap-1">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}&search={{ search }}&status={{ status_filter }}" 
+                       class="px-3 py-1.5 text-sm rounded-lg border border-gray-200 hover:bg-gray-50">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <span class="px-3 py-1.5 text-sm rounded-lg bg-primary-600 text-white">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?page={{ num }}&search={{ search }}&status={{ status_filter }}" 
+                           class="px-3 py-1.5 text-sm rounded-lg border border-gray-200 hover:bg-gray-50">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&search={{ search }}&status={{ status_filter }}" 
+                       class="px-3 py-1.5 text-sm rounded-lg border border-gray-200 hover:bg-gray-50">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
         {% endif %}
     </div>
 </div>

@@ -3,53 +3,63 @@
 {% block title %}Lịch sử thanh toán - LCMS{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1><i class="fas fa-history me-2"></i>Lịch sử thanh toán</h1>
-</div>
-
-<div class="sb-card">
-    <div class="sb-card-header">
-        <i class="fas fa-list me-2"></i>Danh sách thanh toán gần đây
+<div class="fade-in">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">
+            <i class="fas fa-history text-blue-500 mr-2"></i>Lịch sử thanh toán
+        </h1>
+        <p class="text-gray-500 mt-1">Danh sách các giao dịch thanh toán gần đây</p>
     </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
+
+    <div class="card overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                <i class="fas fa-list text-primary-500 mr-2"></i>Chi tiết giao dịch
+            </h3>
+        </div>
+        
+        {% if histories %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th>Ngày</th>
-                        <th>Học sinh</th>
-                        <th>Lớp</th>
-                        <th>Tháng/Khóa</th>
-                        <th>Số tiền</th>
-                        <th>Phương thức</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Ngày</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Học sinh</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Lớp</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Tháng/Khóa</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Số tiền</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Phương thức</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-100">
                     {% for history in histories %}
-                    <tr>
-                        <td>{{ history.paid_at|date:"d/m/Y H:i" }}</td>
-                        <td class="fw-bold">{{ history.tuition.enrollment.student.full_name }}</td>
-                        <td>{{ history.tuition.enrollment.class_enrolled.class_name }}</td>
-                        <td>{{ history.tuition.month|default:history.tuition.course_name }}</td>
-                        <td class="fw-bold text-success">{{ history.amount|floatformat:0 }} VNĐ</td>
-                        <td>
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ history.paid_at|date:"d/m/Y H:i" }}</td>
+                        <td class="px-6 py-4 font-bold text-gray-800">{{ history.tuition.enrollment.student.full_name }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ history.tuition.enrollment.class_enrolled.class_name }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ history.tuition.month|default:history.tuition.course_name }}</td>
+                        <td class="px-6 py-4 font-bold text-green-600">+{{ history.amount|floatformat:0 }} VNĐ</td>
+                        <td class="px-6 py-4">
                             {% if history.payment_method == 'cash' %}
-                            <span class="badge bg-primary">Tiền mặt</span>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Tiền mặt</span>
                             {% elif history.payment_method == 'transfer' %}
-                            <span class="badge bg-info">Chuyển khoản</span>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Chuyển khoản</span>
                             {% else %}
-                            <span class="badge bg-secondary">Thẻ</span>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">Thẻ</span>
                             {% endif %}
                         </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">Không có lịch sử thanh toán</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <div class="px-6 py-12 text-center text-gray-400">
+            <i class="fas fa-receipt text-5xl mb-4 opacity-50 block"></i>
+            <h3 class="text-lg font-medium text-gray-600">Chưa có giao dịch nào</h3>
+            <p class="text-sm mt-1">Lịch sử thanh toán sẽ xuất hiện tại đây khi có giao dịch mới.</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -3,95 +3,113 @@
 {% block title %}Chi tiết lớp học - LCMS{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <div class="d-flex justify-content-between align-items-center">
+<div class="fade-in">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-            <h1 class="h2 mb-1"><i class="fas fa-school me-2"></i>{{ class_obj.class_name }}</h1>
-            <p class="mb-0 opacity-75">Mã lớp: <code>{{ class_obj.class_code }}</code></p>
+            <h1 class="text-2xl font-bold text-gray-800">
+                <i class="fas fa-school text-amber-500 mr-2"></i>{{ class_obj.class_name }}
+            </h1>
+            <p class="text-gray-500 mt-1">Mã lớp: <code class="px-2 py-0.5 bg-gray-100 rounded text-sm">{{ class_obj.class_code }}</code></p>
         </div>
-        <div>
-            <a href="{% url 'classes:edit' class_obj.id %}" class="btn btn-light fw-bold">
-                <i class="fas fa-edit me-2"></i>Sửa
+        <div class="flex gap-2">
+            <a href="{% url 'classes:edit' class_obj.id %}"
+               hx-get="{% url 'classes:edit' class_obj.id %}"
+               hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+               hx-push-url="true"
+               class="btn-primary inline-flex items-center gap-2">
+                <i class="fas fa-edit"></i> Sửa
             </a>
-            <a href="{% url 'classes:list' %}" class="btn btn-outline-light fw-bold">
-                <i class="fas fa-arrow-left me-2"></i>Quay lại
+            <a href="{% url 'classes:list' %}"
+               hx-get="{% url 'classes:list' %}"
+               hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+               hx-push-url="true"
+               class="btn-secondary inline-flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Quay lại
             </a>
         </div>
     </div>
-</div>
 
-<div class="row g-4">
-    <div class="col-lg-4">
-        <div class="card sb-card h-100">
-            <div class="card-header bg-white py-3">
-                <h6 class="mb-0 fw-bold"><i class="fas fa-info-circle me-2 text-primary"></i>Thông tin lớp</h6>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <small class="text-muted d-block">Môn học</small>
-                    <span class="fw-bold">{{ class_obj.subject.subject_name }}</span>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div>
+            <div class="card">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                        <i class="fas fa-info-circle mr-2 text-primary-500"></i>Thông tin lớp
+                    </h3>
                 </div>
-                <div class="mb-3">
-                    <small class="text-muted d-block">Giáo viên</small>
-                    <span class="fw-bold">{{ class_obj.teacher.get_full_name }}</span>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted d-block">Thời gian</small>
-                    <span class="fw-bold">{{ class_obj.start_time|default:"-" }} - {{ class_obj.end_time|default:"-" }}</span>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted d-block">Phòng học</small>
-                    <span class="fw-bold">{{ class_obj.room|default:"-" }}</span>
-                </div>
-                <div>
-                    <small class="text-muted d-block">Sĩ số</small>
-                    <span class="fw-bold">{{ class_obj.get_student_count }} / {{ class_obj.max_students }}</span>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <p class="text-xs text-gray-500">Môn học</p>
+                        <p class="font-medium">{{ class_obj.subject.subject_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Giáo viên</p>
+                        <p class="font-medium">{{ class_obj.teacher.get_full_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Thời gian</p>
+                        <p class="font-medium">{{ class_obj.start_time|default:"-" }} - {{ class_obj.end_time|default:"-" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Phòng học</p>
+                        <p class="font-medium">{{ class_obj.room|default:"-" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Sĩ số</p>
+                        <p class="font-medium">{{ class_obj.get_student_count }} / {{ class_obj.max_students }}</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <div class="col-lg-8">
-        <div class="card sb-card h-100">
-            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 fw-bold"><i class="fas fa-users me-2 text-primary"></i>Danh sách học sinh</h6>
-                <div>
-                    <a href="{% url 'attendance:session_list' class_obj.id %}" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-calendar me-1"></i> Buổi học
+        
+        <div class="lg:col-span-2 space-y-6">
+            <div class="card overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                        <i class="fas fa-users mr-2 text-primary-500"></i>Danh sách học sinh
+                    </h3>
+                    <a href="{% url 'attendance:session_list' class_obj.id %}"
+                       hx-get="{% url 'attendance:session_list' class_obj.id %}"
+                       hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+                       hx-push-url="true"
+                       class="btn-secondary px-3 py-1.5 text-sm">
+                        <i class="fas fa-calendar mr-1"></i> Buổi học
                     </a>
                 </div>
-            </div>
-            <div class="card-body p-0">
-                <table class="table table-hover mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th>STT</th>
-                            <th>Họ tên</th>
-                            <th>Domain</th>
-                            <th>Trạng thái</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for enrollment in class_obj.enrollments.all %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td class="fw-bold">{{ enrollment.student.full_name }}</td>
-                            <td><code>{{ enrollment.student.domain }}</code></td>
-                            <td>
-                                {% if enrollment.status == 'active' %}
-                                <span class="badge bg-success">Hoạt động</span>
-                                {% else %}
-                                <span class="badge bg-secondary">Đã rời</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center py-4 text-muted">Chưa có học sinh</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">STT</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Họ tên</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Domain</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for enrollment in class_obj.enrollments.all %}
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 text-sm text-gray-500">{{ forloop.counter }}</td>
+                                <td class="px-6 py-4 font-medium text-gray-800">{{ enrollment.student.full_name }}</td>
+                                <td class="px-6 py-4"><code class="px-2 py-1 bg-gray-100 rounded text-sm text-gray-600">{{ enrollment.student.domain }}</code></td>
+                                <td class="px-6 py-4">
+                                    {% if enrollment.status == 'active' %}
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Hoạt động</span>
+                                    {% else %}
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">Đã rời</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="px-6 py-12 text-center text-gray-400">
+                                    Chưa có học sinh
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

@@ -3,132 +3,151 @@
 {% block title %}{% if student %}Sửa{% else %}Thêm{% endif %} học sinh - LCMS{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <div class="d-flex justify-content-between align-items-center">
+<div class="fade-in">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-            <h1 class="h2 mb-1">
-                <i class="fas fa-{% if student %}edit{% else %}plus{% endif %} me-2"></i>
+            <h1 class="text-2xl font-bold text-gray-800">
+                <i class="fas fa-{% if student %}edit{% else %}plus{% endif %} text-green-500 mr-2"></i>
                 {% if student %}Sửa{% else %}Thêm{% endif %} học sinh
             </h1>
-            <p class="mb-0 opacity-75">{% if student %}Cập nhật thông tin học sinh{% else %}Tạo học sinh mới{% endif %}</p>
+            <p class="text-gray-500 mt-1">{% if student %}Cập nhật thông tin học sinh{% else %}Tạo học sinh mới{% endif %}</p>
         </div>
-        <a href="{% url 'students:list' %}" class="btn btn-light fw-bold">
-            <i class="fas fa-arrow-left me-2"></i>Quay lại
+        <a href="{% url 'students:list' %}"
+           hx-get="{% url 'students:list' %}"
+           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+           hx-push-url="true"
+           class="btn-secondary inline-flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i> Quay lại
         </a>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-lg-8">
-        <div class="card sb-card">
-            <div class="card-header bg-white py-3">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-user-graduate me-2 text-primary"></i>Thông tin học sinh</h5>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Họ và tên <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-user"></i></span>
-                            <input type="text" name="full_name" class="form-control form-control-lg" 
-                                   value="{{ student.full_name|default:'' }}" required
-                                   placeholder="VD: Nguyễn Văn Nam">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+            <div class="card">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-800">
+                        <i class="fas fa-user-graduate text-green-500 mr-2"></i>Thông tin học sinh
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Họ và tên <span class="text-red-500">*</span></label>
+                            <div class="relative">
+                                <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" name="full_name" class="input-field pl-11"
+                                       value="{{ student.full_name|default:'' }}" required
+                                       placeholder="VD: Nguyễn Văn Nam">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Họ và tên đầy đủ của học sinh</p>
                         </div>
-                        <small class="text-muted">Họ và tên đầy đủ của học sinh</small>
-                    </div>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Giới tính</label>
-                            <select name="gender" class="form-select">
-                                <option value="">-- Chọn --</option>
-                                <option value="male" {% if student.gender == 'male' %}selected{% endif %}>Nam</option>
-                                <option value="female" {% if student.gender == 'female' %}selected{% endif %}>Nữ</option>
-                                <option value="other" {% if student.gender == 'other' %}selected{% endif %}>Khác</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Năm sinh</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                                <input type="number" name="birth_year" class="form-control" 
-                                       value="{{ student.birth_year|default:'' }}"
-                                       placeholder="VD: 2010" min="2000" max="2030">
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Giới tính</label>
+                                <select name="gender" class="input-field">
+                                    <option value="">-- Chọn --</option>
+                                    <option value="male" {% if student.gender == 'male' %}selected{% endif %}>Nam</option>
+                                    <option value="female" {% if student.gender == 'female' %}selected{% endif %}>Nữ</option>
+                                    <option value="other" {% if student.gender == 'other' %}selected{% endif %}>Khác</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Năm sinh</label>
+                                <div class="relative">
+                                    <i class="fas fa-calendar absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <input type="number" name="birth_year" class="input-field pl-11"
+                                           value="{{ student.birth_year|default:'' }}"
+                                           placeholder="VD: 2010" min="2000" max="2030">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái</label>
+                                <select name="status" class="input-field">
+                                    <option value="active" {% if student.status == 'active' %}selected{% endif %}>Hoạt động</option>
+                                    <option value="inactive" {% if student.status == 'inactive' %}selected{% endif %}>Không hoạt động</option>
+                                </select>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Trạng thái</label>
-                            <select name="status" class="form-select">
-                                <option value="active" {% if student.status == 'active' %}selected{% endif %}>Hoạt động</option>
-                                <option value="inactive" {% if student.status == 'inactive' %}selected{% endif %}>Không hoạt động</option>
-                            </select>
+
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Trường học</label>
+                            <div class="relative">
+                                <i class="fas fa-school absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" name="school" class="input-field pl-11"
+                                       value="{{ student.school|default:'' }}"
+                                       placeholder="VD: THPT Chuyên Nguyễn Tất Thành">
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Trường học</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-school"></i></span>
-                            <input type="text" name="school" class="form-control" 
-                                   value="{{ student.school|default:'' }}"
-                                   placeholder="VD: THPT Chuyên Nguyễn Tất Thành">
+
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Số điện thoại khẩn cấp</label>
+                            <div class="relative">
+                                <i class="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" name="emergency_call" class="input-field pl-11"
+                                       value="{{ student.emergency_call|default:'' }}"
+                                       placeholder="0123456789">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Số điện thoại liên hệ khi cần</p>
                         </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Số điện thoại khẩn cấp</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                            <input type="text" name="emergency_call" class="form-control" 
-                                   value="{{ student.emergency_call|default:'' }}"
-                                   placeholder="0123456789">
+
+                        <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                            <a href="{% url 'students:list' %}"
+                               hx-get="{% url 'students:list' %}"
+                               hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+                               hx-push-url="true"
+                               class="btn-secondary px-6 py-2.5">Hủy</a>
+                            <button type="submit" class="btn-primary px-6 py-2.5">
+                                <i class="fas fa-save mr-2"></i>Lưu
+                            </button>
                         </div>
-                        <small class="text-muted">Số điện thoại liên hệ khi cần</small>
-                    </div>
-                    
-                    <div class="d-flex gap-2 justify-content-end pt-3 border-top">
-                        <a href="{% url 'students:list' %}" class="btn btn-secondary btn-lg px-4">Hủy</a>
-                        <button type="submit" class="btn btn-primary btn-lg px-4">
-                            <i class="fas fa-save me-2"></i>Lưu
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-4">
-        {% if student %}
-        <div class="card sb-card">
-            <div class="card-header bg-white py-3">
-                <h6 class="mb-0 fw-bold"><i class="fas fa-info-circle me-2 text-primary"></i>Thông tin</h6>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <small class="text-muted d-block">Domain</small>
-                    <code class="bg-light px-2 py-1 rounded">{{ student.domain }}</code>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted d-block">Ngày tạo</small>
-                    <span class="fw-bold">{{ student.created_at|date:"d/m/Y H:i" }}</span>
+                    </form>
                 </div>
             </div>
         </div>
-        {% else %}
-        <div class="card sb-card">
-            <div class="card-header bg-white py-3">
-                <h6 class="mb-0 fw-bold"><i class="fas fa-lightbulb me-2 text-warning"></i>Lưu ý</h6>
+
+        <div class="space-y-6">
+            {% if student %}
+            <div class="card">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                        <i class="fas fa-user-circle mr-2"></i>Thông tin
+                    </h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <p class="text-xs text-gray-500">Domain</p>
+                        <code class="px-2 py-1 bg-gray-100 rounded text-sm">{{ student.domain }}</code>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Ngày tạo</p>
+                        <p class="font-medium">{{ student.created_at|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <ul class="mb-0 small">
-                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Domain được tạo tự động</li>
-                    <li><i class="fas fa-check text-success me-2"></i>VD: Nguyễn Văn Nam → <code>nguyenvannv</code></li>
-                </ul>
+            {% else %}
+            <div class="card">
+                <div class="px-6 py-4 border-b border-gray-100">
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                        <i class="fas fa-lightbulb mr-2"></i>Lưu ý
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-3 text-sm text-gray-600">
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-check text-green-500"></i> Domain được tạo tự động
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-lightbulb text-amber-500"></i>
+                            VD: Nguyễn Văn Nam → <code class="px-1.5 py-0.5 bg-gray-100 rounded text-xs">namnv</code>
+                        </li>
+                    </ul>
+                </div>
             </div>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
 </div>
 {% endblock %}

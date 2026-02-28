@@ -3,57 +3,68 @@
 {% block title %}Tạo buổi học - LCMS{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <h1><i class="fas fa-calendar-plus me-2"></i>Tạo buổi học mới</h1>
-    <p class="mb-0">{{ class_obj.class_code }} - {{ class_obj.class_name }}</p>
-</div>
+<div class="fade-in">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">
+            <i class="fas fa-calendar-plus text-blue-500 mr-2"></i>Tạo buổi học mới
+        </h1>
+        <p class="text-gray-500 mt-1">{{ class_obj.class_code }} - {{ class_obj.class_name }}</p>
+    </div>
 
-<div class="row">
-    <div class="col-lg-6">
-        <div class="sb-card">
-            <div class="sb-card-header">
-                <i class="fas fa-info-circle me-2"></i>Thông tin buổi học
+    <div class="max-w-2xl mx-auto">
+        <div class="card">
+            <div class="px-6 py-4 border-b border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-800">
+                    <i class="fas fa-info-circle text-primary-500 mr-2"></i>Thông tin buổi học
+                </h3>
             </div>
-            <div class="card-body">
+            <div class="p-6">
                 <form method="post">
                     {% csrf_token %}
                     
-                    <div class="mb-3">
-                        <label class="form-label">Ngày học <span class="text-danger">*</span></label>
-                        <input type="date" name="scheduled_date" class="form-control" required>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Ngày học <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <i class="fas fa-calendar-day absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="date" name="scheduled_date" class="input-field pl-11" required>
+                        </div>
                     </div>
                     
                     {% if class_obj.start_time and class_obj.end_time %}
-                    <div class="alert alert-info">
-                        <i class="fas fa-clock me-2"></i>
-                        Giờ học mặc định: {{ class_obj.start_time|time:"H:i" }} - {{ class_obj.end_time|time:"H:i" }}
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-3 text-blue-700 mb-6">
+                        <i class="fas fa-clock"></i>
+                        <span>Giờ học mặc định: <strong>{{ class_obj.start_time|time:"H:i" }} - {{ class_obj.end_time|time:"H:i" }}</strong></span>
                     </div>
                     <input type="hidden" name="scheduled_start" value="{{ class_obj.start_time|time:'H:i' }}">
                     <input type="hidden" name="scheduled_end" value="{{ class_obj.end_time|time:'H:i' }}">
                     {% else %}
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="mb-3">
-                                <label class="form-label">Giờ bắt đầu</label>
-                                <input type="time" name="scheduled_start" class="form-control">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Giờ bắt đầu</label>
+                            <div class="relative">
+                                <i class="fas fa-clock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="time" name="scheduled_start" class="input-field pl-11">
                             </div>
                         </div>
-                        <div class="col-6">
-                            <div class="mb-3">
-                                <label class="form-label">Giờ kết thúc</label>
-                                <input type="time" name="scheduled_end" class="form-control">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Giờ kết thúc</label>
+                            <div class="relative">
+                                <i class="fas fa-clock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="time" name="scheduled_end" class="input-field pl-11">
                             </div>
                         </div>
                     </div>
                     {% endif %}
                     
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i> Tạo buổi học
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                        <a href="{% url 'attendance:session_list' class_obj.id %}"
+                           hx-get="{% url 'attendance:session_list' class_obj.id %}"
+                           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+                           hx-push-url="true"
+                           class="btn-secondary px-6 py-2.5">Hủy</a>
+                        <button type="submit" class="btn-primary px-6 py-2.5">
+                            <i class="fas fa-save mr-2"></i>Tạo buổi học
                         </button>
-                        <a href="{% url 'attendance:session_list' class_obj.id %}" class="btn btn-secondary">
-                            <i class="fas fa-times me-1"></i> Hủy
-                        </a>
                     </div>
                 </form>
             </div>

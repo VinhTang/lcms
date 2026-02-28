@@ -41,33 +41,62 @@ class Student(models.Model):
 
     @staticmethod
     def clean_name(name):
+        """Remove numbers and special characters, keep Vietnamese letters."""
         if not name:
             return ""
         name = name.strip()
         name = re.sub(r'[0-9]', '', name)
-        name = re.sub(r'[^aăâbcdđeêghiklmnoôơpqrstuưvxyząâbcdefghijklmnopqrstuvxyz\s]', '', name, flags=re.IGNORECASE)
+        name = re.sub(
+            r'[^a-zA-ZàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴĐ\s]',
+            '', name
+        )
         return name
 
+    @staticmethod
+    def remove_diacritics(text):
+        """Convert Vietnamese characters to ASCII equivalents."""
+        diacritics_map = {
+            'à': 'a', 'á': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+            'ă': 'a', 'ắ': 'a', 'ằ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
+            'â': 'a', 'ấ': 'a', 'ầ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
+            'è': 'e', 'é': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+            'ê': 'e', 'ế': 'e', 'ề': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
+            'ì': 'i', 'í': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+            'ò': 'o', 'ó': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+            'ô': 'o', 'ố': 'o', 'ồ': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
+            'ơ': 'o', 'ớ': 'o', 'ờ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
+            'ù': 'u', 'ú': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+            'ư': 'u', 'ứ': 'u', 'ừ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
+            'ỳ': 'y', 'ý': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+            'đ': 'd',
+        }
+        result = []
+        for char in text:
+            result.append(diacritics_map.get(char, char))
+        return ''.join(result)
+
     def generate_domain(self):
-        full_name = self.full_name or ""
+        """
+        Vietnamese naming: Họ (family) + Tên đệm (middle) + Tên (given).
+        Domain = tên (last word) + initials of họ đệm.
+        Example: "Nguyễn Văn Nam"
+                 -> tên = "Nam", họ đệm = "Nguyễn Văn"
+                 -> domain = "nam" + "nv" = "namnv"
+        If duplicate: namnv2, namnv3, ...
+        """
+        full_name = self.clean_name(self.full_name or "")
         parts = full_name.split()
 
-        if len(parts) < 2:
-            last_name = self.clean_name(parts[0] if parts else "")
-            first_name = ""
-        else:
-            last_name = self.clean_name(parts[0])
-            first_name = ' '.join([self.clean_name(p) for p in parts[1:]])
-
-        first_initials = ""
-        if first_name:
-            first_parts = first_name.split()
-            first_initials = ''.join([p[0].upper() for p in first_parts if p])
-
-        base_domain = f"{last_name}{first_initials}".lower()
-
-        if not base_domain:
+        if not parts:
             base_domain = "student"
+        elif len(parts) == 1:
+            base_domain = self.remove_diacritics(parts[0]).lower()
+        else:
+            ten = self.remove_diacritics(parts[-1]).lower()
+            initials = ''.join(
+                [self.remove_diacritics(p[0]).lower() for p in parts[:-1] if p]
+            )
+            base_domain = f"{ten}{initials}"
 
         domain = base_domain
         counter = 2

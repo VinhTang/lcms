@@ -139,7 +139,7 @@
                 {% if user.role == 'admin' %}
                 <a href="{% url 'users:list' %}" 
                    hx-get="{% url 'users:list' %}" 
-                   hx-target="#main-content"
+                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
                    hx-push-url="true"
                    class="group p-4 rounded-xl border border-gray-200 hover:border-primary-500 hover:bg-primary-50 transition-all duration-200 cursor-pointer">
                     <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 mb-3 group-hover:bg-primary-600 group-hover:text-white transition-all duration-200">
@@ -151,7 +151,7 @@
                 
                 <a href="{% url 'students:list' %}" 
                    hx-get="{% url 'students:list' %}" 
-                   hx-target="#main-content"
+                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
                    hx-push-url="true"
                    class="group p-4 rounded-xl border border-gray-200 hover:border-green-500 hover:bg-green-50 transition-all duration-200 cursor-pointer">
                     <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 mb-3 group-hover:bg-green-600 group-hover:text-white transition-all duration-200">
@@ -163,7 +163,7 @@
                 
                 <a href="{% url 'classes:list' %}" 
                    hx-get="{% url 'classes:list' %}" 
-                   hx-target="#main-content"
+                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
                    hx-push-url="true"
                    class="group p-4 rounded-xl border border-gray-200 hover:border-amber-500 hover:bg-amber-50 transition-all duration-200 cursor-pointer">
                     <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 mb-3 group-hover:bg-amber-600 group-hover:text-white transition-all duration-200">
@@ -175,7 +175,7 @@
                 
                 <a href="{% url 'payments:tuition_list' %}" 
                    hx-get="{% url 'payments:tuition_list' %}" 
-                   hx-target="#main-content"
+                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
                    hx-push-url="true"
                    class="group p-4 rounded-xl border border-gray-200 hover:border-red-500 hover:bg-red-50 transition-all duration-200 cursor-pointer">
                     <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-red-600 mb-3 group-hover:bg-red-600 group-hover:text-white transition-all duration-200">
@@ -189,7 +189,7 @@
                 {% if user.role == 'teacher' or user.role == 'assistant' %}
                 <a href="{% url 'classes:my_classes' %}" 
                    hx-get="{% url 'classes:my_classes' %}" 
-                   hx-target="#main-content"
+                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
                    hx-push-url="true"
                    class="group p-4 rounded-xl border border-gray-200 hover:border-primary-500 hover:bg-primary-50 transition-all duration-200 cursor-pointer">
                     <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 mb-3 group-hover:bg-primary-600 group-hover:text-white transition-all duration-200">
@@ -201,7 +201,7 @@
                 
                 <a href="{% url 'attendance:my_sessions' %}" 
                    hx-get="{% url 'attendance:my_sessions' %}" 
-                   hx-target="#main-content"
+                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
                    hx-push-url="true"
                    class="group p-4 rounded-xl border border-gray-200 hover:border-green-500 hover:bg-green-50 transition-all duration-200 cursor-pointer">
                     <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 mb-3 group-hover:bg-green-600 group-hover:text-white transition-all duration-200">
@@ -215,7 +215,7 @@
                 {% if user.role == 'parent' %}
                 <a href="{% url 'students:my_children' %}" 
                    hx-get="{% url 'students:my_children' %}" 
-                   hx-target="#main-content"
+                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
                    hx-push-url="true"
                    class="group p-4 rounded-xl border border-gray-200 hover:border-primary-500 hover:bg-primary-50 transition-all duration-200 cursor-pointer">
                     <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 mb-3 group-hover:bg-primary-600 group-hover:text-white transition-all duration-200">
@@ -227,7 +227,7 @@
                 
                 <a href="{% url 'payments:my_tuitions' %}" 
                    hx-get="{% url 'payments:my_tuitions' %}" 
-                   hx-target="#main-content"
+                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
                    hx-push-url="true"
                    class="group p-4 rounded-xl border border-gray-200 hover:border-green-500 hover:bg-green-50 transition-all duration-200 cursor-pointer">
                     <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 mb-3 group-hover:bg-green-600 group-hover:text-white transition-all duration-200">
