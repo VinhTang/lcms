@@ -3,7 +3,7 @@
 {% block title %}Danh sách học sinh - LCMS{% endblock %}
 
 {% block content %}
-<div class="fade-in">
+<div class="fade-in" x-data="tableController('active')">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
@@ -22,37 +22,34 @@
     </div>
 
     <!-- Filters -->
-    <div class="card mb-6">
-        <div class="p-4">
-            <form method="get" class="flex flex-wrap gap-4">
+    <div class="card mb-5">
+        <div class="p-3">
+            <div class="flex flex-wrap gap-3 items-center">
                 <div class="flex-1 min-w-[200px]">
                     <div class="relative">
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         <input 
                             type="text" 
-                            name="search" 
+                            x-model="search" 
                             class="input-field !pl-10" 
                             placeholder="Tìm kiếm..."
-                            value="{{ search }}"
                         >
                     </div>
                 </div>
                 <div class="w-48">
-                    <select name="status" class="input-field">
+                    <select x-model="filterStatus" class="input-field">
                         <option value="">Tất cả trạng thái</option>
-                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Hoạt động</option>
-                        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Không hoạt động</option>
+                        <option value="active">Hoạt động</option>
+                        <option value="inactive">Nghỉ</option>
+                        <option value="deleted">Khoá</option>
                     </select>
                 </div>
                 <div class="flex gap-2">
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-search mr-1"></i> Tìm
-                    </button>
-                    <a href="{% url 'students:list' %}" class="btn-secondary">
+                    <button type="button" @click.prevent="search = ''; filterStatus = ''" class="btn-secondary h-[42px]">
                         <i class="fas fa-redo mr-1"></i> Reset
-                    </a>
+                    </button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -62,80 +59,87 @@
             <table class="w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">STT</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Họ tên</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Domain</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Năm sinh</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Giới tính</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Trường</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
-                        <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase">Thao tác</th>
+                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase">STT</th>
+                        <th @click="sortBy('name')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none group">Họ tên <i class="fas ml-1" :class="sortCol === 'name' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
+                        <th @click="sortBy('domain')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none group">Domain <i class="fas ml-1" :class="sortCol === 'domain' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
+                        <th @click="sortBy('year')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none group">Năm sinh <i class="fas ml-1" :class="sortCol === 'year' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
+                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase">Giới tính</th>
+                        <th @click="sortBy('school')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none group">Trường <i class="fas ml-1" :class="sortCol === 'school' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
+                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
+                        <th class="px-3 py-1.5 text-right text-xs font-semibold text-gray-500 uppercase">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody x-ref="tbody" class="divide-y divide-gray-100">
                     {% for student in page_obj %}
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-4 py-1.5 text-sm text-gray-500">{{ forloop.counter|add:page_obj.start_index|add:-1 }}</td>
-                        <td class="px-4 py-1.5">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-semibold">
+                    <tr x-show="filterRow($el)" 
+                        data-search="{{ student.full_name|lower }} {{ student.domain|lower }} {{ student.school|lower }}" 
+                        data-status="{{ student.status }}" 
+                        data-sort-name="{{ student.full_name|lower }}" 
+                        data-sort-domain="{{ student.domain|lower }}" 
+                        data-sort-year="{{ student.birth_year|default:0 }}" 
+                        data-sort-school="{{ student.school|default:'' }}"
+                        class="hover:bg-gray-50 transition-colors">
+                        <td class="px-3 py-1 text-sm text-gray-500">{{ forloop.counter|add:page_obj.start_index|add:-1 }}</td>
+                        <td class="px-3 py-1">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-semibold text-sm">
                                     {{ student.full_name|make_list|first|upper }}
                                 </div>
                                 <span class="font-medium text-gray-800">{{ student.full_name }}</span>
                             </div>
                         </td>
-                        <td class="px-4 py-1.5">
-                            <code class="px-2 py-1 bg-gray-100 text-gray-600 rounded text-sm">{{ student.domain }}</code>
+                        <td class="px-3 py-1">
+                            <code class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">{{ student.domain }}</code>
                         </td>
-                        <td class="px-4 py-1.5 text-sm text-gray-600">{{ student.birth_year|default:"-" }}</td>
-                        <td class="px-4 py-1.5 text-sm text-gray-600">{{ student.get_gender_display|default:"-" }}</td>
-                        <td class="px-4 py-1.5 text-sm text-gray-600">{{ student.school|default:"-" }}</td>
-                        <td class="px-4 py-1.5">
+                        <td class="px-3 py-1 text-sm text-gray-600">{{ student.birth_year|default:"-" }}</td>
+                        <td class="px-3 py-1 text-sm text-gray-600">{{ student.get_gender_display|default:"-" }}</td>
+                        <td class="px-3 py-1 text-sm text-gray-600">{{ student.school|default:"-" }}</td>
+                        <td class="px-3 py-1">
                             {% if student.status == 'active' %}
-                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Hoạt động</span>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-green-100 text-green-700">Hoạt động</span>
                             {% elif student.status == 'inactive' %}
-                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700">Nghỉ</span>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-orange-100 text-orange-700">Nghỉ</span>
                             {% else %}
-                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Khoá</span>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-100 text-red-700">Khoá</span>
                             {% endif %}
                         </td>
-                        <td class="px-4 py-1.5 text-right">
-                            <div class="flex items-center justify-end gap-2">
+                        <td class="px-3 py-1 text-right">
+                            <div class="flex items-center justify-end gap-1">
                                 <a href="{% url 'students:detail' student.id %}" 
                                    hx-get="{% url 'students:detail' student.id %}"
                                    hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
                                    hx-push-url="true"
-                                   class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" title="Xem">
-                                    <i class="fas fa-eye"></i>
+                                   class="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" title="Xem">
+                                    <i class="fas fa-eye text-sm"></i>
                                 </a>
-                                <button hx-get="{% url 'users:object_history' 'students' 'student' student.id %}" 
-                                        hx-target="#history-modal-container"
-                                        class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Lịch sử">
-                                    <i class="fas fa-history"></i>
-                                </button>
                                 <a href="{% url 'students:edit' student.id %}" 
                                    hx-get="{% url 'students:edit' student.id %}"
                                    hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
                                    hx-push-url="true"
-                                   class="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Sửa">
-                                    <i class="fas fa-edit"></i>
+                                   class="p-1.5 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Sửa">
+                                    <i class="fas fa-edit text-sm"></i>
                                 </a>
+                                <button hx-get="{% url 'users:object_history' 'students' 'student' student.id %}" 
+                                        hx-target="#history-modal-container"
+                                        class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Lịch sử">
+                                    <i class="fas fa-history text-sm"></i>
+                                </button>
                                 <a href="{% url 'students:delete' student.id %}" 
                                    hx-get="{% url 'students:delete' student.id %}"
                                    hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
                                    hx-push-url="true"
-                                   class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Xóa">
-                                    <i class="fas fa-trash"></i>
+                                   class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Xóa">
+                                    <i class="fas fa-trash text-sm"></i>
                                 </a>
                             </div>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="px-6 py-12 text-center">
+                        <td colspan="8" class="px-6 py-12 text-center">
                             <div class="text-gray-400">
-                                <i class="fas fa-user-graduate text-5xl mb-4 opacity-50"></i>
-                                <h3 class="text-lg font-medium text-gray-600">Không có học sinh nào</h3>
+                                <i class="fas fa-user-graduate text-4xl mb-3 opacity-50"></i>
+                                <h3 class="text-base font-medium text-gray-600">Không có học sinh nào</h3>
                             </div>
                         </td>
                     </tr>

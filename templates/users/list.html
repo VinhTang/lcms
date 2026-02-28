@@ -3,7 +3,7 @@
 {% block title %}Quản lý người dùng - LCMS{% endblock %}
 
 {% block content %}
-<div class="fade-in">
+<div class="fade-in" x-data="tableController()">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
@@ -22,39 +22,35 @@
     </div>
 
     <!-- Filters -->
-    <div class="card mb-6">
-        <div class="p-4">
-            <form method="get" class="flex flex-wrap gap-4">
+    <div class="card mb-5">
+        <div class="p-3">
+            <div class="flex flex-wrap gap-3 items-center">
                 <div class="flex-1 min-w-[200px]">
                     <div class="relative">
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         <input 
                             type="text" 
-                            name="search" 
+                            x-model="search" 
                             class="input-field !pl-10" 
                             placeholder="Tìm kiếm..."
-                            value="{{ search }}"
                         >
                     </div>
                 </div>
                 <div class="w-48">
-                    <select name="role" class="input-field">
+                    <select x-model="filterStatus" class="input-field">
                         <option value="">Tất cả vai trò</option>
-                        <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Quản trị viên</option>
-                        <option value="teacher" {% if role_filter == 'teacher' %}selected{% endif %}>Giáo viên</option>
-                        <option value="assistant" {% if role_filter == 'assistant' %}selected{% endif %}>Trợ giảng</option>
-                        <option value="parent" {% if role_filter == 'parent' %}selected{% endif %}>Phụ huynh</option>
+                        <option value="admin">Quản trị viên</option>
+                        <option value="teacher">Giáo viên</option>
+                        <option value="assistant">Trợ giảng</option>
+                        <option value="parent">Phụ huynh</option>
                     </select>
                 </div>
                 <div class="flex gap-2">
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-search mr-1"></i> Tìm
-                    </button>
-                    <a href="{% url 'users:list' %}" class="btn-secondary">
+                    <button type="button" @click.prevent="search = ''; filterStatus = ''" class="btn-secondary h-[42px]">
                         <i class="fas fa-redo mr-1"></i> Reset
-                    </a>
+                    </button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -64,96 +60,104 @@
             <table class="w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">STT</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Họ tên</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Domain</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Vai trò</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                        <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Thao tác</th>
+                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">STT</th>
+                        <th @click="sortBy('name')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none group">Họ tên <i class="fas ml-1" :class="sortCol === 'name' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
+                        <th @click="sortBy('domain')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none group">Domain <i class="fas ml-1" :class="sortCol === 'domain' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
+                        <th @click="sortBy('email')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none group">Email <i class="fas ml-1" :class="sortCol === 'email' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
+                        <th @click="sortBy('role')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none group">Vai trò <i class="fas ml-1" :class="sortCol === 'role' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
+                        <th @click="sortBy('status')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none group">Trạng thái <i class="fas ml-1" :class="sortCol === 'status' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
+                        <th class="px-3 py-1.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody x-ref="tbody" class="divide-y divide-gray-100">
                     {% for u in page_obj %}
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-4 py-1.5 text-sm text-gray-500">{{ forloop.counter|add:page_obj.start_index|add:-1 }}</td>
-                        <td class="px-4 py-1.5">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-semibold">
+                    <tr x-show="filterRow($el)"
+                        data-search="{{ u.get_full_name|lower }} {{ u.domain|lower }} {{ u.email|lower }}"
+                        data-status="{{ u.role }}"
+                        data-sort-name="{{ u.get_full_name|lower }}"
+                        data-sort-domain="{{ u.domain|lower }}"
+                        data-sort-email="{{ u.email|lower }}"
+                        data-sort-role="{{ u.role }}"
+                        data-sort-status="{{ u.is_active|yesno:'1,0' }}"
+                        class="hover:bg-gray-50 transition-colors">
+                        <td class="px-3 py-1 text-sm text-gray-500">{{ forloop.counter|add:page_obj.start_index|add:-1 }}</td>
+                        <td class="px-3 py-1">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-semibold text-sm">
                                     {{ u.first_name|default:u.username|make_list|first|upper }}
                                 </div>
                                 <span class="font-medium text-gray-800">{{ u.get_full_name }}</span>
                             </div>
                         </td>
-                        <td class="px-4 py-1.5">
-                            <code class="px-2 py-1 bg-gray-100 text-gray-600 rounded text-sm">{{ u.domain }}</code>
+                        <td class="px-3 py-1">
+                            <code class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">{{ u.domain }}</code>
                         </td>
-                        <td class="px-4 py-1.5 text-sm text-gray-600">{{ u.email|default:"-" }}</td>
-                        <td class="px-4 py-1.5">
+                        <td class="px-3 py-1 text-sm text-gray-600">{{ u.email|default:"-" }}</td>
+                        <td class="px-3 py-1">
                             {% if u.role == 'admin' %}
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                                <i class="fas fa-crown"></i> Admin
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-100 text-red-700">
+                                <i class="fas fa-crown text-[10px]"></i> Admin
                             </span>
                             {% elif u.role == 'teacher' %}
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-700">
-                                <i class="fas fa-chalkboard-teacher"></i> Giáo viên
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-primary-100 text-primary-700">
+                                <i class="fas fa-chalkboard-teacher text-[10px]"></i> Giáo viên
                             </span>
                             {% elif u.role == 'assistant' %}
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                                <i class="fas fa-hands-helping"></i> Trợ giảng
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-700">
+                                <i class="fas fa-hands-helping text-[10px]"></i> Trợ giảng
                             </span>
                             {% else %}
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                                <i class="fas fa-user-friends"></i> Phụ huynh
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-700">
+                                <i class="fas fa-user-friends text-[10px]"></i> Phụ huynh
                             </span>
                             {% endif %}
                         </td>
-                        <td class="px-4 py-1.5">
+                        <td class="px-3 py-1">
                             {% if u.is_active %}
-                            <span class="inline-flex items-center gap-1 text-sm text-green-600">
+                            <span class="inline-flex items-center gap-1 text-[13px] text-green-600">
                                 <i class="fas fa-check-circle"></i> Hoạt động
                             </span>
                             {% else %}
-                            <span class="inline-flex items-center gap-1 text-sm text-gray-400">
+                            <span class="inline-flex items-center gap-1 text-[13px] text-gray-400">
                                 <i class="fas fa-times-circle"></i> Khóa
                             </span>
                             {% endif %}
                         </td>
-                        <td class="px-4 py-1.5 text-right">
-                            <div class="flex items-center justify-end gap-2">
+                        <td class="px-3 py-1 text-right">
+                            <div class="flex items-center justify-end gap-1">
+                                <a href="{% url 'users:edit' u.id %}" 
+                                   hx-get="{% url 'users:edit' u.id %}"
+                                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+                                   hx-push-url="true"
+                                   class="p-1.5 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Sửa">
+                                    <i class="fas fa-edit text-sm"></i>
+                                </a>
                                 {% if u.is_active %}
                                 <button hx-post="{% url 'users:toggle_lock' u.id %}" 
                                         hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                                         hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                                        class="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Khóa tài khoản">
-                                    <i class="fas fa-lock"></i>
+                                        class="p-1.5 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors" title="Khóa tài khoản">
+                                    <i class="fas fa-lock text-sm"></i>
                                 </button>
                                 {% else %}
                                 <button hx-post="{% url 'users:toggle_lock' u.id %}" 
                                         hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                                         hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                                        class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Mở khóa tài khoản">
-                                    <i class="fas fa-unlock"></i>
+                                        class="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Mở khóa tài khoản">
+                                    <i class="fas fa-unlock text-sm"></i>
                                 </button>
                                 {% endif %}
-                                <a href="{% url 'users:edit' u.id %}" 
-                                   hx-get="{% url 'users:edit' u.id %}"
-                                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                                   hx-push-url="true"
-                                   class="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Sửa">
-                                    <i class="fas fa-edit"></i>
-                                </a>
                                 <button hx-get="{% url 'users:object_history' 'accounts' 'user' u.id %}" 
                                         hx-target="#history-modal-container"
-                                        class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Lịch sử">
-                                    <i class="fas fa-history"></i>
+                                        class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Lịch sử">
+                                    <i class="fas fa-history text-sm"></i>
                                 </button>
                                 <a href="{% url 'users:delete' u.id %}" 
                                    hx-get="{% url 'users:delete' u.id %}"
                                    hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
                                    hx-push-url="true"
-                                   class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Xóa">
-                                    <i class="fas fa-trash"></i>
+                                   class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Xóa">
+                                    <i class="fas fa-trash text-sm"></i>
                                 </a>
                             </div>
                         </td>

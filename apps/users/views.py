@@ -174,10 +174,32 @@ def activity_logs(request):
         return redirect('dashboard')
         
     histories = []
+    from django.db.models import Q
+    
+    action_filter = request.GET.get('action', '')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    actor_name = request.GET.get('actor', '')
+    
     # Fetch top 100 latest items from each tracked model
     for model in apps.get_models():
         if hasattr(model, 'history') and hasattr(model.history, 'all'):
-            logs = model.history.all().select_related('history_user').order_by('-history_date')[:100]
+            qs = model.history.all().select_related('history_user')
+            
+            if action_filter:
+                qs = qs.filter(history_type=action_filter)
+            if date_from:
+                qs = qs.filter(history_date__gte=date_from)
+            if date_to:
+                qs = qs.filter(history_date__lte=date_to + " 23:59:59")
+            if actor_name:
+                qs = qs.filter(
+                    Q(history_user__username__icontains=actor_name) |
+                    Q(history_user__first_name__icontains=actor_name) |
+                    Q(history_user__last_name__icontains=actor_name)
+                )
+                
+            logs = qs.order_by('-history_date')[:100]
             clean_name = str(model._meta.verbose_name).title()
             for log in logs:
                 log.model_name = clean_name
@@ -211,11 +233,23 @@ def activity_logs(request):
                 pass
     
     extra_query = f'&per_page={per_page}'
+    if action_filter:
+        extra_query += f'&action={action_filter}'
+    if date_from:
+        extra_query += f'&date_from={date_from}'
+    if date_to:
+        extra_query += f'&date_to={date_to}'
+    if actor_name:
+        extra_query += f'&actor={actor_name}'
     
     return render(request, 'users/activity_logs.html', {
         'page_obj': page_obj,
         'per_page': per_page,
         'extra_query': extra_query,
+        'action_filter': action_filter,
+        'date_from': date_from,
+        'date_to': date_to,
+        'actor': actor_name,
     })
 
 @login_required

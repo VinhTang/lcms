@@ -29,7 +29,7 @@
         </div>
     </div>
 
-    <div class="card overflow-hidden">
+    <div class="card overflow-hidden" x-data="tableController()">
         <div class="px-6 py-4 border-b border-gray-100">
             <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
                 <i class="fas fa-list mr-2 text-primary-500"></i>Các buổi học
@@ -41,28 +41,34 @@
             <table class="w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Ngày</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Thời gian</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Điểm danh</th>
-                        <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase">Thao tác</th>
+                        <th @click="sortBy('date')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none group">Ngày <i class="fas ml-1" :class="sortCol === 'date' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
+                        <th @click="sortBy('time')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none group">Thời gian <i class="fas ml-1" :class="sortCol === 'time' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
+                        <th @click="sortBy('status')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none group">Trạng thái <i class="fas ml-1" :class="sortCol === 'status' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
+                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase">Điểm danh</th>
+                        <th class="px-3 py-1.5 text-right text-xs font-semibold text-gray-500 uppercase">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody x-ref="tbody" class="divide-y divide-gray-100">
                     {% for session in page_obj %}
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-4 py-1.5 font-medium text-gray-800">{{ session.scheduled_date|date:"d/m/Y" }}</td>
-                        <td class="px-4 py-1.5 text-sm text-gray-600">{{ session.scheduled_start|time:"H:i" }} - {{ session.scheduled_end|time:"H:i" }}</td>
-                        <td class="px-4 py-1.5">
+                    <tr x-show="filterRow($el)"
+                        data-search=""
+                        data-status=""
+                        data-sort-date="{{ session.scheduled_date|date:'Y-m-d' }}"
+                        data-sort-time="{{ session.scheduled_start|time:'H:i' }}"
+                        data-sort-status="{{ session.status }}"
+                        class="hover:bg-gray-50 transition-colors">
+                        <td class="px-3 py-1 font-medium text-gray-800">{{ session.scheduled_date|date:"d/m/Y" }}</td>
+                        <td class="px-3 py-1 text-sm text-gray-600">{{ session.scheduled_start|time:"H:i" }} - {{ session.scheduled_end|time:"H:i" }}</td>
+                        <td class="px-3 py-1">
                             {% if session.status == 'not_started' %}
-                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">Chưa bắt đầu</span>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-700">Chưa bắt đầu</span>
                             {% elif session.status == 'in_progress' %}
-                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Đang diễn ra</span>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-green-100 text-green-700">Đang diễn ra</span>
                             {% else %}
-                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">Đã kết thúc</span>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-100 text-red-700">Đã kết thúc</span>
                             {% endif %}
                         </td>
-                        <td class="px-4 py-1.5 text-sm">
+                        <td class="px-3 py-1 text-sm">
                             {% if session.status == 'ended' %}
                             {% with session.attendances.all as atts %}
                             {% with atts|length as total %}
@@ -79,19 +85,21 @@
                             <span class="text-gray-400">-</span>
                             {% endif %}
                         </td>
-                        <td class="px-4 py-1.5 text-right">
-                            <a href="{% url 'attendance:session_detail' session.id %}"
-                               hx-get="{% url 'attendance:session_detail' session.id %}"
-                               hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                               hx-push-url="true"
-                               class="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors inline-block" title="Xem">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <button hx-get="{% url 'users:object_history' 'attendance' 'classsession' session.id %}" 
-                                    hx-target="#history-modal-container"
-                                    class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors inline-block" title="Lịch sử">
-                                <i class="fas fa-history"></i>
-                            </button>
+                        <td class="px-3 py-1 text-right">
+                            <div class="flex items-center justify-end gap-1">
+                                <a href="{% url 'attendance:session_detail' session.id %}"
+                                   hx-get="{% url 'attendance:session_detail' session.id %}"
+                                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+                                   hx-push-url="true"
+                                   class="p-1.5 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors inline-block" title="Xem">
+                                    <i class="fas fa-eye text-sm"></i>
+                                </a>
+                                <button hx-get="{% url 'users:object_history' 'attendance' 'classsession' session.id %}" 
+                                        hx-target="#history-modal-container"
+                                        class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors inline-block" title="Lịch sử">
+                                    <i class="fas fa-history text-sm"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}

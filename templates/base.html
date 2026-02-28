@@ -1,463 +1,640 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi" class="h-full">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{% block title %}LCMS - Learning Center Management{% endblock %}</title>
-    
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>
+      {% block title %}LCMS - Learning Center Management{% endblock %}
+    </title>
+
     <script>
-        // Prevent FOUC for theme
-        const savedTheme = localStorage.getItem('lcms_theme') || 'blue';
-        document.documentElement.setAttribute('data-theme', savedTheme);
+      // Prevent FOUC for theme
+      const savedTheme = localStorage.getItem("lcms_theme") || "blue";
+      document.documentElement.setAttribute("data-theme", savedTheme);
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script
+      defer
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: 'rgb(var(--color-primary-50) / <alpha-value>)',
-                            100: 'rgb(var(--color-primary-100) / <alpha-value>)',
-                            200: 'rgb(var(--color-primary-200) / <alpha-value>)',
-                            300: 'rgb(var(--color-primary-300) / <alpha-value>)',
-                            400: 'rgb(var(--color-primary-400) / <alpha-value>)',
-                            500: 'rgb(var(--color-primary-500) / <alpha-value>)',
-                            600: 'rgb(var(--color-primary-600) / <alpha-value>)',
-                            700: 'rgb(var(--color-primary-700) / <alpha-value>)',
-                            800: 'rgb(var(--color-primary-800) / <alpha-value>)',
-                            900: 'rgb(var(--color-primary-900) / <alpha-value>)',
-                        }
-                    }
-                }
-            }
-        }
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: "rgb(var(--color-primary-50) / <alpha-value>)",
+                100: "rgb(var(--color-primary-100) / <alpha-value>)",
+                200: "rgb(var(--color-primary-200) / <alpha-value>)",
+                300: "rgb(var(--color-primary-300) / <alpha-value>)",
+                400: "rgb(var(--color-primary-400) / <alpha-value>)",
+                500: "rgb(var(--color-primary-500) / <alpha-value>)",
+                600: "rgb(var(--color-primary-600) / <alpha-value>)",
+                700: "rgb(var(--color-primary-700) / <alpha-value>)",
+                800: "rgb(var(--color-primary-800) / <alpha-value>)",
+                900: "rgb(var(--color-primary-900) / <alpha-value>)",
+              },
+            },
+          },
+        },
+      };
     </script>
-    
+
     <style type="text/tailwindcss">
-        :root, [data-theme="blue"] {
-            --color-primary-50: 239 246 255;
-            --color-primary-100: 219 234 254;
-            --color-primary-200: 191 219 254;
-            --color-primary-300: 147 197 253;
-            --color-primary-400: 96 165 250;
-            --color-primary-500: 59 130 246;
-            --color-primary-600: 37 99 235;
-            --color-primary-700: 29 78 216;
-            --color-primary-800: 30 64 175;
-            --color-primary-900: 30 58 138;
-        }
+      :root,
+      [data-theme="blue"] {
+        --color-primary-50: 239 246 255;
+        --color-primary-100: 219 234 254;
+        --color-primary-200: 191 219 254;
+        --color-primary-300: 147 197 253;
+        --color-primary-400: 96 165 250;
+        --color-primary-500: 59 130 246;
+        --color-primary-600: 37 99 235;
+        --color-primary-700: 29 78 216;
+        --color-primary-800: 30 64 175;
+        --color-primary-900: 30 58 138;
+      }
 
-        [data-theme="indigo"] {
-            --color-primary-50: 238 242 255;
-            --color-primary-100: 224 231 255;
-            --color-primary-200: 199 210 254;
-            --color-primary-300: 165 180 252;
-            --color-primary-400: 129 140 248;
-            --color-primary-500: 99 102 241;
-            --color-primary-600: 79 70 229;
-            --color-primary-700: 67 56 202;
-            --color-primary-800: 55 48 163;
-            --color-primary-900: 49 46 129;
-        }
+      [data-theme="indigo"] {
+        --color-primary-50: 238 242 255;
+        --color-primary-100: 224 231 255;
+        --color-primary-200: 199 210 254;
+        --color-primary-300: 165 180 252;
+        --color-primary-400: 129 140 248;
+        --color-primary-500: 99 102 241;
+        --color-primary-600: 79 70 229;
+        --color-primary-700: 67 56 202;
+        --color-primary-800: 55 48 163;
+        --color-primary-900: 49 46 129;
+      }
 
-        [data-theme="emerald"] {
-            --color-primary-50: 236 253 245;
-            --color-primary-100: 209 250 229;
-            --color-primary-200: 167 243 208;
-            --color-primary-300: 110 231 183;
-            --color-primary-400: 52 211 153;
-            --color-primary-500: 16 185 129;
-            --color-primary-600: 5 150 105;
-            --color-primary-700: 4 120 87;
-            --color-primary-800: 6 95 70;
-            --color-primary-900: 6 78 59;
-        }
+      [data-theme="emerald"] {
+        --color-primary-50: 236 253 245;
+        --color-primary-100: 209 250 229;
+        --color-primary-200: 167 243 208;
+        --color-primary-300: 110 231 183;
+        --color-primary-400: 52 211 153;
+        --color-primary-500: 16 185 129;
+        --color-primary-600: 5 150 105;
+        --color-primary-700: 4 120 87;
+        --color-primary-800: 6 95 70;
+        --color-primary-900: 6 78 59;
+      }
 
-        [data-theme="rose"] {
-            --color-primary-50: 255 241 242;
-            --color-primary-100: 255 228 230;
-            --color-primary-200: 254 205 211;
-            --color-primary-300: 253 164 175;
-            --color-primary-400: 251 113 133;
-            --color-primary-500: 244 63 94;
-            --color-primary-600: 225 29 72;
-            --color-primary-700: 190 18 60;
-            --color-primary-800: 159 18 57;
-            --color-primary-900: 136 19 55;
-        }
+      [data-theme="rose"] {
+        --color-primary-50: 255 241 242;
+        --color-primary-100: 255 228 230;
+        --color-primary-200: 254 205 211;
+        --color-primary-300: 253 164 175;
+        --color-primary-400: 251 113 133;
+        --color-primary-500: 244 63 94;
+        --color-primary-600: 225 29 72;
+        --color-primary-700: 190 18 60;
+        --color-primary-800: 159 18 57;
+        --color-primary-900: 136 19 55;
+      }
 
-        [x-cloak] { display: none !important; }
-        
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      [x-cloak] {
+        display: none !important;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+
+      .htmx-swapping {
+        opacity: 0;
+        transition: opacity 200ms ease-out;
+      }
+
+      .htmx-indicator {
+        opacity: 0;
+        transition: opacity 200ms ease-out;
+      }
+      .htmx-request .htmx-indicator {
+        opacity: 1;
+      }
+      .htmx-request.htmx-indicator {
+        opacity: 1;
+      }
+
+      .sidebar-link {
+        @apply flex items-center gap-3 px-4 py-2.5 text-primary-100 bg-transparent rounded-xl transition-all duration-200 text-[13px] font-medium hover:bg-white/10 hover:text-white hover:shadow-sm;
+      }
+      .sidebar-link.active {
+        @apply bg-white/20 text-white font-bold shadow-md ring-1 ring-white/30;
+      }
+      .sidebar-group {
+        @apply mb-4;
+      }
+      .sidebar-group-title {
+        @apply px-4 mb-1.5 text-[10px] font-bold text-primary-300 uppercase tracking-widest;
+      }
+
+      .card {
+        @apply bg-white rounded-2xl shadow-sm border border-gray-100;
+      }
+
+      .btn-primary {
+        @apply px-4 py-2 bg-primary-600 text-white rounded-lg font-medium transition-all duration-200 hover:bg-primary-700 active:scale-95;
+      }
+
+      .btn-secondary {
+        @apply px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium transition-all duration-200 hover:bg-gray-200;
+      }
+
+      .input-field {
+        @apply w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200;
+      }
+
+      .fade-in {
+        animation: fadeIn 0.3s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
         }
-        
-        .htmx-swapping {
-            opacity: 0;
-            transition: opacity 200ms ease-out;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
-        
-        .htmx-indicator {
-            opacity: 0;
-            transition: opacity 200ms ease-out;
-        }
-        .htmx-request .htmx-indicator {
-            opacity: 1;
-        }
-        .htmx-request.htmx-indicator {
-            opacity: 1;
-        }
-        
-        .sidebar-link {
-            @apply flex items-center gap-3 px-4 py-2.5 text-primary-100 bg-transparent rounded-xl transition-all duration-200 text-[13px] font-medium hover:bg-white/10 hover:text-white hover:shadow-sm;
-        }
-        .sidebar-link.active {
-            @apply bg-white/20 text-white font-bold shadow-md ring-1 ring-white/30;
-        }
-        .sidebar-group {
-            @apply mb-4;
-        }
-        .sidebar-group-title {
-            @apply px-4 mb-1.5 text-[10px] font-bold text-primary-300 uppercase tracking-widest;
-        }
-        
-        .card {
-            @apply bg-white rounded-2xl shadow-sm border border-gray-100;
-        }
-        
-        .btn-primary {
-            @apply px-4 py-2 bg-primary-600 text-white rounded-lg font-medium transition-all duration-200 hover:bg-primary-700 active:scale-95;
-        }
-        
-        .btn-secondary {
-            @apply px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium transition-all duration-200 hover:bg-gray-200;
-        }
-        
-        .input-field {
-            @apply w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200;
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+      }
     </style>
-    
+
     {% block extra_css %}{% endblock %}
-</head>
-<body class="h-full bg-gray-50 text-gray-800 text-[14px]" x-data="appData()">
+  </head>
+  <body class="h-full bg-gray-50 text-gray-800 text-[14px]" x-data="appData()">
     {% if user.is_authenticated %}
     <div class="h-full flex overflow-hidden">
-        <!-- Sidebar -->
-        <aside 
-            class="fixed inset-y-0 left-0 z-50 w-64 bg-primary-900 border-r border-primary-800 transform transition-transform duration-300 lg:translate-x-0 flex flex-col"
-            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+      <!-- Sidebar -->
+      <aside
+        class="fixed inset-y-0 left-0 z-50 w-64 bg-primary-900 border-r border-primary-800 transform transition-transform duration-300 lg:translate-x-0 flex flex-col"
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+      >
+        <!-- Logo -->
+        <div
+          class="h-16 flex items-center gap-3 px-6 border-b border-primary-800 bg-primary-900"
         >
-            <!-- Logo -->
-            <div class="h-16 flex items-center gap-3 px-6 border-b border-primary-800 bg-primary-900">
-                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md">
-                    <i class="fas fa-graduation-cap text-primary-600 text-lg"></i>
-                </div>
-                <span class="text-white text-xl font-bold tracking-tight">LCMS</span>
-            </div>
-            
-            <!-- Navigation -->
-            <nav class="flex-1 overflow-y-auto p-4 custom-scrollbar">
-                <div class="sidebar-group">
-                    <div class="space-y-2.5">
-                        <a href="{% url 'dashboard' %}" 
-                           class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
-                           hx-get="{% url 'dashboard' %}" 
-                           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                           hx-push-url="true">
-                            <i class="fas fa-home w-5"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </div>
-                </div>
-                
-                {% if user.role == 'admin' %}
-                <div class="sidebar-group">
-                    <div class="sidebar-group-title">Quản lý hệ thống</div>
-                    <div class="space-y-2.5">
-                        <a href="{% url 'users:list' %}" 
-                           class="sidebar-link {% if 'users' in request.path %}active{% endif %}"
-                           hx-get="{% url 'users:list' %}" 
-                           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                           hx-push-url="true">
-                            <i class="fas fa-users w-5"></i>
-                            <span>Người dùng</span>
-                        </a>
-                        <a href="{% url 'students:list' %}" 
-                           class="sidebar-link {% if 'students' in request.path and 'my-children' not in request.path %}active{% endif %}"
-                           hx-get="{% url 'students:list' %}" 
-                           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                           hx-push-url="true">
-                            <i class="fas fa-user-graduate w-5"></i>
-                            <span>Học sinh</span>
-                        </a>
-                        <a href="{% url 'classes:list' %}" 
-                           class="sidebar-link {% if request.path == '/classes/' %}active{% endif %}"
-                           hx-get="{% url 'classes:list' %}" 
-                           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                           hx-push-url="true">
-                            <i class="fas fa-school w-5"></i>
-                            <span>Lớp học</span>
-                        </a>
-                        <a href="{% url 'payments:tuition_list' %}" 
-                           class="sidebar-link {% if 'tuitions' in request.path %}active{% endif %}"
-                           hx-get="{% url 'payments:tuition_list' %}" 
-                           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                           hx-push-url="true">
-                            <i class="fas fa-money-bill-wave w-5"></i>
-                            <span>Học phí</span>
-                        </a>
-                        <a href="{% url 'users:activity_logs' %}" 
-                           class="sidebar-link {% if 'activity-logs' in request.path %}active{% endif %}"
-                           hx-get="{% url 'users:activity_logs' %}" 
-                           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                           hx-push-url="true">
-                            <i class="fas fa-history w-5"></i>
-                            <span>Lịch sử hoạt động</span>
-                        </a>
-                    </div>
-                </div>
-                {% endif %}
-                
-                {% if user.role == 'teacher' or user.role == 'assistant' %}
-                <div class="sidebar-group">
-                    <div class="sidebar-group-title">Chuyên môn</div>
-                    <div class="space-y-2.5">
-                        <a href="{% url 'classes:my_classes' %}" 
-                           class="sidebar-link {% if 'my-classes' in request.path %}active{% endif %}"
-                           hx-get="{% url 'classes:my_classes' %}" 
-                           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                           hx-push-url="true">
-                            <i class="fas fa-chalkboard-teacher w-5"></i>
-                            <span>Lớp của tôi</span>
-                        </a>
-                        <a href="{% url 'attendance:my_sessions' %}" 
-                           class="sidebar-link {% if 'my-sessions' in request.path %}active{% endif %}"
-                           hx-get="{% url 'attendance:my_sessions' %}" 
-                           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                           hx-push-url="true">
-                            <i class="fas fa-calendar-check w-5"></i>
-                            <span>Buổi học</span>
-                        </a>
-                    </div>
-                </div>
-                {% endif %}
-                
-                {% if user.role == 'parent' %}
-                <div class="sidebar-group">
-                    <div class="sidebar-group-title">Thông tin của con</div>
-                    <div class="space-y-2.5">
-                        <a href="{% url 'students:my_children' %}" 
-                           class="sidebar-link {% if 'my-children' in request.path %}active{% endif %}"
-                           hx-get="{% url 'students:my_children' %}" 
-                           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                           hx-push-url="true">
-                            <i class="fas fa-child w-5"></i>
-                            <span>Con của tôi</span>
-                        </a>
-                        <a href="{% url 'payments:my_tuitions' %}" 
-                           class="sidebar-link {% if 'my-tuitions' in request.path %}active{% endif %}"
-                           hx-get="{% url 'payments:my_tuitions' %}" 
-                           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                           hx-push-url="true">
-                            <i class="fas fa-money-bill-wave w-5"></i>
-                            <span>Học phí đóng</span>
-                        </a>
-                    </div>
-                </div>
-                {% endif %}
-            </nav>
-            
-            <!-- User Info -->
-            <div class="h-20 bg-primary-800 border-t border-primary-700 px-4 flex items-center gap-3">
-                <div class="w-10 h-10 bg-white/20 text-white rounded-full flex items-center justify-center font-bold shadow-inner">
-                    {{ user.first_name|default:user.username|make_list|first|upper }}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-[13px] font-bold text-white truncate">{{ user.get_full_name|default:user.username }}</p>
-                    <p class="text-[11px] text-primary-200 truncate">
-                        {% if user.role == 'admin' %}Quản trị viên
-                        {% elif user.role == 'teacher' %}Giáo viên
-                        {% elif user.role == 'assistant' %}Trợ giảng
-                        {% else %}Phụ huynh{% endif %}
-                    </p>
-                </div>
-                <a href="{% url 'logout' %}" class="w-8 h-8 flex items-center justify-center rounded-lg text-primary-200 hover:text-white hover:bg-white/10 transition-colors" title="Đăng xuất">
-                    <i class="fas fa-sign-out-alt"></i>
-                </a>
-            </div>
-        </aside>
-        
-        <!-- Mobile overlay -->
-        <div 
-            class="fixed inset-0 bg-black/50 z-40 lg:hidden"
-            :class="sidebarOpen ? 'block' : 'hidden'"
-            @click="sidebarOpen = false"
-        ></div>
-        
-        <!-- Main Content -->
-        <div class="flex-1 lg:ml-64 flex flex-col h-screen overflow-hidden">
-            <!-- Top Header -->
-            <header class="h-16 bg-primary-600 border-b border-primary-700 flex items-center justify-between px-4 lg:px-8 shrink-0 z-30 shadow-md">
-                <button 
-                    @click="sidebarOpen = !sidebarOpen"
-                    class="lg:hidden p-2 rounded-lg text-white/80 hover:bg-white/10"
-                >
-                    <i class="fas fa-bars"></i>
-                </button>
-                
-                <div class="flex-1 lg:flex-none"></div>
-                
-                <div class="flex items-center gap-4">
-                    <!-- Theme Chooser -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button 
-                            @click="open = !open"
-                            class="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors shadow-sm"
-                            title="Màu giao diện"
-                        >
-                            <i class="fas fa-palette text-[15px]"></i>
-                        </button>
-                        
-                        <div x-show="open" @click.away="open = false" x-transition x-cloak class="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 p-3 z-50">
-                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 px-1">Chủ đề màu sắc</h4>
-                            <div class="grid grid-cols-4 gap-2">
-                                <button @click="setTheme('blue')" class="w-8 h-8 rounded-full bg-blue-500 ring-2 ring-offset-2 ring-transparent focus:ring-blue-500 hover:scale-110 transition-all"></button>
-                                <button @click="setTheme('indigo')" class="w-8 h-8 rounded-full bg-indigo-500 ring-2 ring-offset-2 ring-transparent focus:ring-indigo-500 hover:scale-110 transition-all"></button>
-                                <button @click="setTheme('emerald')" class="w-8 h-8 rounded-full bg-emerald-500 ring-2 ring-offset-2 ring-transparent focus:ring-emerald-500 hover:scale-110 transition-all"></button>
-                                <button @click="setTheme('rose')" class="w-8 h-8 rounded-full bg-rose-500 ring-2 ring-offset-2 ring-transparent focus:ring-rose-500 hover:scale-110 transition-all"></button>
-                            </div>
-                        </div>
-                    </div>
+          <div
+            class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md"
+          >
+            <i class="fas fa-graduation-cap text-primary-600 text-lg"></i>
+          </div>
+          <span class="text-white text-xl font-bold tracking-tight">LCMS</span>
+        </div>
 
-                    <!-- Notifications -->
-                    <button class="relative w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors shadow-sm">
-                        <i class="fas fa-bell text-[15px]"></i>
-                        <span class="absolute top-[6px] right-[6px] w-[8px] h-[8px] bg-red-400 border-2 border-primary-600 rounded-full"></span>
-                    </button>
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+          <div class="sidebar-group">
+            <div class="space-y-2.5">
+              <a
+                href="{% url 'dashboard' %}"
+                class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                hx-get="{% url 'dashboard' %}"
+                hx-target="#main-content"
+                hx-select="#main-content"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+              >
+                <i class="fas fa-home w-5"></i>
+                <span>Dashboard</span>
+              </a>
+            </div>
+          </div>
+
+          {% if user.role == 'admin' %}
+          <div class="sidebar-group">
+            <div class="sidebar-group-title">Quản lý hệ thống</div>
+            <div class="space-y-2.5">
+              <a
+                href="{% url 'users:list' %}"
+                class="sidebar-link {% if 'users' in request.path %}active{% endif %}"
+                hx-get="{% url 'users:list' %}"
+                hx-target="#main-content"
+                hx-select="#main-content"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+              >
+                <i class="fas fa-users w-5"></i>
+                <span>Người dùng</span>
+              </a>
+              <a
+                href="{% url 'students:list' %}"
+                class="sidebar-link {% if 'students' in request.path and 'my-children' not in request.path %}active{% endif %}"
+                hx-get="{% url 'students:list' %}"
+                hx-target="#main-content"
+                hx-select="#main-content"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+              >
+                <i class="fas fa-user-graduate w-5"></i>
+                <span>Học sinh</span>
+              </a>
+              <a
+                href="{% url 'classes:list' %}"
+                class="sidebar-link {% if request.path == '/classes/' %}active{% endif %}"
+                hx-get="{% url 'classes:list' %}"
+                hx-target="#main-content"
+                hx-select="#main-content"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+              >
+                <i class="fas fa-school w-5"></i>
+                <span>Lớp học</span>
+              </a>
+              <a
+                href="{% url 'payments:tuition_list' %}"
+                class="sidebar-link {% if 'tuitions' in request.path %}active{% endif %}"
+                hx-get="{% url 'payments:tuition_list' %}"
+                hx-target="#main-content"
+                hx-select="#main-content"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+              >
+                <i class="fas fa-money-bill-wave w-5"></i>
+                <span>Học phí</span>
+              </a>
+              <a
+                href="{% url 'users:activity_logs' %}"
+                class="sidebar-link {% if 'activity-logs' in request.path %}active{% endif %}"
+                hx-get="{% url 'users:activity_logs' %}"
+                hx-target="#main-content"
+                hx-select="#main-content"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+              >
+                <i class="fas fa-history w-5"></i>
+                <span>Lịch sử hoạt động</span>
+              </a>
+            </div>
+          </div>
+          {% endif %}
+          {% if user.role == 'teacher' or user.role == 'assistant' %}
+          <div class="sidebar-group">
+            <div class="sidebar-group-title">Chuyên môn</div>
+            <div class="space-y-2.5">
+              <a
+                href="{% url 'classes:my_classes' %}"
+                class="sidebar-link {% if 'my-classes' in request.path %}active{% endif %}"
+                hx-get="{% url 'classes:my_classes' %}"
+                hx-target="#main-content"
+                hx-select="#main-content"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+              >
+                <i class="fas fa-chalkboard-teacher w-5"></i>
+                <span>Lớp của tôi</span>
+              </a>
+              <a
+                href="{% url 'attendance:my_sessions' %}"
+                class="sidebar-link {% if 'my-sessions' in request.path %}active{% endif %}"
+                hx-get="{% url 'attendance:my_sessions' %}"
+                hx-target="#main-content"
+                hx-select="#main-content"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+              >
+                <i class="fas fa-calendar-check w-5"></i>
+                <span>Buổi học</span>
+              </a>
+            </div>
+          </div>
+          {% endif %} {% if user.role == 'parent' %}
+          <div class="sidebar-group">
+            <div class="sidebar-group-title">Thông tin của con</div>
+            <div class="space-y-2.5">
+              <a
+                href="{% url 'students:my_children' %}"
+                class="sidebar-link {% if 'my-children' in request.path %}active{% endif %}"
+                hx-get="{% url 'students:my_children' %}"
+                hx-target="#main-content"
+                hx-select="#main-content"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+              >
+                <i class="fas fa-child w-5"></i>
+                <span>Con của tôi</span>
+              </a>
+              <a
+                href="{% url 'payments:my_tuitions' %}"
+                class="sidebar-link {% if 'my-tuitions' in request.path %}active{% endif %}"
+                hx-get="{% url 'payments:my_tuitions' %}"
+                hx-target="#main-content"
+                hx-select="#main-content"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+              >
+                <i class="fas fa-money-bill-wave w-5"></i>
+                <span>Học phí đóng</span>
+              </a>
+            </div>
+          </div>
+          {% endif %}
+        </nav>
+
+        <!-- User Info -->
+        <div
+          class="h-20 bg-primary-800 border-t border-primary-700 px-4 flex items-center gap-3"
+        >
+          <div
+            class="w-10 h-10 bg-white/20 text-white rounded-full flex items-center justify-center font-bold shadow-inner"
+          >
+            {{ user.first_name|default:user.username|make_list|first|upper }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-[13px] font-bold text-white truncate">
+              {{ user.get_full_name|default:user.username }}
+            </p>
+            <p class="text-[11px] text-primary-200 truncate">
+              {% if user.role == 'admin' %}Quản trị viên{% elif user.role == 'teacher' %}Giáo viên{% elif user.role == 'assistant' %}Trợ giảng{% else %}Phụ huynh{% endif %}
+            </p>
+          </div>
+          <a
+            href="{% url 'logout' %}"
+            class="w-8 h-8 flex items-center justify-center rounded-lg text-primary-200 hover:text-white hover:bg-white/10 transition-colors"
+            title="Đăng xuất"
+          >
+            <i class="fas fa-sign-out-alt"></i>
+          </a>
+        </div>
+      </aside>
+
+      <!-- Mobile overlay -->
+      <div
+        class="fixed inset-0 bg-black/50 z-40 lg:hidden"
+        :class="sidebarOpen ? 'block' : 'hidden'"
+        @click="sidebarOpen = false"
+      ></div>
+
+      <!-- Main Content -->
+      <div class="flex-1 lg:ml-64 flex flex-col h-screen overflow-hidden">
+        <!-- Top Header -->
+        <header
+          class="h-16 bg-primary-600 border-b border-primary-700 flex items-center justify-between px-4 lg:px-8 shrink-0 z-30 shadow-md"
+        >
+          <button
+            @click="sidebarOpen = !sidebarOpen"
+            class="lg:hidden p-2 rounded-lg text-white/80 hover:bg-white/10"
+          >
+            <i class="fas fa-bars"></i>
+          </button>
+
+          <div class="flex-1 lg:flex-none"></div>
+
+          <div class="flex items-center gap-4">
+            <!-- Theme Chooser -->
+            <div class="relative" x-data="{ open: false }">
+              <button
+                @click="open = !open"
+                class="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors shadow-sm"
+                title="Màu giao diện"
+              >
+                <i class="fas fa-palette text-[15px]"></i>
+              </button>
+
+              <div
+                x-show="open"
+                @click.away="open = false"
+                x-transition
+                x-cloak
+                class="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 p-3 z-50"
+              >
+                <h4
+                  class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 px-1"
+                >
+                  Chủ đề màu sắc
+                </h4>
+                <div class="grid grid-cols-4 gap-2">
+                  <button
+                    @click="setTheme('blue')"
+                    class="w-8 h-8 rounded-full bg-blue-500 ring-2 ring-offset-2 ring-transparent focus:ring-blue-500 hover:scale-110 transition-all"
+                  ></button>
+                  <button
+                    @click="setTheme('indigo')"
+                    class="w-8 h-8 rounded-full bg-indigo-500 ring-2 ring-offset-2 ring-transparent focus:ring-indigo-500 hover:scale-110 transition-all"
+                  ></button>
+                  <button
+                    @click="setTheme('emerald')"
+                    class="w-8 h-8 rounded-full bg-emerald-500 ring-2 ring-offset-2 ring-transparent focus:ring-emerald-500 hover:scale-110 transition-all"
+                  ></button>
+                  <button
+                    @click="setTheme('rose')"
+                    class="w-8 h-8 rounded-full bg-rose-500 ring-2 ring-offset-2 ring-transparent focus:ring-rose-500 hover:scale-110 transition-all"
+                  ></button>
                 </div>
-            </header>
-            
-            <!-- Page Content -->
-            <main id="main-content" class="flex-1 overflow-y-auto bg-gray-50 p-4 lg:p-8 custom-scrollbar">
-                {% if messages %}
-                <div class="mb-6 space-y-2" id="messages">
-                    {% for message in messages %}
-                    <div 
-                        class="p-4 rounded-xl flex items-center gap-3 fade-in shadow-sm relative overflow-hidden"
-                        :class="{
+              </div>
+            </div>
+
+            <!-- Notifications -->
+            <button
+              class="relative w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors shadow-sm"
+            >
+              <i class="fas fa-bell text-[15px]"></i>
+              <span
+                class="absolute top-[6px] right-[6px] w-[8px] h-[8px] bg-red-400 border-2 border-primary-600 rounded-full"
+              ></span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Page Content -->
+        <main
+          id="main-content"
+          class="flex-1 overflow-y-auto bg-gray-50 p-4 lg:p-8 custom-scrollbar"
+        >
+          {% if messages %}
+          <div class="mb-6 space-y-2" id="messages">
+            {% for message in messages %}
+            <div
+              class="p-4 rounded-xl flex items-center gap-3 fade-in shadow-sm relative overflow-hidden"
+              :class="{
                             'bg-white border text-green-800 border-green-200': '{{ message.tags }}' === 'success',
                             'bg-white border text-red-800 border-red-200': '{{ message.tags }}' === 'error',
                             'bg-white border text-yellow-800 border-yellow-200': '{{ message.tags }}' === 'warning',
                             'bg-white border text-blue-800 border-blue-200': '{{ message.tags }}' === 'info'
                         }"
-                    >
-                        <div class="absolute left-0 top-0 bottom-0 w-1"
-                            :class="{
+            >
+              <div
+                class="absolute left-0 top-0 bottom-0 w-1"
+                :class="{
                                 'bg-green-500': '{{ message.tags }}' === 'success',
                                 'bg-red-500': '{{ message.tags }}' === 'error',
                                 'bg-yellow-500': '{{ message.tags }}' === 'warning',
                                 'bg-blue-500': '{{ message.tags }}' === 'info'
                             }"
-                        ></div>
-                        <i class="fas fa-check-circle text-green-500 text-lg" x-show="'{{ message.tags }}' === 'success'"></i>
-                        <i class="fas fa-exclamation-circle text-red-500 text-lg" x-show="'{{ message.tags }}' === 'error'"></i>
-                        <i class="fas fa-exclamation-triangle text-yellow-500 text-lg" x-show="'{{ message.tags }}' === 'warning'"></i>
-                        <i class="fas fa-info-circle text-blue-500 text-lg" x-show="'{{ message.tags }}' === 'info'"></i>
-                        <span class="font-medium">{{ message }}</span>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
-                
-                {% block content %}{% endblock %}
-            </main>
-        </div>
+              ></div>
+              <i
+                class="fas fa-check-circle text-green-500 text-lg"
+                x-show="'{{ message.tags }}' === 'success'"
+              ></i>
+              <i
+                class="fas fa-exclamation-circle text-red-500 text-lg"
+                x-show="'{{ message.tags }}' === 'error'"
+              ></i>
+              <i
+                class="fas fa-exclamation-triangle text-yellow-500 text-lg"
+                x-show="'{{ message.tags }}' === 'warning'"
+              ></i>
+              <i
+                class="fas fa-info-circle text-blue-500 text-lg"
+                x-show="'{{ message.tags }}' === 'info'"
+              ></i>
+              <span class="font-medium">{{ message }}</span>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %} {% block content %}{% endblock %}
+        </main>
+      </div>
     </div>
-    {% else %}
-    {% block login_content %}{% endblock %}
-    {% endif %}
-    
+    {% else %} {% block login_content %}{% endblock %} {% endif %}
+
     <!-- HTMX config -->
     <script>
-        document.body.addEventListener('htmx:configRequest', (event) => {
-            event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
-        });
-        
-        document.body.addEventListener('htmx:afterSwap', (event) => {
-            // Reinitialize Alpine.js components after content swap
-            if (typeof Alpine !== 'undefined') {
-                Alpine.initTree(document.body);
-            }
-        });
+      document.body.addEventListener("htmx:configRequest", (event) => {
+        event.detail.headers["X-CSRFToken"] = "{{ csrf_token }}";
+      });
 
-        document.body.addEventListener('htmx:pushedIntoHistory', (event) => {
-            // Update sidebar active link based on current URL
-            const currentPath = window.location.pathname;
-            document.querySelectorAll('.sidebar-link').forEach(link => {
-                link.classList.remove('active');
-                const href = link.getAttribute('href');
-                if (href) {
-                    // Exact match or sub-path match (if not home)
-                    if (href === currentPath) {
-                        link.classList.add('active');
-                    } else if (href !== '/' && currentPath.startsWith(href)) {
-                        // Edge case for students/my-children to prevent highlighting the main students list
-                        if (currentPath.includes('my-children') && href.includes('students') && !href.includes('my-children')) {
-                            // Do nothing
-                        } else {
-                            link.classList.add('active');
-                        }
-                    }
-                }
-            });
-        });
-    </script>
-    
-    <script>
-        function appData() {
-            return {
-                sidebarOpen: false,
-                setTheme(color) {
-                    localStorage.setItem('lcms_theme', color);
-                    document.documentElement.setAttribute('data-theme', color);
-                }
+      document.body.addEventListener("htmx:afterSwap", (event) => {
+        // Reinitialize Alpine.js components after content swap
+        if (typeof Alpine !== "undefined") {
+          Alpine.initTree(document.body);
+        }
+      });
+
+      document.body.addEventListener("htmx:pushedIntoHistory", (event) => {
+        // Update sidebar active link based on current URL
+        const currentPath = window.location.pathname;
+        document.querySelectorAll(".sidebar-link").forEach((link) => {
+          link.classList.remove("active");
+          const href = link.getAttribute("href");
+          if (href) {
+            // Exact match or sub-path match (if not home)
+            if (href === currentPath) {
+              link.classList.add("active");
+            } else if (href !== "/" && currentPath.startsWith(href)) {
+              // Edge case for students/my-children to prevent highlighting the main students list
+              if (
+                currentPath.includes("my-children") &&
+                href.includes("students") &&
+                !href.includes("my-children")
+              ) {
+                // Do nothing
+              } else {
+                link.classList.add("active");
+              }
             }
-        }
+          }
+        });
+      });
     </script>
-    
+
+    <script>
+      function appData() {
+        return {
+          sidebarOpen: false,
+          setTheme(color) {
+            localStorage.setItem("lcms_theme", color);
+            document.documentElement.setAttribute("data-theme", color);
+          },
+        };
+      }
+
+      function tableController() {
+        return {
+          search: "",
+          filterStatus: "",
+          sortCol: "",
+          sortAsc: true,
+
+          get getRows() {
+            return Array.from(
+              this.$refs.tbody.querySelectorAll("tr[data-search]"),
+            );
+          },
+
+          sortBy(col) {
+            if (this.sortCol === col) {
+              this.sortAsc = !this.sortAsc;
+            } else {
+              this.sortCol = col;
+              this.sortAsc = true;
+            }
+
+            let rows = this.getRows;
+            rows.sort((a, b) => {
+              let aVal = a.getAttribute(`data-sort-${col}`) || "";
+              let bVal = b.getAttribute(`data-sort-${col}`) || "";
+
+              let isNum =
+                Number(aVal) == aVal &&
+                Number(bVal) == bVal &&
+                aVal !== "" &&
+                bVal !== "";
+              if (isNum) {
+                return this.sortAsc
+                  ? Number(aVal) - Number(bVal)
+                  : Number(bVal) - Number(aVal);
+              }
+
+              return this.sortAsc
+                ? aVal.localeCompare(bVal)
+                : bVal.localeCompare(aVal);
+            });
+
+            let tbody = this.$refs.tbody;
+            rows.forEach((row) => tbody.appendChild(row));
+          },
+
+          filterRow(el) {
+            let show = true;
+            let searchStr = el.getAttribute("data-search") || "";
+            if (
+              this.search &&
+              !searchStr.toLowerCase().includes(this.search.toLowerCase())
+            ) {
+              show = false;
+            }
+            let status = el.getAttribute("data-status") || "";
+            if (show && this.filterStatus && status !== this.filterStatus) {
+              show = false;
+            }
+            return show;
+          },
+        };
+      }
+    </script>
+
     <style>
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 20px;
-        }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 20px;
+      }
     </style>
-    
+
     <!-- HTMX Modal Container -->
     <div id="history-modal-container"></div>
     {% block extra_js %}{% endblock %}
-</body>
+  </body>
 </html>
