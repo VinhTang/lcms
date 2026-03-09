@@ -30,7 +30,10 @@ class ClassSession(models.Model):
         ordering = ["-scheduled_date", "-scheduled_start"]
 
     def __str__(self):
-        return f"{self.class_enrolled.class_code} - {self.scheduled_date}"
+        try:
+            return f"{self.class_enrolled.class_code} - {self.scheduled_date}"
+        except Exception:
+            return f"ClassSession ID {self.id}"
 
     def open_class(self):
         self.status = "in_progress"
@@ -79,7 +82,10 @@ class Attendance(models.Model):
         ordering = ["class_session", "enrollment__student__full_name"]
 
     def __str__(self):
-        return f"{self.enrollment.student.full_name} - {self.class_session.class_enrolled.class_code} - {self.get_status_display()}"
+        try:
+            return f"{self.enrollment.student.full_name} - {self.class_session.class_enrolled.class_code} - {self.get_status_display()}"
+        except Exception:
+            return f"Attendance ID {self.id}"
 
     def mark(self, status, marked_by):
         self.status = status

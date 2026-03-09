@@ -20,21 +20,43 @@ def tuition_list(request):
         'enrollment__class_enrolled__subject'
     )
     
+    # 1. Filters logic
     search = request.GET.get('search', '')
     if search:
         tuitions = tuitions.filter(
             models.Q(enrollment__student__full_name__icontains=search) |
+            models.Q(enrollment__student__domain__icontains=search) |
             models.Q(enrollment__class_enrolled__class_code__icontains=search) |
             models.Q(enrollment__class_enrolled__class_name__icontains=search) |
             models.Q(month__icontains=search)
         )
     
+    class_id = request.GET.get('class_id', '')
+    if class_id:
+        tuitions = tuitions.filter(enrollment__class_enrolled_id=class_id)
+        
     status_filter = request.GET.get('status', '')
     if status_filter == 'paid':
         tuitions = tuitions.filter(paid=True)
     elif status_filter == 'unpaid':
         tuitions = tuitions.filter(paid=False)
         
+    date_from = request.GET.get('date_from', '')
+    if date_from:
+        tuitions = tuitions.filter(due_date__gte=date_from)
+        
+    date_to = request.GET.get('date_to', '')
+    if date_to:
+        tuitions = tuitions.filter(due_date__lte=date_to)
+        
+    month_filter = request.GET.get('month', '')
+    if month_filter:
+        tuitions = tuitions.filter(month=month_filter)
+
+    # 2. Get data for dropdowns
+    classes = Class.objects.filter(is_active=True).order_by('class_code')
+    
+    # 3. Pagination
     per_page = request.GET.get('per_page', 30)
     try:
         per_page = int(per_page)
@@ -45,15 +67,21 @@ def tuition_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    extra_query = ''
-    if search: extra_query += f'&search={search}'
-    if status_filter: extra_query += f'&status={status_filter}'
-    extra_query += f'&per_page={per_page}'
+    # 4. Handle query parameters for pagination links
+    query_params = request.GET.copy()
+    if 'page' in query_params:
+        del query_params['page']
+    extra_query = f"&{query_params.urlencode()}" if query_params else ""
     
     return render(request, 'payments/tuition_list.html', {
         'page_obj': page_obj,
         'search': search,
         'status_filter': status_filter,
+        'selected_class': int(class_id) if class_id else '',
+        'date_from': date_from,
+        'date_to': date_to,
+        'month_filter': month_filter,
+        'classes': classes,
         'per_page': per_page,
         'extra_query': extra_query,
     })
@@ -122,11 +150,26 @@ def mark_paid(request, tuition_id):
     
     if request.method == 'POST':
         payment_method = request.POST.get('payment_method', '')
-        
         tuition.mark_as_paid(payment_method)
+        
+        if request.headers.get('HX-Request'):
+            referer = request.META.get('HTTP_REFERER', '/')
+            response = JsonResponse({'status': 'success'})
+            response['HX-Redirect'] = referer
+            return response
+            
         return JsonResponse({'status': 'success'})
     
     return JsonResponse({'error': 'Invalid method'}, status=405)
+
+
+@login_required
+def tuition_mark_paid_modal(request, tuition_id):
+    if request.user.role != 'admin':
+        return redirect('dashboard')
+    
+    tuition = get_object_or_404(Tuition, id=tuition_id)
+    return render(request, 'payments/partials/mark_paid_modal.html', {'tuition': tuition})
 
 
 @login_required
@@ -182,3 +225,12 @@ def my_tuitions(request):
     ).select_related('enrollment__student', 'enrollment__class_enrolled__subject')
     
     return render(request, 'payments/my_tuitions.html', {'tuitions': tuitions})
+
+@login_required
+def get_student_info_partial(request):
+    enrollment_id = request.GET.get('enrollment')
+    if not enrollment_id:
+        return render(request, 'payments/partials/student_info.html', {'student': None})
+    
+    enrollment = get_object_or_404(Enrollment, id=enrollment_id)
+    return render(request, 'payments/partials/student_info.html', {'student': enrollment.student})

@@ -13,7 +13,10 @@
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {% if user.role == 'admin' %}
-        <div class="bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <a href="{% url 'users:list' %}"
+           hx-get="{% url 'users:list' %}"
+           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true"
+           class="block bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-primary-100 text-sm font-medium">TỔNG NGƯỜI DÙNG</p>
@@ -23,9 +26,12 @@
                     <i class="fas fa-users text-2xl"></i>
                 </div>
             </div>
-        </div>
+        </a>
         
-        <div class="bg-gradient-to-br from-green-500 to-green-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <a href="{% url 'students:list' %}"
+           hx-get="{% url 'students:list' %}"
+           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true"
+           class="block bg-gradient-to-br from-green-500 to-green-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-green-100 text-sm font-medium">HỌC SINH</p>
@@ -35,9 +41,12 @@
                     <i class="fas fa-user-graduate text-2xl"></i>
                 </div>
             </div>
-        </div>
+        </a>
         
-        <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <a href="{% url 'classes:list' %}"
+           hx-get="{% url 'classes:list' %}"
+           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true"
+           class="block bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-amber-100 text-sm font-medium">LỚP HỌC</p>
@@ -47,7 +56,7 @@
                     <i class="fas fa-school text-2xl"></i>
                 </div>
             </div>
-        </div>
+        </a>
         
         <div class="bg-gradient-to-br from-red-500 to-red-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div class="flex items-center justify-between">
@@ -63,7 +72,10 @@
         {% endif %}
         
         {% if user.role == 'teacher' or user.role == 'assistant' %}
-        <div class="bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <a href="{% url 'classes:list' %}"
+           hx-get="{% url 'classes:list' %}"
+           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true"
+           class="block bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-primary-100 text-sm font-medium">LỚP HỌC CỦA TÔI</p>
@@ -73,9 +85,12 @@
                     <i class="fas fa-chalkboard-teacher text-2xl"></i>
                 </div>
             </div>
-        </div>
+        </a>
         
-        <div class="bg-gradient-to-br from-green-500 to-green-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <a href="{% url 'attendance:my_sessions' %}"
+           hx-get="{% url 'attendance:my_sessions' %}"
+           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true"
+           class="block bg-gradient-to-br from-green-500 to-green-700 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-green-100 text-sm font-medium">BUỔI ĐÃ ĐIỂM DANH</p>
@@ -85,9 +100,12 @@
                     <i class="fas fa-calendar-check text-2xl"></i>
                 </div>
             </div>
-        </div>
+        </a>
         
-        <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <a href="{% url 'students:list' %}"
+           hx-get="{% url 'students:list' %}"
+           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true"
+           class="block bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-amber-100 text-sm font-medium">HỌC SINH</p>
@@ -97,7 +115,7 @@
                     <i class="fas fa-users text-2xl"></i>
                 </div>
             </div>
-        </div>
+        </a>
         {% endif %}
         
         {% if user.role == 'parent' %}
@@ -207,7 +225,7 @@
                     <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 mb-3 group-hover:bg-green-600 group-hover:text-white transition-all duration-200">
                         <i class="fas fa-calendar-check text-xl"></i>
                     </div>
-                    <h4 class="font-semibold text-gray-800">Buổi học</h4>
+                    <h4 class="font-semibold text-gray-800">Tiết học</h4>
                     <p class="text-sm text-gray-500 mt-1">Điểm danh hàng ngày</p>
                 </a>
                 {% endif %}

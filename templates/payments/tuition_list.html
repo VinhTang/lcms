@@ -3,7 +3,7 @@
 {% block title %}Danh sách học phí - LCMS{% endblock %}
 
 {% block content %}
-<div class="fade-in" x-data="tableController()">
+<div class="fade-in">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
@@ -22,34 +22,79 @@
     </div>
 
     <!-- Filters -->
-    <div class="card mb-5">
-        <div class="p-3">
-            <div class="flex flex-wrap gap-3 items-center">
-                <div class="flex-1 min-w-[200px]">
-                    <div class="relative">
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                        <input 
-                            type="text" 
-                            x-model="search" 
-                            class="input-field !pl-10" 
-                            placeholder="Tìm kiếm..."
-                        >
-                    </div>
-                </div>
-                <div class="w-48">
-                    <select x-model="filterStatus" class="input-field">
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="paid">Đã thanh toán</option>
-                        <option value="unpaid">Chưa thanh toán</option>
-                    </select>
-                </div>
-                <div class="flex gap-2">
-                    <button type="button" @click.prevent="search = ''; filterStatus = ''" class="btn-secondary h-[42px]">
-                        <i class="fas fa-redo mr-1"></i> Reset
-                    </button>
+    <div class="card p-3 mb-4">
+        <form method="get" action="{% url 'payments:tuition_list' %}"
+              class="flex flex-wrap items-end gap-3"
+              hx-get="{% url 'payments:tuition_list' %}"
+              hx-target="#main-content"
+              hx-select="#main-content"
+              hx-swap="outerHTML"
+              hx-push-url="true">
+            
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Tìm kiếm</label>
+                <div class="relative">
+                    <i class="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" name="search" class="input-field !pl-8 text-sm !py-1.5" 
+                           placeholder="Học sinh, mã lớp, tên lớp..." value="{{ search }}">
                 </div>
             </div>
-        </div>
+
+            <div class="flex-1 min-w-[180px]">
+                <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Lớp học</label>
+                <div class="relative">
+                    <i class="fas fa-school absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <select name="class_id" class="input-field !pl-8 text-sm !py-1.5">
+                        <option value="">Tất cả lớp</option>
+                        {% for cls in classes %}
+                        <option value="{{ cls.id }}" {% if selected_class == cls.id %}selected{% endif %}>
+                            {{ cls.class_code }} - {{ cls.class_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex-1 min-w-[150px]">
+                <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Trạng thái</label>
+                <div class="relative">
+                    <i class="fas fa-filter absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <select name="status" class="input-field !pl-8 text-sm !py-1.5">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Đã thanh toán</option>
+                        <option value="unpaid" {% if status_filter == 'unpaid' %}selected{% endif %}>Chưa thanh toán</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex-1 min-w-[150px]">
+                <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Hạn từ</label>
+                <div class="relative">
+                    <i class="fas fa-calendar absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="date" name="date_from" class="input-field !pl-8 text-sm !py-1.5" value="{{ date_from }}">
+                </div>
+            </div>
+
+            <div class="flex-1 min-w-[150px]">
+                <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Hạn đến</label>
+                <div class="relative">
+                    <i class="fas fa-calendar absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="date" name="date_to" class="input-field !pl-8 text-sm !py-1.5" value="{{ date_to }}">
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <a href="{% url 'payments:tuition_list' %}"
+                   class="btn-secondary px-3 py-1.5 text-sm h-[34px] flex items-center justify-center"
+                   hx-get="{% url 'payments:tuition_list' %}"
+                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true">
+                    <i class="fas fa-redo mr-1"></i> Làm mới
+                </a>
+                <button type="submit" class="btn-primary px-3 py-1.5 text-sm h-[34px]">
+                    <i class="fas fa-filter mr-1"></i> Lọc
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- Table -->
@@ -58,47 +103,37 @@
             <table class="w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th @click="sortBy('student')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none group">Học sinh <i class="fas ml-1" :class="sortCol === 'student' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
-                        <th @click="sortBy('class')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none group">Lớp <i class="fas ml-1" :class="sortCol === 'class' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
-                        <th @click="sortBy('type')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none group">Loại <i class="fas ml-1" :class="sortCol === 'type' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
-                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tháng/Khóa</th>
-                        <th @click="sortBy('amount')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none group">Số tiền <i class="fas ml-1" :class="sortCol === 'amount' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
-                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Đến hạn</th>
-                        <th @click="sortBy('status')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none group">Trạng thái <i class="fas ml-1" :class="sortCol === 'status' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
-                        <th class="px-3 py-1.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Thao tác</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Học sinh</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Mã lớp</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tên lớp</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tháng/Khóa</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Số tiền</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Đến hạn</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                        <th class="px-3 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody x-ref="tbody" class="divide-y divide-gray-100">
                     {% for tuition in page_obj %}
-                    <tr x-show="filterRow($el)"
-                        data-search="{{ tuition.enrollment.student.full_name|lower }} {{ tuition.enrollment.class_enrolled.class_name|lower }}"
-                        data-status="{{ tuition.paid|yesno:'paid,unpaid' }}"
-                        data-sort-student="{{ tuition.enrollment.student.full_name|lower }}"
-                        data-sort-class="{{ tuition.enrollment.class_enrolled.class_name|lower }}"
-                        data-sort-type="{{ tuition.tuition_type }}"
-                        data-sort-amount="{{ tuition.amount }}"
-                        data-sort-status="{{ tuition.paid|yesno:'1,0' }}"
-                        class="hover:bg-gray-50 transition-colors">
-                        <td class="px-3 py-1 font-bold text-gray-800">{{ tuition.enrollment.student.full_name }}</td>
-                        <td class="px-3 py-1 text-sm text-gray-600">{{ tuition.enrollment.class_enrolled.class_name }}</td>
-                        <td class="px-3 py-1">
-                            {% if tuition.tuition_type == 'monthly' %}
-                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-700">Theo tháng</span>
-                            {% else %}
-                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-100 text-amber-700">Theo khóa</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-3 py-1 text-sm text-gray-600">{{ tuition.month|default:tuition.course_name }}</td>
-                        <td class="px-3 py-1 font-bold text-primary-600">{{ tuition.amount|floatformat:0 }} VNĐ</td>
-                        <td class="px-3 py-1 text-sm text-gray-600">{{ tuition.due_date|date:"d/m/Y" }}</td>
-                        <td class="px-3 py-1">
+                    <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0 text-sm">
+                        <td class="px-3 py-2 font-bold text-gray-800">{{ tuition.enrollment.student.full_name }} <a href="{% url 'students:detail' tuition.enrollment.student.id %}" hx-get="{% url 'students:detail' tuition.enrollment.student.id %}" hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true" class="text-xs text-gray-400 font-normal hover:text-primary-600 transition-colors">({{ tuition.enrollment.student.domain }})</a></td>
+                        <td class="px-3 py-2 text-gray-600 font-mono text-xs">{{ tuition.enrollment.class_enrolled.class_code }}</td>
+                        <td class="px-3 py-2 text-gray-600 truncate max-w-[150px]">{{ tuition.enrollment.class_enrolled.class_name }}</td>
+                        <td class="px-3 py-2 text-gray-600">{{ tuition.month|default:tuition.course_name }}</td>
+                        <td class="px-3 py-2 font-bold text-primary-600">{{ tuition.amount|floatformat:0 }} VND</td>
+                        <td class="px-3 py-2 text-gray-600 whitespace-nowrap">{{ tuition.due_date|date:"d/m/Y" }}</td>
+                        <td class="px-3 py-2">
                             {% if tuition.paid %}
-                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-green-100 text-green-700"><i class="fas fa-check-circle mr-1"></i> Đã thanh toán</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700 inline-flex items-center gap-1">
+                                <i class="fas fa-check-circle"></i> Đã thanh toán
+                            </span>
                             {% else %}
-                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-100 text-red-700"><i class="fas fa-clock mr-1"></i> Chưa thanh toán</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-100 text-red-700 inline-flex items-center gap-1">
+                                <i class="fas fa-clock"></i> Chưa thanh toán
+                            </span>
                             {% endif %}
                         </td>
-                        <td class="px-3 py-1 text-right">
+                        <td class="px-3 py-2 text-right">
                             <div class="flex items-center justify-end gap-1">
                                 <a href="{% url 'payments:tuition_detail' tuition.id %}" 
                                    hx-get="{% url 'payments:tuition_detail' tuition.id %}"

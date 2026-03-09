@@ -35,9 +35,12 @@ class Tuition(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        if self.tuition_type == "monthly":
-            return f"{self.enrollment.student.full_name} - {self.enrollment.class_enrolled.class_name} - {self.month}"
-        return f"{self.enrollment.student.full_name} - {self.enrollment.class_enrolled.class_name} - {self.course_name}"
+        try:
+            if self.tuition_type == "monthly":
+                return f"{self.enrollment.student.full_name} - {self.enrollment.class_enrolled.class_name} - {self.month}"
+            return f"{self.enrollment.student.full_name} - {self.enrollment.class_enrolled.class_name} - {self.course_name}"
+        except Exception:
+            return f"Tuition #{self.pk}"
 
     def mark_as_paid(self, payment_method=None):
         self.paid = True
@@ -74,4 +77,7 @@ class PaymentHistory(models.Model):
         ordering = ["-paid_at"]
 
     def __str__(self):
-        return f"{self.tuition} - {self.amount}"
+        try:
+            return f"{self.tuition} - {self.amount}"
+        except Exception:
+            return f"PaymentHistory #{self.pk}"

@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from .models import User
 
@@ -69,19 +70,19 @@ def dashboard(request):
         from classes.models import Class
         from payments.models import Tuition
         
-        context['total_users'] = User.objects.count()
-        context['total_students'] = Student.objects.count()
-        context['total_classes'] = Class.objects.count()
+        context['total_users'] = User.objects.filter(is_active=True).count()
+        context['total_students'] = Student.objects.filter(status='active').count()
+        context['total_classes'] = Class.objects.filter(is_active=True).count()
         context['unpaid_tuition'] = Tuition.objects.filter(paid=False).count()
         
     elif request.user.role in ['teacher', 'assistant']:
         from classes.models import Class, Enrollment
         from attendance.models import ClassSession
         
-        my_classes = Class.objects.filter(teacher=request.user) if request.user.role == 'teacher' else Class.objects.filter(assistant=request.user)
+        my_classes = Class.objects.filter(teacher=request.user) if request.user.role == 'teacher' else Class.objects.filter(assistants=request.user)
         context['my_classes_count'] = my_classes.count()
         context['sessions_count'] = ClassSession.objects.filter(class_enrolled__in=my_classes, status='ended').count()
-        context['my_students_count'] = Enrollment.objects.filter(class_enrolled__in=my_classes).values('student').distinct().count()
+        context['my_students_count'] = Enrollment.objects.filter(class_enrolled__in=my_classes, status='active').values('student').distinct().count()
         
     elif request.user.role == 'parent':
         from payments.models import Tuition
@@ -92,3 +93,29 @@ def dashboard(request):
         context['paid_tuition'] = Tuition.objects.filter(enrollment__student__in=my_children, paid=True).count()
 
     return render(request, "accounts/dashboard.html", context)
+
+
+@login_required
+def password_change(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important!
+            messages.success(request, 'Mật khẩu của bạn đã được thay đổi thành công!')
+            
+            if request.headers.get('HX-Request'):
+                 return render(request, 'accounts/password_change.html', {
+                    'form': PasswordChangeForm(request.user),
+                    'success': True
+                })
+            return redirect('dashboard')
+        else:
+            if not request.headers.get('HX-Request'):
+                messages.error(request, 'Vui lòng sửa các lỗi bên dưới.')
+    else:
+        form = PasswordChangeForm(request.user)
+    
+    return render(request, 'accounts/password_change.html', {
+        'form': form
+    })

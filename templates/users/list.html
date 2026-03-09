@@ -82,15 +82,15 @@
                         class="hover:bg-gray-50 transition-colors">
                         <td class="px-3 py-1 text-sm text-gray-500">{{ forloop.counter|add:page_obj.start_index|add:-1 }}</td>
                         <td class="px-3 py-1">
-                            <div class="flex items-center gap-2">
-                                <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-semibold text-sm">
+                            <a href="{% url 'users:detail' u.id %}" hx-get="{% url 'users:detail' u.id %}" hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true" class="flex items-center gap-2 group">
+                                <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-semibold text-sm group-hover:bg-primary-200 transition-colors">
                                     {{ u.first_name|default:u.username|make_list|first|upper }}
                                 </div>
-                                <span class="font-medium text-gray-800">{{ u.get_full_name }}</span>
-                            </div>
+                                <span class="font-medium text-gray-800 group-hover:text-primary-600 transition-colors">{{ u.get_full_name }}</span>
+                            </a>
                         </td>
                         <td class="px-3 py-1">
-                            <code class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">{{ u.domain }}</code>
+                            <a href="{% url 'users:detail' u.id %}" hx-get="{% url 'users:detail' u.id %}" hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true" class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs hover:bg-primary-100 hover:text-primary-600 transition-colors">{{ u.domain }}</a>
                         </td>
                         <td class="px-3 py-1 text-sm text-gray-600">{{ u.email|default:"-" }}</td>
                         <td class="px-3 py-1">

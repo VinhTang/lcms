@@ -1,0 +1,66 @@
+<div class="modal-backdrop fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 shadow-2xl transition-all duration-300"
+     id="mark-paid-modal"
+     {% if not request.headers.HX_Request %}x-data="{ show: true }" x-show="show"{% endif %}>
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-100 opacity-100 border border-gray-100"
+         onclick="event.stopPropagation()">
+        
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-money-bill-wave text-green-500"></i>
+                Xác nhận thanh toán
+            </h3>
+            <button onclick="document.getElementById('mark-paid-modal').remove()" 
+                    class="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-lg">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
+
+        <form hx-post="{% url 'payments:mark_paid' tuition.id %}"
+              class="p-6 space-y-4">
+            {% csrf_token %}
+            
+            <div class="space-y-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                <div class="flex justify-between text-sm">
+                    <span class="text-blue-600 font-medium">Học sinh:</span>
+                    <span class="text-gray-800 font-bold text-right">{{ tuition.enrollment.student.full_name }}</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-blue-600 font-medium">Lớp:</span>
+                    <span class="text-gray-800 text-right">{{ tuition.enrollment.class_enrolled.class_name }}</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-blue-600 font-medium">Kỳ hạn:</span>
+                    <span class="text-gray-800 text-right">
+                        {% if tuition.tuition_type == 'monthly' %}
+                            Tháng {{ tuition.month|slice:"5:7" }}/{{ tuition.month|slice:"0:4" }}
+                        {% else %}
+                            {{ tuition.course_name }}
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="flex justify-between text-base pt-2 border-t border-blue-100">
+                    <span class="text-blue-700 font-bold uppercase tracking-tight">Số tiền:</span>
+                    <span class="text-primary-600 font-black">{{ tuition.amount|floatformat:0 }} VND</span>
+                </div>
+            </div>
+
+            <div class="space-y-2 hidden">
+                <input type="hidden" name="payment_method" value="Tiền mặt">
+            </div>
+
+            <!-- Footer -->
+            <div class="flex gap-3 pt-4">
+                <button type="button" 
+                        onclick="document.getElementById('mark-paid-modal').remove()"
+                        class="btn-secondary flex-1 py-3 font-semibold text-gray-700">
+                    Hủy bỏ
+                </button>
+                <button type="submit" 
+                        class="btn-primary flex-1 py-3 font-bold shadow-lg shadow-primary-200 active:scale-[0.98] transition-all">
+                    Xác nhận
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

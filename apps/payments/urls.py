@@ -11,4 +11,6 @@ urlpatterns = [
     path('enrollment/<int:enrollment_id>/tuitions/', views.get_enrollment_tuitions, name='get_enrollment_tuitions'),
     path('payments/history/', views.payment_history, name='payment_history'),
     path('my-tuitions/', views.my_tuitions, name='my_tuitions'),
+    path('get-student-info/', views.get_student_info_partial, name='get_student_info'),
+    path('tuition-mark-paid-modal/<int:tuition_id>/', views.tuition_mark_paid_modal, name='tuition_mark_paid_modal'),
 ]

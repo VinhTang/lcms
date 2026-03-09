@@ -11,9 +11,8 @@ class Student(models.Model):
         ("other", "Khác"),
     ]
     STATUS_CHOICES = [
-        ("active", "Hoạt động"),
+        ("active", "Đang học"),
         ("inactive", "Nghỉ"),
-        ("deleted", "Khoá"),
     ]
 
     domain = models.CharField(max_length=100, unique=True, blank=True)
@@ -23,9 +22,6 @@ class Student(models.Model):
     school = models.CharField(max_length=200, blank=True, help_text="Trường học")
     emergency_call = models.CharField(max_length=20, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    restored_at = models.DateTimeField(null=True, blank=True)
-    restored_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -41,7 +37,21 @@ class Student(models.Model):
     def save(self, *args, **kwargs):
         if not self.domain:
             self.domain = self.generate_domain()
+            
+        is_becoming_inactive = False
+        if self.pk:
+            old_status = Student.objects.get(pk=self.pk).status
+            if old_status == 'active' and self.status in ['inactive', 'deleted']:
+                is_becoming_inactive = True
+                
         super().save(*args, **kwargs)
+        
+        if is_becoming_inactive:
+            from classes.models import Enrollment
+            Enrollment.objects.filter(student=self, status='active').update(
+                status='dropped',
+                dropped_at=timezone.now()
+            )
 
     @staticmethod
     def clean_name(name):
@@ -73,6 +83,19 @@ class Student(models.Model):
             'ư': 'u', 'ứ': 'u', 'ừ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
             'ỳ': 'y', 'ý': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
             'đ': 'd',
+            'À': 'a', 'Á': 'a', 'Ả': 'a', 'Ã': 'a', 'Ạ': 'a',
+            'Ă': 'a', 'Ắ': 'a', 'Ằ': 'a', 'Ẳ': 'a', 'Ẵ': 'a', 'Ặ': 'a',
+            'Â': 'a', 'Ấ': 'a', 'Ầ': 'a', 'Ẩ': 'a', 'Ẫ': 'a', 'Ậ': 'a',
+            'È': 'e', 'É': 'e', 'Ẻ': 'e', 'Ẽ': 'e', 'Ẹ': 'e',
+            'Ê': 'e', 'Ế': 'e', 'Ề': 'e', 'Ể': 'e', 'Ễ': 'e', 'Ệ': 'e',
+            'Ì': 'i', 'Í': 'i', 'Ỉ': 'i', 'Ĩ': 'i', 'Ị': 'i',
+            'Ò': 'o', 'Ó': 'o', 'Ỏ': 'o', 'Õ': 'o', 'Ọ': 'o',
+            'Ô': 'o', 'Ố': 'o', 'Ồ': 'o', 'Ổ': 'o', 'Ỗ': 'o', 'Ộ': 'o',
+            'Ơ': 'o', 'Ớ': 'o', 'Ờ': 'o', 'Ở': 'o', 'Ỡ': 'o', 'Ợ': 'o',
+            'Ù': 'u', 'Ú': 'u', 'Ủ': 'u', 'Ũ': 'u', 'Ụ': 'u',
+            'Ư': 'u', 'Ứ': 'u', 'Ừ': 'u', 'Ử': 'u', 'Ữ': 'u', 'Ự': 'u',
+            'Ý': 'y', 'Ý': 'y', 'Ỷ': 'y', 'Ỹ': 'y', 'Ỵ': 'y',
+            'Đ': 'd', 'Ð': 'd',
         }
         result = []
         for char in text:
@@ -113,12 +136,5 @@ class Student(models.Model):
         return domain
 
     def soft_delete(self):
-        self.status = "deleted"
-        self.deleted_at = timezone.now()
-        self.save()
-
-    def restore(self):
-        self.status = "active"
-        self.deleted_at = None
-        self.restored_at = timezone.now()
+        self.status = "inactive"
         self.save()

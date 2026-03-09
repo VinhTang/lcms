@@ -35,7 +35,7 @@
                 <tbody class="divide-y divide-gray-100">
                     {% for tuition in tuitions %}
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-4 py-1.5 font-bold text-gray-800">{{ tuition.enrollment.student.full_name }}</td>
+                        <td class="px-4 py-1.5 font-bold text-gray-800">{{ tuition.enrollment.student.full_name }} <a href="{% url 'students:detail' tuition.enrollment.student.id %}" hx-get="{% url 'students:detail' tuition.enrollment.student.id %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="text-xs text-gray-400 font-normal hover:text-primary-600 transition-colors">({{ tuition.enrollment.student.domain }})</a></td>
                         <td class="px-4 py-1.5 text-sm text-gray-600">{{ tuition.enrollment.class_enrolled.class_name }}</td>
                         <td class="px-4 py-1.5">
                             {% if tuition.tuition_type == 'monthly' %}
@@ -45,7 +45,7 @@
                             {% endif %}
                         </td>
                         <td class="px-4 py-1.5 text-sm text-gray-600">{{ tuition.month|default:tuition.course_name }}</td>
-                        <td class="px-4 py-1.5 font-bold text-primary-600">{{ tuition.amount|floatformat:0 }} VNĐ</td>
+                        <td class="px-4 py-1.5 font-bold text-primary-600">{{ tuition.amount|floatformat:0 }} VND</td>
                         <td class="px-4 py-1.5 text-sm text-gray-600">{{ tuition.due_date|date:"d/m/Y" }}</td>
                         <td class="px-4 py-1.5">
                             {% if tuition.paid %}

@@ -2,11 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.apps import apps
+from operator import attrgetter
 from django.db import models
 from django.views.decorators.http import require_http_methods
 from accounts.models import User
-from django.apps import apps
-from operator import attrgetter
+from classes.models import Class
+from attendance.models import ClassSession
 
 
 @login_required
@@ -206,7 +208,7 @@ def activity_logs(request):
             histories.extend(logs)
         
     # Sort merged lists from all models manually in-memory
-    histories.sort(key=attrgetter('history_date'), reverse=True)
+    histories.sort(key=lambda x: getattr(x, 'history_date', None), reverse=True)
     
     per_page = request.GET.get('per_page', 50)
     try:
@@ -223,12 +225,15 @@ def activity_logs(request):
         log.changes = []
         if log.history_type == '~':
             try:
-                prev = log.prev_record
+                prev = getattr(log, 'prev_record', None)
                 if prev:
-                    delta = log.diff_against(prev)
-                    for change in delta.changes:
-                        if change.field not in ['history_id', 'history_user', 'history_date', 'history_type', 'history_change_reason']:
-                            log.changes.append(change)
+                    try:
+                        delta = log.diff_against(prev)
+                        for change in delta.changes:
+                            if change.field not in ['history_id', 'history_user', 'history_date', 'history_type', 'history_change_reason', 'deleted_at', 'restored_at']:
+                                log.changes.append(change)
+                    except Exception:
+                        pass
             except Exception:
                 pass
     
@@ -289,3 +294,74 @@ def object_history(request, app_label, model_name, object_id):
         'object_id': object_id,
         'instance': instance,
     })
+@login_required
+def user_detail(request, user_id):
+    if request.user.role not in ['admin', 'teacher', 'assistant']:
+        messages.error(request, 'Bạn không có quyền xem thông tin này.')
+        return redirect('dashboard')
+        
+    user_obj = get_object_or_404(User, id=user_id, is_deleted=False)
+    
+    context = {
+        'user_obj': user_obj,
+    }
+    
+    # If the user is a teacher, fetch teaching related data
+    if user_obj.role == 'teacher':
+        # --- Active Classes ---
+        active_classes = Class.objects.filter(
+            teacher=user_obj, 
+            status='active',
+            is_active=True
+        ).select_related('subject').order_by('-start_date')
+        
+        # --- Completed Classes ---
+        comp_search = request.GET.get('search_completed', '')
+        completed_classes_qs = Class.objects.filter(
+            teacher=user_obj, 
+            status='completed',
+            is_active=True
+        ).select_related('subject').order_by('-end_date')
+        
+        if comp_search:
+            completed_classes_qs = completed_classes_qs.filter(
+                models.Q(class_code__icontains=comp_search) |
+                models.Q(class_name__icontains=comp_search)
+            )
+            
+        paginator_comp = Paginator(completed_classes_qs, 5)
+        page_comp = request.GET.get('page_completed', 1)
+        completed_classes = paginator_comp.get_page(page_comp)
+        
+        # --- Session Logs ---
+        sess_search = request.GET.get('search_sessions', '')
+        session_logs_qs = ClassSession.objects.filter(
+            class_enrolled__teacher=user_obj
+        ).select_related('class_enrolled__subject').order_by('-scheduled_date', '-scheduled_start')
+        
+        if sess_search:
+            session_logs_qs = session_logs_qs.filter(
+                models.Q(class_enrolled__class_code__icontains=sess_search) |
+                models.Q(class_enrolled__class_name__icontains=sess_search)
+            )
+            
+        paginator_sess = Paginator(session_logs_qs, 5)
+        page_sess = request.GET.get('page_sessions', 1)
+        session_logs = paginator_sess.get_page(page_sess)
+        
+        context.update({
+            'active_classes': active_classes,
+            'completed_classes': completed_classes,
+            'session_logs': session_logs,
+            'sess_search': sess_search,
+            'comp_search': comp_search,
+        })
+        
+        # Handle HTMX partial requests
+        if request.headers.get('HX-Request'):
+            if 'search_sessions' in request.GET or 'page_sessions' in request.GET:
+                return render(request, 'users/partials/session_logs_table.html', context)
+            if 'search_completed' in request.GET or 'page_completed' in request.GET:
+                return render(request, 'users/partials/completed_classes_table.html', context)
+        
+    return render(request, 'users/user_detail.html', context)

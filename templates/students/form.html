@@ -4,11 +4,29 @@
 
 {% block content %}
 <div class="fade-in">
+    <!-- Breadcrumbs -->
+    <nav class="flex mb-4 text-sm text-gray-500" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="{% url 'students:list' %}" class="hover:text-primary-600 transition-colors"
+                   hx-get="{% url 'students:list' %}" hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true">
+                    Học sinh
+                </a>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <i class="fas fa-chevron-right text-xs mx-2 text-gray-400"></i>
+                    <span class="text-gray-800 font-medium">{% if student %}Quản lý{% else %}Thêm{% endif %} học sinh</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">
                 <i class="fas fa-{% if student %}edit{% else %}plus{% endif %} text-green-500 mr-2"></i>
-                {% if student %}Sửa{% else %}Thêm{% endif %} học sinh
+                {% if student %}Quản lý{% else %}Thêm{% endif %} học sinh
             </h1>
             <p class="text-gray-500 mt-1">{% if student %}Cập nhật thông tin học sinh{% else %}Tạo học sinh mới{% endif %}</p>
         </div>
@@ -104,6 +122,55 @@
                                 <i class="fas fa-save mr-2"></i>Lưu
                             </button>
                         </div>
+                        
+                        <!-- Duplicate Student Warning Modal inline -->
+                        {% if duplicate_student %}
+                        <div id="duplicate-warning-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4 fade-in">
+                            <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
+                                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-red-50">
+                                    <h3 class="text-lg font-semibold text-red-700">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i> Phát hiện trùng lặp
+                                    </h3>
+                                    <a href="{% url 'students:create' %}" class="text-gray-400 hover:text-gray-600 transition-colors">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                </div>
+                                <div class="p-6">
+                                    <p class="text-gray-600 mb-4">Hệ thống tìm thấy một học sinh có tên và năm sinh tương tự trong dữ liệu:</p>
+                                    
+                                    <div class="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <span class="font-semibold text-lg text-gray-800">{{ duplicate_student.full_name }}</span>
+                                            {% if duplicate_student.status == 'active' %}
+                                                <span class="badge bg-green-100 text-green-700">Đang học</span>
+                                            {% else %}
+                                                <span class="badge bg-gray-100 text-gray-700">Nghỉ/Khóa</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-sm text-gray-600 space-y-1">
+                                            <div><i class="fas fa-fingerprint text-gray-400 w-5"></i> Domain: <code class="bg-gray-200 px-1 rounded">{{ duplicate_student.domain }}</code></div>
+                                            <div><i class="fas fa-calendar-alt text-gray-400 w-5"></i> Năm sinh: {{ duplicate_student.birth_year|default:"Trống" }}</div>
+                                            <div><i class="fas fa-school text-gray-400 w-5"></i> Trường: {{ duplicate_student.school|default:"Trống" }}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="text-sm text-gray-600 mb-6">Bạn có muốn khôi phục hồ sơ cũ này hay vẫn muốn tạo một tài khoản mới tinh?</p>
+                                    
+                                    <div class="flex flex-col sm:flex-row gap-3 sm:justify-end">
+                                        <a href="{% url 'students:create' %}" class="btn-secondary text-center">
+                                            Hủy bỏ
+                                        </a>
+                                        <button type="submit" name="force_create" value="1" class="btn-secondary text-primary-600 border-primary-200 hover:bg-primary-50">
+                                            Vẫn tạo mới
+                                        </button>
+                                        <button type="submit" name="restore_user_id" value="{{ duplicate_student.id }}" class="btn-primary">
+                                            Khôi phục & Cập nhật
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
                     </form>
                 </div>
             </div>

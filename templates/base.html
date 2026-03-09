@@ -269,6 +269,18 @@
                 <span>Học phí</span>
               </a>
               <a
+                href="{% url 'attendance:session_statistics' %}"
+                class="sidebar-link {% if 'statistics' in request.path %}active{% endif %}"
+                hx-get="{% url 'attendance:session_statistics' %}"
+                hx-target="#main-content"
+                hx-select="#main-content"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+              >
+                <i class="fas fa-chart-bar w-5"></i>
+                <span>Thống kê tiết học</span>
+              </a>
+              <a
                 href="{% url 'users:activity_logs' %}"
                 class="sidebar-link {% if 'activity-logs' in request.path %}active{% endif %}"
                 hx-get="{% url 'users:activity_logs' %}"
@@ -309,7 +321,7 @@
                 hx-push-url="true"
               >
                 <i class="fas fa-calendar-check w-5"></i>
-                <span>Buổi học</span>
+                <span>Tiết học</span>
               </a>
             </div>
           </div>
@@ -364,6 +376,18 @@
             </p>
           </div>
           <a
+            href="{% url 'password_change' %}"
+            hx-get="{% url 'password_change' %}"
+            hx-target="#main-content"
+            hx-select="#main-content"
+            hx-swap="outerHTML"
+            hx-push-url="true"
+            class="w-8 h-8 flex items-center justify-center rounded-lg text-primary-200 hover:text-white hover:bg-white/10 transition-colors"
+            title="Đổi mật khẩu"
+          >
+            <i class="fas fa-key"></i>
+          </a>
+          <a
             href="{% url 'logout' %}"
             class="w-8 h-8 flex items-center justify-center rounded-lg text-primary-200 hover:text-white hover:bg-white/10 transition-colors"
             title="Đăng xuất"
@@ -396,6 +420,16 @@
           <div class="flex-1 lg:flex-none"></div>
 
           <div class="flex items-center gap-4">
+            <!-- Real-time Clock -->
+            <div class="hidden sm:flex items-center text-white/60 px-3 py-1.5 text-xs italic"
+                 x-data="{ time: new Date() }"
+                 x-init="setInterval(() => time = new Date(), 1000)">
+                <i class="far fa-clock mr-1.5"></i>
+                <span x-text="time.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit', second:'2-digit'})"></span>
+                <span class="mx-2 text-white/30">|</span>
+                <span x-text="time.toLocaleDateString('vi-VN', {weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric'})"></span>
+            </div>
+
             <!-- Theme Chooser -->
             <div class="relative" x-data="{ open: false }">
               <button

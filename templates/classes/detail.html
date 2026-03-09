@@ -4,6 +4,24 @@
 
 {% block content %}
 <div class="fade-in">
+    <!-- Breadcrumbs -->
+    <nav class="flex mb-4 text-sm text-gray-500" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="{% url 'classes:list' %}" class="hover:text-primary-600 transition-colors"
+                   hx-get="{% url 'classes:list' %}" hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true">
+                    Lớp học
+                </a>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <i class="fas fa-chevron-right text-xs mx-2 text-gray-400"></i>
+                    <span class="text-gray-800 font-medium">Chi tiết lớp</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">
@@ -12,6 +30,7 @@
             <p class="text-gray-500 mt-1">Mã lớp: <code class="px-2 py-0.5 bg-gray-100 rounded text-sm">{{ class_obj.class_code }}</code></p>
         </div>
         <div class="flex gap-2">
+            {% if user.role == 'admin' %}
             <a href="{% url 'classes:edit' class_obj.id %}"
                hx-get="{% url 'classes:edit' class_obj.id %}"
                hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
@@ -19,6 +38,7 @@
                class="btn-primary inline-flex items-center gap-2">
                 <i class="fas fa-edit"></i> Sửa
             </a>
+            {% endif %}
             <a href="{% url 'classes:list' %}"
                hx-get="{% url 'classes:list' %}"
                hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
@@ -37,27 +57,44 @@
                         <i class="fas fa-info-circle mr-2 text-primary-500"></i>Thông tin lớp
                     </h3>
                 </div>
-                <div class="p-6 space-y-4">
-                    <div>
-                        <p class="text-xs text-gray-500">Môn học</p>
-                        <p class="font-medium">{{ class_obj.subject.subject_name }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500">Giáo viên</p>
-                        <p class="font-medium">{{ class_obj.teacher.get_full_name }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500">Thời gian</p>
-                        <p class="font-medium">{{ class_obj.start_time|default:"-" }} - {{ class_obj.end_time|default:"-" }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500">Phòng học</p>
-                        <p class="font-medium">{{ class_obj.room|default:"-" }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500">Sĩ số</p>
-                        <p class="font-medium">{{ class_obj.get_student_count }} / {{ class_obj.max_students }}</p>
-                    </div>
+                <div class="px-0 py-2">
+                    <ul class="divide-y divide-gray-100">
+                        <li class="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
+                            <span class="text-sm text-gray-500 flex items-center gap-2"><i class="fas fa-book w-4 text-center text-gray-400"></i> Môn học</span>
+                            <span class="text-sm font-medium text-gray-900">{{ class_obj.subject.subject_name }}</span>
+                        </li>
+                        <li class="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
+                            <span class="text-sm text-gray-500 flex items-center gap-2"><i class="fas fa-chalkboard-teacher w-4 text-center text-gray-400"></i> Giáo viên</span>
+                            <span class="text-sm font-medium text-gray-900">{{ class_obj.teacher.get_full_name }}</span>
+                        </li>
+                        <li class="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
+                            <span class="text-sm text-gray-500 flex items-center gap-2"><i class="fas fa-calendar-alt w-4 text-center text-gray-400"></i> Khóa học</span>
+                            <span class="text-sm font-medium text-gray-900">
+                                {{ class_obj.start_date|date:"d/m/Y"|default:"-" }} <i class="fas fa-arrow-right mx-1 text-gray-300 text-xs"></i> {{ class_obj.end_date|date:"d/m/Y"|default:"Không khai báo" }}
+                            </span>
+                        </li>
+                        <li class="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
+                            <span class="text-sm text-gray-500 flex items-center gap-2"><i class="fas fa-clock w-4 text-center text-gray-400"></i> Thời gian</span>
+                            <span class="text-sm font-medium text-gray-900">
+                                {{ class_obj.start_time|time:"H:i"|default:"-" }} <i class="fas fa-arrow-right mx-1 text-gray-300 text-xs"></i> {{ class_obj.end_time|time:"H:i"|default:"-" }}
+                                {% if class_obj.get_schedule_display %}<span class="text-gray-500 ml-2 font-normal">({{ class_obj.get_schedule_display }})</span>{% endif %}
+                            </span>
+                        </li>
+                        <li class="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
+                            <span class="text-sm text-gray-500 flex items-center gap-2"><i class="fas fa-door-open w-4 text-center text-gray-400"></i> Phòng học</span>
+                            <span class="text-sm font-medium text-gray-900">{{ class_obj.room|default:"-" }}</span>
+                        </li>
+                        <li class="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
+                            <span class="text-sm text-gray-500 flex items-center gap-2"><i class="fas fa-user-friends w-4 text-center text-gray-400"></i> Sĩ số</span>
+                            <span class="text-sm font-medium text-gray-900">{{ class_obj.get_student_count }} / {{ class_obj.max_students }}</span>
+                        </li>
+                        <li class="flex justify-between items-center px-6 py-3 hover:bg-gray-50 transition-colors">
+                            <span class="text-sm text-gray-500 flex items-center gap-2"><i class="fas fa-money-bill-wave w-4 text-center text-gray-400"></i> Học phí/tháng</span>
+                            <span class="text-sm font-medium text-emerald-600">
+                                {% if class_obj.tuition_fee %}{{ class_obj.tuition_fee|floatformat:"0" }} đ{% else %}-{% endif %}
+                            </span>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -68,13 +105,22 @@
                     <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
                         <i class="fas fa-users mr-2 text-primary-500"></i>Danh sách học sinh
                     </h3>
-                    <a href="{% url 'attendance:session_list' class_obj.id %}"
-                       hx-get="{% url 'attendance:session_list' class_obj.id %}"
-                       hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                       hx-push-url="true"
-                       class="btn-secondary px-3 py-1.5 text-sm">
-                        <i class="fas fa-calendar mr-1"></i> Buổi học
-                    </a>
+                    <div class="flex items-center gap-2">
+                        {% if user.role == 'admin' %}
+                        <button hx-get="{% url 'classes:enroll_students' class_obj.id %}"
+                                hx-target="#history-modal-container"
+                                class="btn-primary px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors inline-flex items-center">
+                            <i class="fas fa-user-plus mr-1"></i> Thêm học sinh
+                        </button>
+                        {% endif %}
+                        <a href="{% url 'attendance:session_list' class_obj.id %}"
+                           hx-get="{% url 'attendance:session_list' class_obj.id %}"
+                           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+                           hx-push-url="true"
+                           class="btn-secondary px-3 py-1.5 text-sm inline-flex items-center">
+                            <i class="fas fa-calendar mr-1"></i> Tiết học
+                        </a>
+                    </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full">
@@ -87,16 +133,20 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
-                            {% for enrollment in class_obj.enrollments.all %}
+                            {% for enrollment in active_enrollments %}
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="px-4 py-1.5 text-sm text-gray-500">{{ forloop.counter }}</td>
-                                <td class="px-4 py-1.5 font-medium text-gray-800">{{ enrollment.student.full_name }}</td>
-                                <td class="px-4 py-1.5"><code class="px-2 py-1 bg-gray-100 rounded text-sm text-gray-600">{{ enrollment.student.domain }}</code></td>
+                                <td class="px-4 py-1.5 font-medium text-gray-900">
+                                    {{ enrollment.student.full_name }}
+                                </td>
                                 <td class="px-4 py-1.5">
-                                    {% if enrollment.status == 'active' %}
-                                    <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Hoạt động</span>
+                                    <a href="{% url 'students:detail' enrollment.student.id %}" hx-get="{% url 'students:detail' enrollment.student.id %}" hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true" class="px-2 py-1 bg-gray-100 rounded text-sm text-gray-600 hover:bg-primary-100 hover:text-primary-600 transition-colors font-medium">{{ enrollment.student.domain }}</a>
+                                </td>
+                                <td class="px-4 py-1.5">
+                                    {% if enrollment.student.status == 'active' %}
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Đang học</span>
                                     {% else %}
-                                    <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">Đã rời</span>
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">Nghỉ</span>
                                     {% endif %}
                                 </td>
                             </tr>

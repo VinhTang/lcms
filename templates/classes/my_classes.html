@@ -15,41 +15,73 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {% for class_obj in classes %}
         <div class="card flex flex-col h-full">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-start">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-start bg-white">
                 <div>
-                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-primary-100 text-primary-700">{{ class_obj.class_code }}</span>
-                    <h3 class="text-lg font-bold text-gray-800 mt-2">{{ class_obj.class_name }}</h3>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary-100 text-primary-700 uppercase tracking-wider">{{ class_obj.class_code }}</span>
+                        {% if class_obj.status == 'pending' %}
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 uppercase tracking-wider">Chưa bắt đầu</span>
+                        {% elif class_obj.status == 'active' %}
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-700 uppercase tracking-wider">Khai giảng</span>
+                        {% else %}
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 uppercase tracking-wider">Kết thúc</span>
+                        {% endif %}
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800">{{ class_obj.class_name }}</h3>
                 </div>
-                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">{{ class_obj.subject.subject_name }}</span>
+                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-600 border border-blue-100">{{ class_obj.subject.subject_name }}</span>
             </div>
-            <div class="p-6 flex-grow">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-xs text-gray-500">Thời gian</p>
-                        <p class="font-medium">{{ class_obj.start_time|default:"-" }} - {{ class_obj.end_time|default:"-" }}</p>
+            <div class="p-6 flex-grow bg-white">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold mb-1">Lịch học</p>
+                            <p class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                <i class="far fa-calendar-alt text-gray-400"></i> {{ class_obj.get_schedule_display|default:"-" }}
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold mb-1">Giờ học</p>
+                            <p class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                <i class="far fa-clock text-gray-400"></i> {{ class_obj.start_time|time:"H:i"|default:"-" }} - {{ class_obj.end_time|time:"H:i"|default:"-" }}
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-xs text-gray-500">Phòng</p>
-                        <p class="font-medium">{{ class_obj.room|default:"-" }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500">Sĩ số</p>
-                        <p class="font-medium">{{ class_obj.get_student_count }} / {{ class_obj.max_students }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500">Ngày học</p>
-                        <p class="font-medium">{{ class_obj.schedule_days|default:"-" }}</p>
+                    
+                    <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-50">
+                        <div>
+                            <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold mb-1">Khóa học</p>
+                            <p class="text-sm font-medium text-gray-700">
+                                {{ class_obj.start_date|date:"d/m/Y"|default:"-" }} <i class="fas fa-arrow-right mx-1 text-gray-300 text-[10px]"></i> {{ class_obj.end_date|date:"d/m/Y"|default:"-" }}
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold mb-1">Phòng / Sĩ số</p>
+                            <p class="text-sm font-medium text-gray-700">
+                                <span class="bg-gray-100 px-2 py-0.5 rounded text-xs mr-2">{{ class_obj.room|default:"-" }}</span>
+                                <span class="text-primary-600">{{ class_obj.get_student_count }}</span><span class="text-gray-400">/{{ class_obj.max_students }}</span>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-                <a href="{% url 'attendance:session_list' class_obj.id %}"
-                   hx-get="{% url 'attendance:session_list' class_obj.id %}"
-                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                   hx-push-url="true"
-                   class="btn-primary w-full flex justify-center items-center gap-2 py-2">
-                    <i class="fas fa-clipboard-check"></i> Điểm danh
-                </a>
+                <div class="flex gap-2">
+                    <a href="{% url 'attendance:session_list' class_obj.id %}"
+                       hx-get="{% url 'attendance:session_list' class_obj.id %}"
+                       hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+                       hx-push-url="true"
+                       class="btn-primary flex-grow flex justify-center items-center gap-2 py-2">
+                        <i class="fas fa-clipboard-check"></i> Điểm danh
+                    </a>
+                    <a href="{% url 'classes:detail' class_obj.id %}"
+                       hx-get="{% url 'classes:detail' class_obj.id %}"
+                       hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+                       hx-push-url="true"
+                       class="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center" title="Chi tiết lớp">
+                        <i class="fas fa-info-circle"></i>
+                    </a>
+                </div>
             </div>
         </div>
         {% endfor %}

@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db import models
 from .models import Class, Subject
+from payments.models import Tuition
 
 
 @login_required
@@ -73,10 +74,18 @@ def class_create(request):
         schedule_days = request.POST.getlist('schedule_days')
         schedule_days = ','.join(schedule_days)
         
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        start_date = start_date if start_date else None
+        end_date = end_date if end_date else None
+        
         start_time = request.POST.get('start_time')
         end_time = request.POST.get('end_time')
         room = request.POST.get('room', '').strip()
         max_students = request.POST.get('max_students', 30)
+        
+        tuition_fee_raw = request.POST.get('tuition_fee', '').strip()
+        tuition_fee = int(tuition_fee_raw) if tuition_fee_raw else None
         
         if not class_code or not class_name:
             messages.error(request, 'Mã lớp và tên lớp không được để trống.')
@@ -92,10 +101,13 @@ def class_create(request):
             subject_id=subject_id,
             teacher_id=teacher_id,
             schedule_days=schedule_days,
+            start_date=start_date,
+            end_date=end_date,
             start_time=start_time,
             end_time=end_time,
             room=room,
-            max_students=max_students
+            max_students=max_students,
+            tuition_fee=tuition_fee
         )
         
         messages.success(request, f'Đã tạo lớp {class_obj.class_name} thành công.')
@@ -114,7 +126,16 @@ def class_create(request):
 @login_required
 def class_detail(request, class_id):
     class_obj = get_object_or_404(Class, id=class_id)
-    return render(request, 'classes/detail.html', {'class_obj': class_obj})
+    # Filter for active enrollments AND active students
+    active_enrollments = class_obj.enrollments.filter(
+        status='active', 
+        student__status='active'
+    ).select_related('student')
+    
+    return render(request, 'classes/detail.html', {
+        'class_obj': class_obj,
+        'active_enrollments': active_enrollments
+    })
 
 
 @login_required
@@ -149,10 +170,19 @@ def class_edit(request, class_id):
         schedule_days = request.POST.getlist('schedule_days')
         class_obj.schedule_days = ','.join(schedule_days)
         
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        class_obj.start_date = start_date if start_date else None
+        class_obj.end_date = end_date if end_date else None
+        
         class_obj.start_time = request.POST.get('start_time')
         class_obj.end_time = request.POST.get('end_time')
         class_obj.room = request.POST.get('room', '').strip()
         class_obj.max_students = request.POST.get('max_students', 30)
+        
+        tuition_fee_raw = request.POST.get('tuition_fee', '').strip()
+        class_obj.tuition_fee = int(tuition_fee_raw) if tuition_fee_raw else None
+        
         class_obj.save()
         
         messages.success(request, f'Đã cập nhật lớp {class_obj.class_name}.')
@@ -179,8 +209,8 @@ def class_delete(request, class_id):
     
     if request.method == 'POST':
         class_name = class_obj.class_name
-        class_obj.delete()
-        messages.success(request, f'Đã xóa lớp {class_name}.')
+        class_obj.soft_delete()
+        messages.success(request, f'Đã xóa/ngừng hoạt động lớp {class_name}.')
         return redirect('classes:list')
     
     return render(request, 'classes/confirm_delete.html', {'class_obj': class_obj})
@@ -198,3 +228,126 @@ def my_classes(request):
         classes = Class.objects.filter(assistants=request.user, is_active=True)
     
     return render(request, 'classes/my_classes.html', {'classes': classes})
+
+
+def check_schedule_conflict(student, target_class):
+    """
+    Checks if enrolling the `student` into `target_class` causes a schedule overlap.
+    Returns the conflicting Class object if an overlap exists, else None.
+    """
+    if not target_class.schedule_days or not target_class.start_time or not target_class.end_time:
+        return None
+        
+    target_days = set(target_class.schedule_days.split(','))
+    
+    # Get active enrollments for this student
+    active_enrollments = student.enrollments.filter(status='active').select_related('class_enrolled')
+    
+    for enrollment in active_enrollments:
+        current_class = enrollment.class_enrolled
+        
+        # Skip if checking against the same class or if schedule is missing
+        if current_class.id == target_class.id or not current_class.schedule_days or not current_class.start_time or not current_class.end_time:
+            continue
+            
+        current_days = set(current_class.schedule_days.split(','))
+        
+        # Check if there's any common day
+        if target_days.intersection(current_days):
+            # Check time overlap
+            # Overlap exists if: (StartA < EndB) and (StartB < EndA)
+            if (target_class.start_time < current_class.end_time) and (current_class.start_time < target_class.end_time):
+                return current_class
+                
+    return None
+
+
+@login_required
+def class_enroll_students(request, class_id):
+    if request.user.role not in ['admin', 'teacher', 'assistant']:
+        messages.error(request, 'Bạn không có quyền truy cập chức năng này.')
+        return redirect('classes:detail', class_id=class_id)
+        
+    class_obj = get_object_or_404(Class, id=class_id)
+    
+    if request.method == 'POST':
+        student_ids = request.POST.getlist('students')
+        if not student_ids:
+            messages.error(request, 'Vui lòng chọn ít nhất một học sinh.')
+            return redirect('classes:detail', class_id=class_id)
+            
+        success_count = 0
+        error_messages = []
+        
+        from students.models import Student
+        from .models import Enrollment
+        # Only enroll students who are currently active
+        students_to_enroll = Student.objects.filter(id__in=student_ids, status='active')
+        
+        for student in students_to_enroll:
+            # Check if already enrolled in this exact class
+            if Enrollment.objects.filter(student=student, class_enrolled=class_obj, status='active').exists():
+                error_messages.append(f"{student.full_name}: Đã ở trong lớp này.")
+                continue
+                
+            conflict_class = check_schedule_conflict(student, class_obj)
+            if conflict_class:
+                error_messages.append(f"{student.full_name}: Trùng giờ với lớp {conflict_class.class_name}.")
+                continue
+                
+            # If valid, create or update enrollment
+            enrollment, created = Enrollment.objects.update_or_create(
+                student=student,
+                class_enrolled=class_obj,
+                defaults={'status': 'active', 'dropped_at': None}
+            )
+            
+            # Auto generate monthly tuition (even if class has no fee or 0 fee)
+            if created:
+                from django.utils import timezone
+                import datetime
+                import calendar
+                
+                current_date = timezone.localtime(timezone.now()).date()
+                current_month_str = current_date.strftime('%Y-%m')
+                
+                # Default amount to 0 if None
+                tuition_amount = class_obj.tuition_fee if class_obj.tuition_fee is not None else 0
+                
+                if class_obj.end_date and class_obj.end_date.strftime('%Y-%m') == current_month_str:
+                    due_date = class_obj.end_date
+                else:
+                    _, last_day = calendar.monthrange(current_date.year, current_date.month)
+                    due_date = current_date.replace(day=last_day)
+                
+                Tuition.objects.get_or_create(
+                    enrollment=enrollment,
+                    tuition_type='monthly',
+                    month=current_month_str,
+                    defaults={
+                        'amount': tuition_amount,
+                        'due_date': due_date
+                    }
+                )
+                
+            success_count += 1
+            
+        if success_count > 0:
+            messages.success(request, f'Đã thêm thành công {success_count} học sinh vào lớp.')
+            
+        for error in error_messages:
+            messages.error(request, error)
+            
+        return redirect('classes:detail', class_id=class_id)
+        
+    # GET request - return modal
+    from students.models import Student
+    from .models import Enrollment
+    # Exclude students already active in this class and ensure they are active
+    enrolled_student_ids = Enrollment.objects.filter(class_enrolled=class_obj, status='active').values_list('student_id', flat=True)
+    available_students = Student.objects.filter(status='active').exclude(id__in=enrolled_student_ids).order_by('full_name')
+    
+    return render(request, 'classes/enroll_students_modal.html', {
+        'class_obj': class_obj,
+        'available_students': available_students
+    })

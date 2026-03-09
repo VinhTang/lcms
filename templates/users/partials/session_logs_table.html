@@ -1,0 +1,112 @@
+<div id="session-logs-container" class="card overflow-hidden transition-all duration-300">
+    <div class="px-6 py-4 border-b border-gray-100 flex flex-wrap justify-between items-center bg-white gap-4">
+        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+            <i class="fas fa-history mr-2 text-primary-500"></i>Nhật ký tiết học gần đây
+        </h3>
+        <div class="flex items-center gap-3">
+            <div class="relative">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                <input type="text" 
+                       name="search_sessions" 
+                       value="{{ sess_search }}"
+                       placeholder="Tìm lớp..." 
+                       class="pl-9 pr-4 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none w-48 transition-all"
+                       hx-get="{% url 'users:detail' user_obj.id %}"
+                       hx-trigger="keyup changed delay:500ms, search"
+                       hx-target="#session-logs-container"
+                       hx-swap="outerHTML"
+                       hx-include="[name='search_sessions']">
+            </div>
+            <a href="{% url 'attendance:session_statistics' %}?teacher_id={{ user_obj.id }}"
+               hx-get="{% url 'attendance:session_statistics' %}?teacher_id={{ user_obj.id }}"
+               hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+               hx-push-url="true"
+               class="text-[11px] font-semibold text-primary-600 hover:text-primary-700 bg-primary-50 px-2 py-1.5 rounded-lg transition-colors">
+                Xem tất cả
+            </a>
+        </div>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Ngày dạy</th>
+                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Lớp</th>
+                    <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
+                    <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for session in session_logs %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-2.5 text-sm">
+                        <p class="font-medium text-gray-800">{{ session.scheduled_date|date:"d/m" }}</p>
+                        <p class="text-[10px] text-gray-400">{{ session.actual_start|default:session.scheduled_start|time:"H:i" }}</p>
+                    </td>
+                    <td class="px-4 py-2.5">
+                        <p class="text-xs font-bold text-gray-800">{{ session.class_enrolled.class_code }}</p>
+                        <p class="text-[11px] text-gray-500 truncate max-w-[150px]">{{ session.class_enrolled.class_name }}</p>
+                    </td>
+                    <td class="px-4 py-2.5">
+                        {% if session.status == 'ended' %}
+                        <span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] rounded font-bold">Hoàn thành</span>
+                        {% elif session.status == 'in_progress' %}
+                        <span class="px-2 py-0.5 bg-green-50 text-green-600 text-[10px] rounded font-bold animate-pulse">Đang dạy</span>
+                        {% else %}
+                        <span class="px-2 py-0.5 bg-gray-50 text-gray-500 text-[10px] rounded font-medium">Chưa bắt đầu</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-2.5 text-right">
+                        <a href="{% url 'attendance:session_detail' session.id %}"
+                           hx-get="{% url 'attendance:session_detail' session.id %}"
+                           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+                           hx-push-url="true"
+                           class="p-1.5 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors inline-block" title="Xem nhật ký">
+                            <i class="fas fa-eye text-sm"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="px-6 py-8 text-center text-gray-400 italic text-sm">Chưa có nhật ký tiết học</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if session_logs.paginator.num_pages > 1 %}
+    <div class="px-6 py-3 border-t border-gray-100 flex items-center justify-between bg-white">
+        <div class="text-xs text-gray-500">
+            Trang {{ session_logs.number }} / {{ session_logs.paginator.num_pages }}
+        </div>
+        <div class="flex gap-2">
+            {% if session_logs.has_previous %}
+            <button hx-get="{% url 'users:detail' user_obj.id %}?page_sessions={{ session_logs.previous_page_number }}&search_sessions={{ sess_search }}"
+                    hx-target="#session-logs-container"
+                    hx-swap="outerHTML"
+                    class="p-1 px-3 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded border border-gray-200 text-xs transition-colors">
+                Trước
+            </button>
+            {% else %}
+            <button disabled class="p-1 px-3 bg-gray-50 text-gray-300 rounded border border-gray-200 text-xs cursor-not-allowed">
+                Trước
+            </button>
+            {% endif %}
+            
+            {% if session_logs.has_next %}
+            <button hx-get="{% url 'users:detail' user_obj.id %}?page_sessions={{ session_logs.next_page_number }}&search_sessions={{ sess_search }}"
+                    hx-target="#session-logs-container"
+                    hx-swap="outerHTML"
+                    class="p-1 px-3 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded border border-gray-200 text-xs transition-colors">
+                Sau
+            </button>
+            {% else %}
+            <button disabled class="p-1 px-3 bg-gray-50 text-gray-300 rounded border border-gray-200 text-xs cursor-not-allowed">
+                Sau
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>

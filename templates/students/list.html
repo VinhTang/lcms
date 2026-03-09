@@ -24,28 +24,39 @@
     <!-- Filters -->
     <div class="card mb-5">
         <div class="p-3">
-            <div class="flex flex-wrap gap-3 items-center">
+            <div class="flex flex-wrap gap-3 items-center" id="students-filter-form">
                 <div class="flex-1 min-w-[200px]">
                     <div class="relative">
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         <input 
                             type="text" 
-                            x-model="search" 
+                            name="search"
+                            value="{{ search }}"
+                            hx-get="{% url 'students:list' %}"
+                            hx-include="#students-filter-form [name]"
+                            hx-trigger="keyup changed delay:500ms"
+                            hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true"
                             class="input-field !pl-10" 
                             placeholder="Tìm kiếm..."
                         >
                     </div>
                 </div>
                 <div class="w-48">
-                    <select x-model="filterStatus" class="input-field">
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="active">Hoạt động</option>
-                        <option value="inactive">Nghỉ</option>
-                        <option value="deleted">Khoá</option>
+                    <select name="status" class="input-field"
+                            hx-get="{% url 'students:list' %}"
+                            hx-include="#students-filter-form [name]"
+                            hx-trigger="change"
+                            hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true">
+                        <option value="" {% if status_filter == '' %}selected{% endif %}>Tất cả trạng thái</option>
+                        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Đang học</option>
+                        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Nghỉ</option>
                     </select>
                 </div>
-                <div class="flex gap-2">
-                    <button type="button" @click.prevent="search = ''; filterStatus = ''" class="btn-secondary h-[42px]">
+                <div class="flex gap-2">    
+                    <button type="button" 
+                            hx-get="{% url 'students:list' %}?status=active"
+                            hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true"
+                            class="btn-secondary h-[42px]">
                         <i class="fas fa-redo mr-1"></i> Reset
                     </button>
                 </div>
@@ -89,18 +100,17 @@
                             </div>
                         </td>
                         <td class="px-3 py-1">
-                            <code class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">{{ student.domain }}</code>
+                            <a href="{% url 'students:detail' student.id %}" hx-get="{% url 'students:detail' student.id %}" hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true" class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs hover:bg-primary-100 hover:text-primary-600 transition-colors">{{ student.domain }}</a>
                         </td>
                         <td class="px-3 py-1 text-sm text-gray-600">{{ student.birth_year|default:"-" }}</td>
                         <td class="px-3 py-1 text-sm text-gray-600">{{ student.get_gender_display|default:"-" }}</td>
                         <td class="px-3 py-1 text-sm text-gray-600">{{ student.school|default:"-" }}</td>
                         <td class="px-3 py-1">
+                            
                             {% if student.status == 'active' %}
-                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-green-100 text-green-700">Hoạt động</span>
-                            {% elif student.status == 'inactive' %}
-                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-orange-100 text-orange-700">Nghỉ</span>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-green-100 text-green-700">Đang học</span>
                             {% else %}
-                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-red-100 text-red-700">Khoá</span>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-orange-100 text-orange-700">Nghỉ</span>
                             {% endif %}
                         </td>
                         <td class="px-3 py-1 text-right">

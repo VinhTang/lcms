@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Chi tiết người dùng - {{ user_obj.get_full_name }} - LCMS{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Breadcrumbs -->
+    <nav class="flex mb-4 text-sm text-gray-500" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="{% url 'users:list' %}" class="hover:text-primary-600 transition-colors"
+                   hx-get="{% url 'users:list' %}" hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true">
+                    Người dùng
+                </a>
+            </li>
+                <div class="flex items-center">
+                    <i class="fas fa-chevron-right text-xs mx-2 text-gray-400"></i>
+                    <span class="text-gray-800 font-medium">Chi tiết người dùng</span>
+                </div>
+        </ol>
+    </nav>
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 text-white flex items-center justify-center text-2xl font-bold shadow-lg shadow-primary-100 uppercase">
+                {{ user_obj.first_name|slice:":1" }}{{ user_obj.last_name|slice:":1" }}
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">
+                    {{ user_obj.get_full_name }}
+                    {% if not user_obj.is_active %}
+                    <span class="ml-2 px-2 py-0.5 bg-red-100 text-red-600 text-xs rounded-full font-medium">Đã khóa</span>
+                    {% endif %}
+                </h1>
+                <p class="text-gray-500 mt-1 flex items-center gap-2">
+                    <span class="px-2 py-0.5 bg-gray-100 rounded text-xs font-mono">{{ user_obj.domain }}</span>
+                    <span class="text-gray-300">|</span>
+                    <span class="text-sm">
+                        {% if user_obj.role == 'admin' %}Admin
+                        {% elif user_obj.role == 'teacher' %}Giáo viên
+                        {% elif user_obj.role == 'assistant' %}Trợ giảng
+                        {% else %}{{ user_obj.role|title }}
+                        {% endif %}
+                    </span>
+                </p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            {% if request.user.role == 'admin' %}
+            <a href="{% url 'users:edit' user_obj.id %}"
+               hx-get="{% url 'users:edit' user_obj.id %}"
+               hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+               hx-push-url="true"
+               class="btn-primary inline-flex items-center gap-2">
+                <i class="fas fa-edit"></i> Sửa
+            </a>
+            {% endif %}
+            <a href="{% url 'users:list' %}"
+               hx-get="{% url 'users:list' %}"
+               hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+               hx-push-url="true"
+               class="btn-secondary inline-flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Left Column: Info & Stats Stack -->
+        <div class="space-y-4">
+            <!-- Sidebar: Info -->
+            <div class="card">
+                <div class="px-6 py-3 border-b border-gray-100">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <i class="fas fa-user-circle mr-2 text-primary-500"></i>Thông tin cá nhân
+                    </h3>
+                </div>
+                <div class="px-0 py-1">
+                    <ul class="divide-y divide-gray-100">
+                        <li class="px-6 py-2 hover:bg-gray-50 transition-colors">
+                            <p class="text-[10px] text-gray-400 uppercase font-semibold mb-0.5">Email</p>
+                            <p class="text-sm font-medium text-gray-900">{{ user_obj.email }}</p>
+                        </li>
+                        <li class="px-6 py-2 hover:bg-gray-50 transition-colors">
+                            <p class="text-[10px] text-gray-400 uppercase font-semibold mb-0.5">Số điện thoại</p>
+                            <p class="text-sm font-medium text-gray-900">{{ user_obj.phone|default:"-" }}</p>
+                        </li>
+                        <li class="px-6 py-2 hover:bg-gray-50 transition-colors">
+                            <p class="text-[10px] text-gray-400 uppercase font-semibold mb-0.5">Giới tính</p>
+                            <p class="text-sm font-medium text-gray-900">
+                                {% if user_obj.gender == 'male' %}Nam
+                                {% elif user_obj.gender == 'female' %}Nữ
+                                {% else %}Khác{% endif %}
+                            </p>
+                        </li>
+                        <li class="px-6 py-2 hover:bg-gray-50 transition-colors">
+                            <p class="text-[10px] text-gray-400 uppercase font-semibold mb-0.5">Ngày tham gia</p>
+                            <p class="text-sm font-medium text-gray-900">{{ user_obj.date_joined|date:"d/m/Y" }}</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            {% if user_obj.role == 'teacher' %}
+            <div class="card p-5 bg-gradient-to-br from-primary-600 to-primary-700 text-white border-none">
+                <h4 class="text-primary-100 text-[10px] font-bold uppercase tracking-widest mb-3">Tổng quan giảng dạy</h4>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-white/10 backdrop-blur-md rounded-xl p-2.5 border border-white/10 text-center">
+                        <p class="text-primary-100 text-[10px] font-medium uppercase mb-0.5">Lớp đang dạy</p>
+                        <p class="text-xl font-black text-white">{{ active_classes.count }}</p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md rounded-xl p-2.5 border border-white/10 text-center">
+                        <p class="text-primary-100 text-[10px] font-medium uppercase mb-0.5">Hoàn thành</p>
+                        <p class="text-xl font-black text-white">{{ completed_classes.paginator.count }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Active Classes -->
+        <div class="lg:col-span-2 space-y-4">
+            {% if user_obj.role == 'teacher' %}
+            <!-- Active Classes -->
+            <div class="card h-full overflow-hidden">
+                <div class="px-6 py-3 border-b border-gray-100 flex justify-between items-center bg-white">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <i class="fas fa-chalkboard mr-2 text-primary-500"></i>Lớp học đang phụ trách
+                    </h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Mã lớp</th>
+                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Tên lớp</th>
+                                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Thời gian</th>
+                                <th class="px-4 py-2 text-right text-xs font-semibold text-gray-500 uppercase">Sỉ số</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for class_item in active_classes %}
+                            <tr class="hover:bg-gray-50 transition-colors group">
+                                <td class="px-4 py-2.5">
+                                    <a href="{% url 'classes:detail' class_item.id %}" 
+                                       hx-get="{% url 'classes:detail' class_item.id %}" hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true"
+                                       class="px-2 py-0.5 bg-primary-50 text-primary-700 rounded text-[10px] font-bold hover:bg-primary-100 transition-colors">{{ class_item.class_code }}</a>
+                                </td>
+                                <td class="px-4 py-2.5">
+                                    <a href="{% url 'classes:detail' class_item.id %}" 
+                                      hx-get="{% url 'classes:detail' class_item.id %}" hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true" 
+                                      class="text-xs font-bold text-gray-800 hover:text-primary-600 transition-colors uppercase">{{ class_item.class_name }}</a>
+                                </td>
+                                <td class="px-4 py-2.5 text-[11px] text-gray-600">
+                                    <p class="font-medium">{{ class_item.get_schedule_display }}</p>
+                                    <p class="text-gray-400 mt-0.5">{{ class_item.start_time|time:"H:i" }} - {{ class_item.end_time|time:"H:i" }}</p>
+                                </td>
+                                <td class="px-4 py-2.5 text-right text-xs">
+                                    <span class="font-bold text-gray-800 text-sm">{{ class_item.active_students_count }}</span><span class="text-gray-400">/{{ class_item.max_students }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="px-6 py-8 text-center text-gray-400 italic text-sm">Chưa phụ trách lớp nào hiện tại</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <!-- For Admins or Other Roles -->
+            <div class="card p-12 text-center text-gray-500 h-full flex flex-col items-center justify-center">
+                <i class="fas fa-user-shield text-5xl opacity-20 mb-4"></i>
+                <p>Thông tin chi tiết cho tài khoản Admin hiện đang được cập nhật.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if user_obj.role == 'teacher' %}
+    <!-- Horizontal Sections Below -->
+    <div class="mt-4 space-y-4">
+        <!-- Session Logs Row -->
+        {% include "users/partials/session_logs_table.html" %}
+
+        <!-- Completed Classes Row -->
+        {% if completed_classes %}
+            {% include "users/partials/completed_classes_table.html" %}
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

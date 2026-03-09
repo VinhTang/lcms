@@ -58,7 +58,8 @@
                         <th @click="sortBy('teacher')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none group">Giáo viên <i class="fas ml-1" :class="sortCol === 'teacher' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
                         <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase">Thời gian</th>
                         <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase">Phòng</th>
-                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase">HS</th>
+                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
+                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase">Sỉ số</th>
                         <th class="px-3 py-1.5 text-right text-xs font-semibold text-gray-500 uppercase">Thao tác</th>
                     </tr>
                 </thead>
@@ -79,11 +80,21 @@
                         <td class="px-3 py-1 text-sm text-gray-600">{{ class_obj.subject.subject_name }}</td>
                         <td class="px-3 py-1 text-sm text-gray-600">{{ class_obj.teacher.get_full_name }}</td>
                         <td class="px-3 py-1 text-sm text-gray-600">
-                            {% if class_obj.start_time %}{{ class_obj.start_time|time:"H:i" }} - {{ class_obj.end_time|time:"H:i" }}{% else %}-{% endif %}
+                            <div class="font-medium text-gray-800">{% if class_obj.start_time %}{{ class_obj.start_time|time:"H:i" }} - {{ class_obj.end_time|time:"H:i" }}{% else %}-{% endif %} {% if class_obj.get_schedule_display %}<span class="text-xs font-normal">({{ class_obj.get_schedule_display }})</span>{% endif %}</div>
+                            <div class="text-[11px] text-gray-400">{% if class_obj.start_date %}{{ class_obj.start_date|date:"d/m/Y" }} - {{ class_obj.end_date|default_if_none:"Không thời hạn"|date:"d/m/Y" }}{% endif %}</div>
                         </td>
                         <td class="px-3 py-1 text-sm text-gray-600">{{ class_obj.room|default:"-" }}</td>
                         <td class="px-3 py-1 text-sm">
-                            <span class="font-medium">{{ class_obj.get_student_count }}</span>/{{ class_obj.max_students }}
+                            {% if class_obj.status == 'pending' %}
+                            <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 text-gray-600">Chưa bắt đầu</span>
+                            {% elif class_obj.status == 'active' %}
+                            <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-green-100 text-green-700">Khai giảng</span>
+                            {% elif class_obj.status == 'completed' %}
+                            <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-blue-100 text-blue-700">Kết thúc</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-3 py-1 text-sm">
+                            <span class="font-medium">{{ class_obj.active_students_count }}</span>/{{ class_obj.max_students }}
                         </td>
                         <td class="px-3 py-1 text-right">
                             <div class="flex items-center justify-end gap-1">

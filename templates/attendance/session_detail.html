@@ -1,15 +1,42 @@
 {% extends 'base.html' %}
 
-{% block title %}Điểm danh - LCMS{% endblock %}
+{% block title %}Nhật ký giảng dạy - LCMS{% endblock %}
 
 {% block content %}
-<div class="fade-in">
+<div class="fade-in" x-data="sessionDiary()">
+    <!-- Breadcrumbs -->
+    <nav class="flex mb-4 text-sm text-gray-500" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="{% url 'attendance:session_list' session.class_enrolled.id %}" class="hover:text-primary-600 transition-colors"
+                   hx-get="{% url 'attendance:session_list' session.class_enrolled.id %}" hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true">
+                    Lịch dạy 
+                </a>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <i class="fas fa-chevron-right text-xs mx-2 text-gray-400"></i>
+                    <span class="text-gray-800 font-medium">Nhật ký giảng dạy</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">
-                <i class="fas fa-clipboard-check text-blue-500 mr-2"></i>Điểm danh
+                <i class="fas fa-book-open text-blue-500 mr-2"></i>Nhật ký giảng dạy
             </h1>
             <p class="text-gray-500 mt-1">{{ session.class_enrolled.class_code }} - {{ session.class_enrolled.class_name }}</p>
+            <p class="text-gray-500 text-sm mt-1">
+                Giáo viên: <span class="font-semibold text-gray-800">{{ session.teacher.get_full_name }}</span>
+                <a href="{% url 'users:detail' session.class_enrolled.teacher.id %}" 
+                   hx-get="{% url 'users:detail' session.class_enrolled.teacher.id %}"
+                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true"
+                   class="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-xs font-mono hover:bg-indigo-100 transition-colors uppercase">
+                    {{ session.class_enrolled.teacher.domain }}
+                </a>
+            </p>
             <p class="text-gray-500 text-sm mt-1 font-medium">{{ session.scheduled_date|date:"d/m/Y" }} | {{ session.scheduled_start|time:"H:i" }} - {{ session.scheduled_end|time:"H:i" }}</p>
         </div>
         <a href="{% url 'attendance:session_list' session.class_enrolled.id %}"
@@ -21,8 +48,8 @@
         </a>
     </div>
 
-    <div class="card mb-6">
-        <div class="px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div class="card mb-4">
+        <div class="px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
                 <span class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Trạng thái:</span>
                 {% if session.status == 'not_started' %}
@@ -35,77 +62,108 @@
             </div>
             <div>
                 {% if session.status == 'not_started' %}
-                <button class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors shadow-sm flex items-center gap-2" onclick="openSession()">
+                <button class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors shadow-sm flex items-center gap-2" @click="showConfirm('open', '{% url 'attendance:open_session' session.id %}')">
                     <i class="fas fa-play"></i> Mở lớp
                 </button>
                 {% elif session.status == 'in_progress' %}
-                <button class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors shadow-sm flex items-center gap-2" onclick="endSession()">
+                <button class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors shadow-sm flex items-center gap-2" @click="showConfirm('end', '{% url 'attendance:end_session' session.id %}')">
                     <i class="fas fa-stop"></i> Kết thúc
                 </button>
                 {% endif %}
             </div>
         </div>
         
-        <div class="px-6 pb-4">
+        <div class="px-4 pb-3">
             {% if session.status == 'in_progress' %}
-            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-3 text-blue-700">
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-3 text-blue-700 mb-4">
                 <i class="fas fa-clock text-lg"></i>
-                <p>Buổi học đang diễn ra. Vui lòng điểm danh cho học sinh.</p>
+                <p>Tiết học đang diễn ra. Vui lòng điểm danh và ghi chú nhận xét.</p>
             </div>
             {% elif session.status == 'not_started' %}
-            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3 text-amber-700">
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3 text-amber-700 mb-4">
                 <i class="fas fa-clock text-lg"></i>
-                <p>Buổi học chưa bắt đầu. Nhấn <strong>"Mở lớp"</strong> để bắt đầu điểm danh.</p>
+                <p>Tiết học chưa bắt đầu. Nhấn <strong>"Mở lớp"</strong> để bắt đầu nhận lớp.</p>
             </div>
             {% else %}
-            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center gap-3 text-gray-600">
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center gap-3 text-gray-600 mb-4">
                 <i class="fas fa-check-circle text-lg"></i>
-                <p>Buổi học đã kết thúc.</p>
+                <p>Tiết học đã kết thúc.</p>
             </div>
             {% endif %}
+
+            <div class="flex flex-col gap-2">
+                <label for="session-notes" class="text-sm font-semibold text-gray-500 uppercase tracking-wider block">Ghi chú / Nhận xét tiết học:</label>
+                <textarea id="session-notes" 
+                          hx-post="{% url 'attendance:save_session_notes' session.id %}" 
+                          hx-trigger="keyup changed delay:1s" 
+                          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                          name="notes"
+                          rows="3" 
+                          {% if session.status != 'in_progress' %}disabled class="input-field w-full bg-gray-100 cursor-not-allowed"{% else %}class="input-field w-full"{% endif %}>{{ session.notes }}</textarea>
+                <div class="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                    <i class="htmx-indicator fas fa-spinner fa-spin text-primary-500" id="notes-spinner"></i>
+                    <span>Hệ thống tự động lưu ghi chú khi bạn ngừng gõ.</span>
+                    <span class="htmx-indicator text-primary-600">Đang lưu...</span>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="card overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100">
+        <div class="px-4 py-3 border-b border-gray-100">
             <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
                 <i class="fas fa-users mr-2 text-primary-500"></i>Danh sách học sinh ({{ attendances|length }})
             </h3>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full">
+            <table class="w-full text-sm">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">STT</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Họ tên</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Ngày sinh</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Ghi chú</th>
+                        <th class="px-2 py-1.5 text-left font-semibold text-gray-500 uppercase">STT</th>
+                        <th class="px-2 py-1.5 text-left font-semibold text-gray-500 uppercase">Họ tên</th>
+                        <th class="px-2 py-1.5 text-left font-semibold text-gray-500 uppercase">Ngày sinh</th>
+                        <th class="px-2 py-1.5 text-left font-semibold text-gray-500 uppercase sm:min-w-[280px]">Trạng thái</th>
+                        <th class="px-2 py-1.5 text-left font-semibold text-gray-500 uppercase">Ghi chú</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     {% for att in attendances %}
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-4 py-1.5 text-sm text-gray-500">{{ forloop.counter }}</td>
-                        <td class="px-4 py-1.5 font-medium text-gray-800">{{ att.enrollment.student.full_name }}</td>
-                        <td class="px-4 py-1.5 text-sm text-gray-600">{{ att.enrollment.student.birth_year|default:"-" }}</td>
-                        <td class="px-4 py-1.5">
-                            <div class="relative inline-block w-48">
-                                <select class="input-field py-1.5 pl-3 pr-8 text-sm attendance-select cursor-pointer 
-                                    {% if att.status == 'present' %}bg-green-50 border-green-200 text-green-700
-                                    {% elif att.status == 'absent_with_permission' %}bg-amber-50 border-amber-200 text-amber-700
-                                    {% elif att.status == 'absent_without_permission' %}bg-red-50 border-red-200 text-red-700
-                                    {% else %}bg-white border-gray-300 text-gray-700{% endif %}" 
-                                        data-attendance-id="{{ att.id }}"
-                                        {% if session.status != 'in_progress' %}disabled{% endif %}>
-                                    <option value="not_marked" {% if att.status == 'not_marked' %}selected{% endif %}>Chưa điểm danh</option>
-                                    <option value="present" {% if att.status == 'present' %}selected{% endif %} class="text-green-700 bg-white">Có mặt</option>
-                                    <option value="absent_with_permission" {% if att.status == 'absent_with_permission' %}selected{% endif %} class="text-amber-700 bg-white">Vắng có phép</option>
-                                    <option value="absent_without_permission" {% if att.status == 'absent_without_permission' %}selected{% endif %} class="text-red-700 bg-white">Vắng không phép</option>
-                                </select>
+                        <td class="px-2 py-1 text-gray-500 text-center">{{ forloop.counter }}</td>
+                        <td class="px-2 py-1 font-medium text-gray-800">{{ att.enrollment.student.full_name }} <a href="{% url 'students:detail' att.enrollment.student.id %}" hx-get="{% url 'students:detail' att.enrollment.student.id %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="text-xs text-gray-400 font-normal hover:text-primary-600 transition-colors">({{ att.enrollment.student.domain }})</a></td>
+                        <td class="px-2 py-1 text-gray-600">{{ att.enrollment.student.birth_year|default:"-" }}</td>
+                        <td class="px-2 py-1">
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                <label class="cursor-pointer flex-1 group">
+                                    <input type="radio" name="attendance_{{ att.id }}" value="present" class="peer sr-only attendance-radio" data-attendance-id="{{ att.id }}" data-session-status="{{ session.status }}" data-admin="{% if request.user.role == 'admin' %}true{% else %}false{% endif %}" {% if att.status == 'present' %}checked{% endif %} {% if session.status != 'in_progress' and request.user.role != 'admin' %}disabled{% endif %}>
+                                    <div class="text-center px-2 py-1.5 rounded border border-gray-200 text-xs sm:text-sm font-medium transition-colors
+                                                peer-disabled:opacity-50 peer-disabled:cursor-not-allowed
+                                                peer-checked:bg-green-100 peer-checked:text-green-800 peer-checked:border-green-300
+                                                group-hover:bg-green-50">
+                                        Có mặt
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer flex-1 group">
+                                    <input type="radio" name="attendance_{{ att.id }}" value="absent_with_permission" class="peer sr-only attendance-radio" data-attendance-id="{{ att.id }}" data-session-status="{{ session.status }}" data-admin="{% if request.user.role == 'admin' %}true{% else %}false{% endif %}" {% if att.status == 'absent_with_permission' %}checked{% endif %} {% if session.status != 'in_progress' and request.user.role != 'admin' %}disabled{% endif %}>
+                                    <div class="text-center px-2 py-1.5 rounded border border-gray-200 text-xs sm:text-sm font-medium transition-colors
+                                                peer-disabled:opacity-50 peer-disabled:cursor-not-allowed
+                                                peer-checked:bg-amber-100 peer-checked:text-amber-800 peer-checked:border-amber-300
+                                                group-hover:bg-amber-50">
+                                        Phép
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer flex-1 group">
+                                    <input type="radio" name="attendance_{{ att.id }}" value="absent_without_permission" class="peer sr-only attendance-radio" data-attendance-id="{{ att.id }}" data-session-status="{{ session.status }}" data-admin="{% if request.user.role == 'admin' %}true{% else %}false{% endif %}" {% if att.status == 'absent_without_permission' %}checked{% endif %} {% if session.status != 'in_progress' and request.user.role != 'admin' %}disabled{% endif %}>
+                                    <div class="text-center px-2 py-1.5 rounded border border-gray-200 text-xs sm:text-sm font-medium transition-colors
+                                                peer-disabled:opacity-50 peer-disabled:cursor-not-allowed
+                                                peer-checked:bg-red-100 peer-checked:text-red-800 peer-checked:border-red-300
+                                                group-hover:bg-red-50">
+                                        Không phép
+                                    </div>
+                                </label>
                             </div>
                         </td>
-                        <td class="px-4 py-1.5 text-sm text-gray-600">{{ att.notes|default:"-" }}</td>
+                        <td class="px-2 py-1 text-gray-600">{{ att.notes|default:"-" }}</td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -118,67 +176,106 @@
             </table>
         </div>
     </div>
+
+    <!-- Confirm Modal -->
+    <div x-show="confirmModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" x-cloak>
+        <div @click.away="confirmModalOpen = false" class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden transform transition-all"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+            <div class="p-6">
+                <div class="flex items-center justify-center w-12 h-12 mx-auto rounded-full mb-4"
+                     :class="confirmActionType === 'end' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'">
+                    <i class="fas text-xl" :class="confirmActionType === 'end' ? 'fa-exclamation-triangle' : 'fa-play'"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 text-center" x-text="confirmTitle"></h3>
+                <p class="text-gray-600 mt-2 text-center text-sm" x-text="confirmMessage"></p>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex justify-between gap-3 rounded-b-2xl border-t border-gray-100">
+                <button @click="confirmModalOpen = false" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium transition-colors hover:bg-gray-50 flex-1">Hủy</button>
+                <button @click="executeAction()" class="px-4 py-2 text-white rounded-lg font-medium transition-colors flex-1" 
+                        :class="confirmActionType === 'end' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'">
+                    Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Edit Reason Modal -->
+    <div x-show="editReasonModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" x-cloak>
+        <div @click.away="cancelAdminEdit()" class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden transform transition-all"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+            <div class="p-6">
+                <div class="flex items-center justify-center w-12 h-12 mx-auto rounded-full mb-4 bg-purple-100 text-purple-600">
+                    <i class="fas fa-pencil-alt text-xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 text-center">Ghi chú xác nhận sửa điểm danh</h3>
+                <p class="text-gray-600 mt-2 text-center text-sm mb-4">Lớp học này đã kết thúc. Là Admin, bạn bắt buộc phải ghi lại lý do khi thay đổi điểm danh để lưu vào lịch sử hệ thống.</p>
+                <textarea x-model="editReasonText" class="input-field w-full" rows="3" placeholder="Nhập lý do thay đổi... (Ví dụ: Phụ huynh xin phép bù, GV điểm danh sót...)"></textarea>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex justify-between gap-3 rounded-b-2xl border-t border-gray-100">
+                <button @click="cancelAdminEdit()" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium transition-colors hover:bg-gray-50 flex-1">Hủy</button>
+                <button @click="submitAdminEdit()" class="px-4 py-2 text-white rounded-lg font-medium transition-colors flex-1" 
+                        :class="editReasonText.trim() === '' ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'"
+                        :disabled="editReasonText.trim() === ''">
+                    Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
-function openSession() {
-    if (!confirm('Bắt đầu buổi học?')) return;
-    
-    fetch('{% url "attendance:open_session" session.id %}', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/json'
+    function triggerAdminEditModal(attendanceId, status, originalElement) {
+        // Find the alpine component instance
+        const el = document.querySelector('[x-data]');
+        if (el && el.__x && el.__x.getUnobservedData) {
+            let data = el.__x.getUnobservedData();
+            // Just dispatch an event that Alpine can listen to
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            location.reload();
-        } else {
-            alert(data.error || 'Có lỗi xảy ra');
-        }
-    });
-}
+        window.dispatchEvent(new CustomEvent('open-admin-edit', {
+            detail: {
+                attendanceId: attendanceId,
+                status: status,
+                elem: originalElement
+            }
+        }));
+    }
 
-function endSession() {
-    if (!confirm('Kết thúc buổi học? Những học sinh chưa điểm danh sẽ được đánh dấu là vắng không phép.')) return;
-    
-    fetch('{% url "attendance:end_session" session.id %}', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            location.reload();
-        } else {
-            alert(data.error || 'Có lỗi xảy ra');
-        }
-    });
-}
+document.querySelectorAll('.attendance-radio').forEach(radio => {
+    // Store original selected so we can revert if cancelled
+    if (radio.checked) radio.dataset.initChecked = "true";
 
-document.querySelectorAll('.attendance-select').forEach(select => {
-    select.addEventListener('change', function() {
+    radio.addEventListener('change', function(e) {
         const attendanceId = this.dataset.attendanceId;
         const status = this.value;
-        const selectElement = this;
+        const sessionStatus = this.dataset.sessionStatus;
+        const isAdmin = this.dataset.admin === 'true';
+        const radioElement = this;
         
-        // Remove existing color classes
-        selectElement.classList.remove('bg-green-50', 'border-green-200', 'text-green-700', 
-                                     'bg-amber-50', 'border-amber-200', 'text-amber-700', 
-                                     'bg-red-50', 'border-red-200', 'text-red-700', 
-                                     'bg-white', 'border-gray-300', 'text-gray-700');
-                                     
-        // Add loading state opacity
-        selectElement.style.opacity = '0.7';
-        
-        fetch(`/attendance/attendance/${attendanceId}/mark/`, {
+        // Find competing radios in the group to reset their initial state if needed later
+        document.getElementsByName(this.name).forEach(r => {
+            if(r !== radioElement) r.dataset.wasChecked = (r.dataset.initChecked === "true");
+        });
+
+        // 1. If Ended + Admin -> Show Modal Instead of direct fetch
+        if (sessionStatus === 'ended' && isAdmin) {
+            triggerAdminEditModal(attendanceId, status, radioElement);
+            return;
+        }
+
+        // 2. Normal flow (in_progress)
+        const row = radioElement.closest('tr');
+        row.style.opacity = '0.7';
+        fetch(`/attendance/${attendanceId}/mark/`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': '{{ csrf_token }}',
@@ -188,31 +285,135 @@ document.querySelectorAll('.attendance-select').forEach(select => {
         })
         .then(response => response.json())
         .then(data => {
-            selectElement.style.opacity = '1';
+            row.style.opacity = '1';
             if (data.status !== 'success') {
-                alert('Có lỗi xảy ra');
-                selectElement.value = 'not_marked';
-                selectElement.classList.add('bg-white', 'border-gray-300', 'text-gray-700');
+                alert(data.error || 'Có lỗi xảy ra');
+                revertRadioGroup(radioElement);
             } else {
-                // Apply new color classes based on status
-                if (status === 'present') {
-                    selectElement.classList.add('bg-green-50', 'border-green-200', 'text-green-700');
-                } else if (status === 'absent_with_permission') {
-                    selectElement.classList.add('bg-amber-50', 'border-amber-200', 'text-amber-700');
-                } else if (status === 'absent_without_permission') {
-                    selectElement.classList.add('bg-red-50', 'border-red-200', 'text-red-700');
-                } else {
-                    selectElement.classList.add('bg-white', 'border-gray-300', 'text-gray-700');
-                }
+                updateRadioGroupInit(radioElement);
             }
         })
         .catch(err => {
-            selectElement.style.opacity = '1';
+            row.style.opacity = '1';
             alert('Lỗi kết nối. Vui lòng thử lại.');
-            selectElement.value = 'not_marked';
-            selectElement.classList.add('bg-white', 'border-gray-300', 'text-gray-700');
+            revertRadioGroup(radioElement);
         });
     });
 });
+
+function revertRadioGroup(changedRadio) {
+    document.getElementsByName(changedRadio.name).forEach(r => {
+        r.checked = (r.dataset.initChecked === "true");
+    });
+}
+function updateRadioGroupInit(changedRadio) {
+    document.getElementsByName(changedRadio.name).forEach(r => {
+        r.dataset.initChecked = r.checked ? "true" : "false";
+    });
+}
+
+function sessionDiary() {
+    return {
+        confirmModalOpen: false,
+        confirmTitle: '',
+        confirmMessage: '',
+        confirmActionUrl: '',
+        confirmActionType: '', 
+        
+        // Admin Edit State
+        editReasonModalOpen: false,
+        editReasonText: '',
+        editTargetId: null,
+        editTargetStatus: '',
+        editOriginalElement: null,
+
+        init() {
+            window.addEventListener('open-admin-edit', (e) => {
+                this.editTargetId = e.detail.attendanceId;
+                this.editTargetStatus = e.detail.status;
+                this.editOriginalElement = e.detail.elem;
+                this.editReasonText = '';
+                this.editReasonModalOpen = true;
+            });
+        },
+
+        cancelAdminEdit() {
+            this.editReasonModalOpen = false;
+            if (this.editOriginalElement) {
+                // Call global fallback reverter
+                revertRadioGroup(this.editOriginalElement);
+            }
+        },
+
+        submitAdminEdit() {
+            if (this.editReasonText.trim() === '') return;
+            
+            this.editReasonModalOpen = false;
+            const row = this.editOriginalElement.closest('tr');
+            row.style.opacity = '0.7';
+            
+            const payload = new URLSearchParams();
+            payload.append('status', this.editTargetStatus);
+            payload.append('reason', this.editReasonText);
+            
+            fetch(`/attendance/${this.editTargetId}/mark/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: payload
+            })
+            .then(res => res.json())
+            .then(data => {
+                row.style.opacity = '1';
+                if (data.status === 'success') {
+                    updateRadioGroupInit(this.editOriginalElement);
+                    // Optional: show mini toast
+                } else {
+                    alert(data.error || 'Có lỗi xảy ra');
+                    revertRadioGroup(this.editOriginalElement);
+                }
+            })
+            .catch(err => {
+                row.style.opacity = '1';
+                alert('Lỗi mạng. Vui lòng thử lại.');
+                revertRadioGroup(this.editOriginalElement);
+            });
+        },
+        
+        showConfirm(type, url) {
+            this.confirmActionType = type;
+            this.confirmActionUrl = url;
+            if (type === 'open') {
+                this.confirmTitle = 'Nhận lớp';
+                this.confirmMessage = 'Bắt đầu tiết học? Hệ thống sẽ ghi nhận thời gian bắt đầu của bạn.';
+            } else {
+                this.confirmTitle = 'Kết thúc tiết học';
+                this.confirmMessage = 'Kết thúc tiết học? Những học sinh chưa điểm danh sẽ được đánh dấu là vắng không phép. Hành động này không thể hoàn tác.';
+            }
+            this.confirmModalOpen = true;
+        },
+        
+        executeAction() {
+            this.confirmModalOpen = false;
+            fetch(this.confirmActionUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    alert(data.error || 'Có lỗi xảy ra');
+                }
+            });
+        }
+    };
+}
 </script>
 {% endblock %}

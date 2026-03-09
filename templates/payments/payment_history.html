@@ -35,10 +35,10 @@
                     {% for history in histories %}
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-4 py-1.5 text-sm text-gray-600">{{ history.paid_at|date:"d/m/Y H:i" }}</td>
-                        <td class="px-4 py-1.5 font-bold text-gray-800">{{ history.tuition.enrollment.student.full_name }}</td>
+                        <td class="px-4 py-1.5 font-bold text-gray-800">{{ history.tuition.enrollment.student.full_name }} <a href="{% url 'students:detail' history.tuition.enrollment.student.id %}" hx-get="{% url 'students:detail' history.tuition.enrollment.student.id %}" hx-target="#main-content" hx-select="#main-content" hx-push-url="true" class="text-xs text-gray-400 font-normal hover:text-primary-600 transition-colors">({{ history.tuition.enrollment.student.domain }})</a></td>
                         <td class="px-4 py-1.5 text-sm text-gray-600">{{ history.tuition.enrollment.class_enrolled.class_name }}</td>
                         <td class="px-4 py-1.5 text-sm text-gray-600">{{ history.tuition.month|default:history.tuition.course_name }}</td>
-                        <td class="px-4 py-1.5 font-bold text-green-600">+{{ history.amount|floatformat:0 }} VNĐ</td>
+                        <td class="px-4 py-1.5 font-bold text-green-600">+{{ history.amount|floatformat:0 }} VND</td>
                         <td class="px-4 py-1.5">
                             {% if history.payment_method == 'cash' %}
                             <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Tiền mặt</span>
