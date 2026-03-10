@@ -1,0 +1,80 @@
+<div id="completed-enrollments-container" class="card flex flex-col min-h-[400px]">
+    <div class="px-5 py-3 border-b border-gray-100 bg-gray-50 shrink-0">
+        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+            <i class="fas fa-history mr-1.5 text-gray-400"></i>Tiết học đã tham gia
+        </h3>
+    </div>
+    <div class="overflow-x-auto grow">
+        <table class="w-full text-xs">
+            <thead class="bg-white border-b border-gray-100">
+                <tr class="text-gray-400 uppercase text-[10px] tracking-wider">
+                    <th class="px-5 py-2.5 text-left font-bold">Lớp học</th>
+                    <th class="px-5 py-2.5 text-left font-bold">Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50 uppercase">
+                {% for enrollment in completed_page_obj %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-3">
+                        <a href="{% url 'classes:detail' enrollment.class_enrolled.id %}" 
+                           hx-get="{% url 'classes:detail' enrollment.class_enrolled.id %}" hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true"
+                           class="font-bold text-gray-600 hover:text-primary-600 transition-colors">{{ enrollment.class_enrolled.class_name }}</a>
+                        <div class="text-[10px] text-gray-400 mt-0.5 font-medium">{{ enrollment.class_enrolled.subject.subject_name }}</div>
+                    </td>
+                    <td class="px-5 py-3">
+                        {% if enrollment.status == 'dropped' %}
+                            <span class="text-[9px] text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-100 font-bold uppercase">Đã nghỉ</span>
+                        {% else %}
+                            <span class="text-[9px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded border border-gray-200 font-bold uppercase">{{ enrollment.get_status_display }}</span>
+                        {% endif %}
+                        {% if enrollment.dropped_at %}
+                        <div class="text-[10px] text-gray-400 mt-1 font-mono">{{ enrollment.dropped_at|date:"d/m/Y" }}</div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="px-5 py-12 text-center text-gray-400 italic">
+                        Không có lịch sử
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if completed_page_obj.paginator.num_pages > 1 %}
+    <div class="px-5 py-3 border-t border-gray-50 flex items-center justify-between bg-white rounded-b-2xl">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+            Trang {{ completed_page_obj.number }} / {{ completed_page_obj.paginator.num_pages }}
+        </div>
+        <div class="flex gap-2">
+            {% if completed_page_obj.has_previous %}
+            <button hx-get="{% url 'students:detail' student.id %}?page_completed={{ completed_page_obj.previous_page_number }}"
+                    hx-target="#completed-enrollments-container"
+                    hx-swap="outerHTML"
+                    class="p-1 px-3 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded border border-gray-200 text-[10px] font-bold transition-colors uppercase">
+                Trước
+            </button>
+            {% else %}
+            <button disabled class="p-1 px-3 bg-gray-50 text-gray-300 rounded border border-gray-200 text-[10px] font-bold cursor-not-allowed uppercase">
+                Trước
+            </button>
+            {% endif %}
+            
+            {% if completed_page_obj.has_next %}
+            <button hx-get="{% url 'students:detail' student.id %}?page_completed={{ completed_page_obj.next_page_number }}"
+                    hx-target="#completed-enrollments-container"
+                    hx-swap="outerHTML"
+                    class="p-1 px-3 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded border border-gray-200 text-[10px] font-bold transition-colors uppercase">
+                Sau
+            </button>
+            {% else %}
+            <button disabled class="p-1 px-3 bg-gray-50 text-gray-300 rounded border border-gray-200 text-[10px] font-bold cursor-not-allowed uppercase">
+                Sau
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>

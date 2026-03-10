@@ -1,0 +1,93 @@
+<div id="active-enrollments-container" class="card flex flex-col min-h-[400px]">
+    <div class="px-5 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+        <h3 class="text-xs font-bold text-gray-600 uppercase tracking-wider">
+            <i class="fas fa-school mr-1.5 text-green-500"></i>Lớp đang học
+        </h3>
+        <button hx-get="{% url 'students:enroll_class' student.id %}"
+                hx-target="#history-modal-container"
+                class="btn-primary !px-2.5 !py-1 text-[11px] bg-green-600 hover:bg-green-700 text-white rounded transition-colors inline-flex items-center">
+            <i class="fas fa-plus mr-1"></i> Gắn lớp
+        </button>
+    </div>
+    <div class="overflow-x-auto grow">
+        <table class="w-full text-xs">
+            <thead class="bg-white border-b border-gray-100">
+                <tr class="text-gray-400 uppercase text-[10px] tracking-wider">
+                    <th class="px-5 py-2.5 text-left font-bold">Lớp học</th>
+                    <th class="px-5 py-2.5 text-left font-bold">Lịch học / Thời gian</th>
+                    <th class="px-5 py-2.5 text-right font-bold">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50 uppercase">
+                {% for enrollment in active_page_obj %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-3">
+                        <a href="{% url 'classes:detail' enrollment.class_enrolled.id %}" 
+                           hx-get="{% url 'classes:detail' enrollment.class_enrolled.id %}" hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true"
+                           class="font-bold text-gray-800 hover:text-primary-600 transition-colors">{{ enrollment.class_enrolled.class_name }}</a>
+                        <div class="text-[10px] text-gray-400 mt-0.5 font-medium">{{ enrollment.class_enrolled.subject.subject_name }} &bull; {{ enrollment.class_enrolled.teacher.get_full_name }}</div>
+                    </td>
+                    <td class="px-5 py-3">
+                        <div class="text-gray-700 bg-gray-100 rounded px-2 py-0.5 inline-block text-[10px] font-bold">
+                            {{ enrollment.class_enrolled.get_schedule_display }}
+                        </div>
+                        <div class="text-[10px] text-gray-400 mt-1 font-mono uppercase">{{ enrollment.class_enrolled.start_time|time:"H:i" }} - {{ enrollment.class_enrolled.end_time|time:"H:i" }}</div>
+                    </td>
+                    <td class="px-5 py-3 text-right">
+                        {% if user.role == 'admin' %}
+                        <button hx-get="{% url 'classes:drop_student' enrollment.id %}"
+                                hx-target="#history-modal-container"
+                                hx-swap="innerHTML"
+                                class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors"
+                                title="Gỡ khỏi lớp">
+                            <i class="fas fa-trash-alt text-sm"></i>
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="px-5 py-12 text-center text-gray-400 italic">
+                        Chưa tham gia lớp nào
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if active_page_obj.paginator.num_pages > 1 %}
+    <div class="px-5 py-3 border-t border-gray-50 flex items-center justify-between bg-white rounded-b-2xl">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+            Trang {{ active_page_obj.number }} / {{ active_page_obj.paginator.num_pages }}
+        </div>
+        <div class="flex gap-2">
+            {% if active_page_obj.has_previous %}
+            <button hx-get="{% url 'students:detail' student.id %}?page_active={{ active_page_obj.previous_page_number }}"
+                    hx-target="#active-enrollments-container"
+                    hx-swap="outerHTML"
+                    class="p-1 px-3 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded border border-gray-200 text-[10px] font-bold transition-colors uppercase">
+                Trước
+            </button>
+            {% else %}
+            <button disabled class="p-1 px-3 bg-gray-50 text-gray-300 rounded border border-gray-200 text-[10px] font-bold cursor-not-allowed uppercase">
+                Trước
+            </button>
+            {% endif %}
+            
+            {% if active_page_obj.has_next %}
+            <button hx-get="{% url 'students:detail' student.id %}?page_active={{ active_page_obj.next_page_number }}"
+                    hx-target="#active-enrollments-container"
+                    hx-swap="outerHTML"
+                    class="p-1 px-3 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded border border-gray-200 text-[10px] font-bold transition-colors uppercase">
+                Sau
+            </button>
+            {% else %}
+            <button disabled class="p-1 px-3 bg-gray-50 text-gray-300 rounded border border-gray-200 text-[10px] font-bold cursor-not-allowed uppercase">
+                Sau
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>

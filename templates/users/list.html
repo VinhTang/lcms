@@ -3,7 +3,7 @@
 {% block title %}Quản lý người dùng - LCMS{% endblock %}
 
 {% block content %}
-<div class="fade-in" x-data="tableController()">
+<div class="fade-in">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
@@ -22,36 +22,51 @@
     </div>
 
     <!-- Filters -->
-    <div class="card mb-5">
-        <div class="p-3">
-            <div class="flex flex-wrap gap-3 items-center">
-                <div class="flex-1 min-w-[200px]">
-                    <div class="relative">
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                        <input 
-                            type="text" 
-                            x-model="search" 
-                            class="input-field !pl-10" 
-                            placeholder="Tìm kiếm..."
-                        >
-                    </div>
-                </div>
-                <div class="w-48">
-                    <select x-model="filterStatus" class="input-field">
-                        <option value="">Tất cả vai trò</option>
-                        <option value="admin">Quản trị viên</option>
-                        <option value="teacher">Giáo viên</option>
-                        <option value="assistant">Trợ giảng</option>
-                        <option value="parent">Phụ huynh</option>
-                    </select>
-                </div>
-                <div class="flex gap-2">
-                    <button type="button" @click.prevent="search = ''; filterStatus = ''" class="btn-secondary h-[42px]">
-                        <i class="fas fa-redo mr-1"></i> Reset
-                    </button>
+    <div class="card p-3 mb-4">
+        <form method="get" action="{% url 'users:list' %}"
+              class="flex flex-wrap items-end gap-3"
+              id="users-filter-form"
+              hx-get="{% url 'users:list' %}"
+              hx-target="#main-content"
+              hx-select="#main-content"
+              hx-swap="outerHTML"
+              hx-push-url="true">
+            
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Tìm kiếm</label>
+                <div class="relative">
+                    <i class="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" name="search" class="input-field !pl-8 text-sm !py-1.5" 
+                           placeholder="Họ tên, email, domain..." value="{{ search }}">
                 </div>
             </div>
-        </div>
+
+            <div class="flex-1 min-w-[180px]">
+                <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Vai trò</label>
+                <div class="relative">
+                    <i class="fas fa-user-tag absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <select name="role" class="input-field !pl-8 text-sm !py-1.5">
+                        <option value="">Tất cả vai trò</option>
+                        <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Quản trị viên</option>
+                        <option value="teacher" {% if role_filter == 'teacher' %}selected{% endif %}>Giáo viên</option>
+                        <option value="assistant" {% if role_filter == 'assistant' %}selected{% endif %}>Trợ giảng</option>
+                        <option value="parent" {% if role_filter == 'parent' %}selected{% endif %}>Phụ huynh</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <a href="{% url 'users:list' %}"
+                   class="btn-secondary px-3 py-1.5 text-sm h-[34px] flex items-center justify-center"
+                   hx-get="{% url 'users:list' %}"
+                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true">
+                    <i class="fas fa-redo mr-1"></i> Làm mới
+                </a>
+                <button type="submit" class="btn-primary px-3 py-1.5 text-sm h-[34px]">
+                    <i class="fas fa-filter mr-1"></i> Lọc
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- Table -->
@@ -61,25 +76,17 @@
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">STT</th>
-                        <th @click="sortBy('name')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none group">Họ tên <i class="fas ml-1" :class="sortCol === 'name' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
-                        <th @click="sortBy('domain')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none group">Domain <i class="fas ml-1" :class="sortCol === 'domain' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
-                        <th @click="sortBy('email')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none group">Email <i class="fas ml-1" :class="sortCol === 'email' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
-                        <th @click="sortBy('role')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none group">Vai trò <i class="fas ml-1" :class="sortCol === 'role' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
-                        <th @click="sortBy('status')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none group">Trạng thái <i class="fas ml-1" :class="sortCol === 'status' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
+                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Họ tên</th>
+                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Domain</th>
+                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Vai trò</th>
+                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng thái</th>
                         <th class="px-3 py-1.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody x-ref="tbody" class="divide-y divide-gray-100">
                     {% for u in page_obj %}
-                    <tr x-show="filterRow($el)"
-                        data-search="{{ u.get_full_name|lower }} {{ u.domain|lower }} {{ u.email|lower }}"
-                        data-status="{{ u.role }}"
-                        data-sort-name="{{ u.get_full_name|lower }}"
-                        data-sort-domain="{{ u.domain|lower }}"
-                        data-sort-email="{{ u.email|lower }}"
-                        data-sort-role="{{ u.role }}"
-                        data-sort-status="{{ u.is_active|yesno:'1,0' }}"
-                        class="hover:bg-gray-50 transition-colors">
+                    <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
                         <td class="px-3 py-1 text-sm text-gray-500">{{ forloop.counter|add:page_obj.start_index|add:-1 }}</td>
                         <td class="px-3 py-1">
                             <a href="{% url 'users:detail' u.id %}" hx-get="{% url 'users:detail' u.id %}" hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true" class="flex items-center gap-2 group">

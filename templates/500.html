@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}500 - Lỗi hệ thống - LCMS{% endblock %}
+
+{% block content %}
+<div class="h-full flex flex-col items-center justify-center p-4 min-h-[70vh]">
+    <div class="relative mb-8">
+        <!-- Background Glow -->
+        <div class="absolute -inset-4 bg-amber-400/20 blur-3xl rounded-full scale-150"></div>
+        
+        <!-- Icon Container -->
+        <div class="relative w-32 h-32 md:w-48 md:h-48 bg-white/40 backdrop-blur-xl border border-white/40 rounded-[3rem] shadow-2xl flex items-center justify-center -rotate-3 transform hover:rotate-0 transition-transform duration-500">
+            <div class="text-center">
+                <span class="text-5xl md:text-7xl font-black text-amber-600 tracking-tighter">500</span>
+                <div class="w-full h-1.5 bg-amber-500/20 rounded-full mt-1 md:mt-2 scale-x-50"></div>
+            </div>
+        </div>
+        
+        <!-- Animated Gears -->
+        <div class="absolute -top-4 -left-4 w-12 h-12 bg-amber-500 rounded-2xl shadow-lg flex items-center justify-center animate-spin" style="animation-duration: 4s">
+            <i class="fas fa-cog text-white text-xl"></i>
+        </div>
+        <div class="absolute -bottom-2 -right-6 w-14 h-14 bg-gray-800 rounded-full shadow-lg flex items-center justify-center animate-pulse">
+            <i class="fas fa-tools text-white text-sm"></i>
+        </div>
+    </div>
+
+    <div class="text-center max-w-md relative">
+        <h1 class="text-3xl font-bold text-gray-800 mb-3 tracking-tight">Hệ thống đang bảo trì...</h1>
+        <p class="text-gray-500 mb-8 leading-relaxed">
+            Máy chủ của chúng tôi gặp một trục trặc bất ngờ. Đội ngũ kỹ thuật đã được thông báo và đang khắc phục sớm nhất có thể.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-3 items-center justify-center">
+            <button onclick="window.location.reload()" 
+                    class="btn-primary !bg-amber-600 hover:!bg-amber-700 flex items-center gap-3 px-8 py-3.5 !shadow-xl !shadow-amber-100">
+                <i class="fas fa-sync-alt"></i> Tải lại trang
+            </button>
+            <a href="{% url 'dashboard' %}" 
+               class="btn-secondary flex items-center gap-3 px-8 py-3.5 border border-gray-200 hover:bg-white transition-colors">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+        </div>
+        
+        <p class="mt-8 text-xs text-gray-400">
+            Nếu vấn đề tiếp tục xảy ra, vui lòng liên hệ Admin để được hỗ trợ.
+        </p>
+    </div>
+
+    <!-- Technical Decoration -->
+    <div class="mt-16 flex gap-4 md:gap-8 opacity-20 font-mono text-[10px]">
+        <div class="px-3 py-1 bg-gray-200 rounded-full">Error_Code: INTERNAL_SERVER_ERROR</div>
+        <div class="px-3 py-1 bg-gray-200 rounded-full">Timestamp: {% now "Y-m-d H:i:s" %}</div>
+        <div class="px-3 py-1 bg-gray-200 rounded-full">Status: 500</div>
+    </div>
+</div>
+{% endblock %}

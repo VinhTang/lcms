@@ -1,0 +1,92 @@
+<div id="tuitions-container" class="card flex flex-col min-h-[400px]">
+    <div class="px-5 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+            <i class="fas fa-money-bill-wave mr-1.5 text-blue-500"></i>Lịch sử học phí
+        </h3>
+    </div>
+    <div class="overflow-x-auto grow">
+        <table class="w-full text-xs">
+            <thead class="bg-white border-b border-gray-100">
+                <tr class="text-gray-400 uppercase text-[10px] tracking-wider">
+                    <th class="px-5 py-2.5 text-left font-bold">Kỳ / Lớp học</th>
+                    <th class="px-5 py-2.5 text-right font-bold">Trạng thái / Số tiền</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50 uppercase">
+                {% for tuition in tuition_page_obj %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-5 py-3">
+                        <div class="font-bold text-gray-700">
+                            {% if tuition.tuition_type == 'monthly' %}
+                                THÁNG {{ tuition.month|slice:"5:7" }}/{{ tuition.month|slice:"0:4" }}
+                            {% else %}
+                                {{ tuition.course_name }}
+                            {% endif %}
+                        </div>
+                        <div class="text-[10px] text-gray-400 mt-0.5 truncate max-w-[200px] font-medium" title="{{ tuition.enrollment.class_enrolled.class_name }}">
+                            {{ tuition.enrollment.class_enrolled.class_name }}
+                        </div>
+                    </td>
+                    <td class="px-5 py-3 text-right">
+                        <div class="font-bold text-gray-800">{{ tuition.amount|floatformat:0 }}đ</div>
+                        <div class="mt-1.5">
+                            {% if tuition.paid %}
+                                <span class="text-[9px] text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-200 inline-flex items-center gap-1 font-bold uppercase">
+                                    <i class="fas fa-check"></i> Đã thu
+                                </span>
+                            {% else %}
+                                <button hx-get="{% url 'payments:tuition_mark_paid_modal' tuition.id %}"
+                                        hx-target="#history-modal-container"
+                                        class="text-[9px] text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200 hover:bg-red-100 transition-colors inline-flex items-center gap-1 group font-bold uppercase">
+                                    <i class="fas fa-money-bill-wave group-hover:scale-110 transition-transform"></i> Chưa thu
+                                </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="px-5 py-12 text-center text-gray-400 italic">
+                        Không có dữ liệu học phí
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if tuition_page_obj.paginator.num_pages > 1 %}
+    <div class="px-5 py-3 border-t border-gray-50 flex items-center justify-between bg-white rounded-b-2xl">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+            Trang {{ tuition_page_obj.number }} / {{ tuition_page_obj.paginator.num_pages }}
+        </div>
+        <div class="flex gap-2">
+            {% if tuition_page_obj.has_previous %}
+            <button hx-get="{% url 'students:detail' student.id %}?page_tuition={{ tuition_page_obj.previous_page_number }}"
+                    hx-target="#tuitions-container"
+                    hx-swap="outerHTML"
+                    class="p-1 px-3 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded border border-gray-200 text-[10px] font-bold transition-colors uppercase">
+                Trước
+            </button>
+            {% else %}
+            <button disabled class="p-1 px-3 bg-gray-50 text-gray-300 rounded border border-gray-200 text-[10px] font-bold cursor-not-allowed uppercase">
+                Trước
+            </button>
+            {% endif %}
+            
+            {% if tuition_page_obj.has_next %}
+            <button hx-get="{% url 'students:detail' student.id %}?page_tuition={{ tuition_page_obj.next_page_number }}"
+                    hx-target="#tuitions-container"
+                    hx-swap="outerHTML"
+                    class="p-1 px-3 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded border border-gray-200 text-[10px] font-bold transition-colors uppercase">
+                Sau
+            </button>
+            {% else %}
+            <button disabled class="p-1 px-3 bg-gray-50 text-gray-300 rounded border border-gray-200 text-[10px] font-bold cursor-not-allowed uppercase">
+                Sau
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>

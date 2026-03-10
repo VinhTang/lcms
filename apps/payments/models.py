@@ -31,7 +31,7 @@ class Tuition(models.Model):
 
     class Meta:
         db_table = "tuition"
-        unique_together = [["enrollment", "month"], ["enrollment", "course_name"]]
+        unique_together = [["enrollment", "month"]]
         ordering = ["-created_at"]
 
     def __str__(self):

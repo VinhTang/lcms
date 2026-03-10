@@ -56,6 +56,23 @@ class Class(models.Model):
     ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
+    def save(self, *args, **kwargs):
+        from django.utils import timezone
+        from django.core.exceptions import ValidationError
+        
+        # Strict rule: Cannot activate class before start_date
+        if self.status == 'active' and self.start_date:
+            if self.start_date > timezone.now().date():
+                raise ValidationError(f'Lớp {self.class_name} chưa đến ngày khai giảng ({self.start_date}).')
+        
+        if self.status == 'active' and not self.start_date:
+            # If no start date, we shouldn't really be 'active' unless it's a legacy case, 
+            # but user specifically said "Lớp chưa khai giảng... không được mở"
+            # So we might want a start date to be required for active status.
+            pass
+
+        super().save(*args, **kwargs)
+
     @property
     def get_schedule_display(self):
         if not self.schedule_days:

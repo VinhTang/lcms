@@ -55,13 +55,14 @@ def tuition_list(request):
 
     # 2. Get data for dropdowns
     classes = Class.objects.filter(is_active=True).order_by('class_code')
+    classes_options = [{'id': c.id, 'label': f"{c.class_code} - {c.class_name}"} for c in classes]
     
     # 3. Pagination
-    per_page = request.GET.get('per_page', 30)
+    per_page = request.GET.get('per_page', 20)
     try:
         per_page = int(per_page)
     except ValueError:
-        per_page = 30
+        per_page = 20
     
     paginator = Paginator(tuitions, per_page)
     page_number = request.GET.get('page')
@@ -72,16 +73,21 @@ def tuition_list(request):
     if 'page' in query_params:
         del query_params['page']
     extra_query = f"&{query_params.urlencode()}" if query_params else ""
+
+    selected_class_obj = None
+    if class_id:
+        selected_class_obj = Class.objects.filter(id=class_id).first()
     
     return render(request, 'payments/tuition_list.html', {
         'page_obj': page_obj,
         'search': search,
         'status_filter': status_filter,
         'selected_class': int(class_id) if class_id else '',
+        'selected_class_label': f"{selected_class_obj.class_code} - {selected_class_obj.class_name}" if selected_class_obj else "Tất cả lớp",
         'date_from': date_from,
         'date_to': date_to,
         'month_filter': month_filter,
-        'classes': classes,
+        'classes': classes_options,
         'per_page': per_page,
         'extra_query': extra_query,
     })

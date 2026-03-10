@@ -3,143 +3,44 @@
 {% block title %}Danh sách lớp học - LCMS{% endblock %}
 
 {% block content %}
-<div class="fade-in" x-data="tableController()">
+<div class="fade-in">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">
                 <i class="fas fa-school text-amber-500 mr-2"></i>Quản lý lớp học
             </h1>
-            <p class="text-gray-500 mt-1">Quản lý các lớp học trong hệ thống</p>
         </div>
         <a href="{% url 'classes:create' %}" 
            hx-get="{% url 'classes:create' %}"
-           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-           hx-push-url="true"
-           class="btn-primary inline-flex items-center gap-2">
+           hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true"
+           class="btn-primary !px-3 !py-1 text-sm inline-flex items-center gap-2">
             <i class="fas fa-plus"></i> Thêm lớp học
         </a>
     </div>
 
-    <!-- Filters -->
-    <div class="card mb-5">
-        <div class="p-3">
-            <div class="flex flex-wrap gap-3 items-center">
-                <div class="flex-1 min-w-[200px]">
-                    <div class="relative">
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                        <input 
-                            type="text" 
-                            x-model="search" 
-                            class="input-field !pl-10" 
-                            placeholder="Tìm kiếm..."
-                        >
-                    </div>
-                </div>
-                <div class="flex gap-2">
-                    <button type="button" @click.prevent="search = ''" class="btn-secondary h-[42px]">
-                        <i class="fas fa-redo mr-1"></i> Reset
-                    </button>
-                </div>
+    <div class="space-y-8">
+        <!-- Section 1: Active & Pending -->
+        <div class="space-y-4">
+            <div class="flex items-center justify-between px-1">
+                <h2 class="text-base font-bold text-gray-700 uppercase tracking-tight flex items-center gap-2">
+                    <span class="w-1.5 h-5 bg-green-500 rounded-full"></span>
+                    Đang hoạt động & Chờ mở
+                </h2>
             </div>
+            {% include 'classes/partials/active_classes_table.html' %}
+        </div>
+
+        <!-- Section 2: Completed -->
+        <div class="space-y-4">
+            <div class="flex items-center justify-between px-1 border-t border-gray-100 pt-8">
+                <h2 class="text-base font-bold text-gray-500 uppercase tracking-tight flex items-center gap-2">
+                    <span class="w-1.5 h-5 bg-gray-400 rounded-full"></span>
+                    Lớp đã hoàn thành
+                </h2>
+            </div>
+            {% include 'classes/partials/completed_classes_table.html' %}
         </div>
     </div>
-
-    <!-- Table -->
-    <div class="card overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase">STT</th>
-                        <th @click="sortBy('code')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none group">Mã lớp <i class="fas ml-1" :class="sortCol === 'code' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
-                        <th @click="sortBy('name')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none group">Tên lớp <i class="fas ml-1" :class="sortCol === 'name' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
-                        <th @click="sortBy('subject')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none group">Môn học <i class="fas ml-1" :class="sortCol === 'subject' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
-                        <th @click="sortBy('teacher')" class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none group">Giáo viên <i class="fas ml-1" :class="sortCol === 'teacher' ? (sortAsc ? 'fa-sort-up text-primary-600' : 'fa-sort-down text-primary-600') : 'fa-sort text-gray-300 group-hover:text-gray-500 transition-colors'"></i></th>
-                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase">Thời gian</th>
-                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase">Phòng</th>
-                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
-                        <th class="px-3 py-1.5 text-left text-xs font-semibold text-gray-500 uppercase">Sỉ số</th>
-                        <th class="px-3 py-1.5 text-right text-xs font-semibold text-gray-500 uppercase">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody x-ref="tbody" class="divide-y divide-gray-100">
-                    {% for class_obj in page_obj %}
-                    <tr x-show="filterRow($el)"
-                        data-search="{{ class_obj.class_code|lower }} {{ class_obj.class_name|lower }} {{ class_obj.subject.subject_name|lower }} {{ class_obj.teacher.get_full_name|lower }}"
-                        data-sort-code="{{ class_obj.class_code|lower }}"
-                        data-sort-name="{{ class_obj.class_name|lower }}"
-                        data-sort-subject="{{ class_obj.subject.subject_name|lower }}"
-                        data-sort-teacher="{{ class_obj.teacher.get_full_name|lower }}"
-                        class="hover:bg-gray-50 transition-colors">
-                        <td class="px-3 py-1 text-sm text-gray-500">{{ forloop.counter|add:page_obj.start_index|add:-1 }}</td>
-                        <td class="px-3 py-1">
-                            <span class="px-2 py-0.5 bg-primary-600 text-white rounded-lg text-xs font-medium">{{ class_obj.class_code }}</span>
-                        </td>
-                        <td class="px-3 py-1 font-medium text-gray-800">{{ class_obj.class_name }}</td>
-                        <td class="px-3 py-1 text-sm text-gray-600">{{ class_obj.subject.subject_name }}</td>
-                        <td class="px-3 py-1 text-sm text-gray-600">{{ class_obj.teacher.get_full_name }}</td>
-                        <td class="px-3 py-1 text-sm text-gray-600">
-                            <div class="font-medium text-gray-800">{% if class_obj.start_time %}{{ class_obj.start_time|time:"H:i" }} - {{ class_obj.end_time|time:"H:i" }}{% else %}-{% endif %} {% if class_obj.get_schedule_display %}<span class="text-xs font-normal">({{ class_obj.get_schedule_display }})</span>{% endif %}</div>
-                            <div class="text-[11px] text-gray-400">{% if class_obj.start_date %}{{ class_obj.start_date|date:"d/m/Y" }} - {{ class_obj.end_date|default_if_none:"Không thời hạn"|date:"d/m/Y" }}{% endif %}</div>
-                        </td>
-                        <td class="px-3 py-1 text-sm text-gray-600">{{ class_obj.room|default:"-" }}</td>
-                        <td class="px-3 py-1 text-sm">
-                            {% if class_obj.status == 'pending' %}
-                            <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 text-gray-600">Chưa bắt đầu</span>
-                            {% elif class_obj.status == 'active' %}
-                            <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-green-100 text-green-700">Khai giảng</span>
-                            {% elif class_obj.status == 'completed' %}
-                            <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-blue-100 text-blue-700">Kết thúc</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-3 py-1 text-sm">
-                            <span class="font-medium">{{ class_obj.active_students_count }}</span>/{{ class_obj.max_students }}
-                        </td>
-                        <td class="px-3 py-1 text-right">
-                            <div class="flex items-center justify-end gap-1">
-                                <a href="{% url 'classes:detail' class_obj.id %}" 
-                                   hx-get="{% url 'classes:detail' class_obj.id %}"
-                                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                                   hx-push-url="true"
-                                   class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Xem">
-                                    <i class="fas fa-eye text-sm"></i>
-                                </a>
-                                <a href="{% url 'classes:edit' class_obj.id %}" 
-                                   hx-get="{% url 'classes:edit' class_obj.id %}"
-                                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                                   hx-push-url="true"
-                                   class="p-1.5 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Sửa">
-                                    <i class="fas fa-edit text-sm"></i>
-                                </a>
-                                <button hx-get="{% url 'users:object_history' 'classes' 'class' class_obj.id %}" 
-                                        hx-target="#history-modal-container"
-                                        class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Lịch sử">
-                                    <i class="fas fa-history text-sm"></i>
-                                </button>
-                                <a href="{% url 'classes:delete' class_obj.id %}" 
-                                   hx-get="{% url 'classes:delete' class_obj.id %}"
-                                   hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
-                                   hx-push-url="true"
-                                   class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Xóa">
-                                    <i class="fas fa-trash text-sm"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="9" class="px-6 py-12 text-center">
-                            <div class="text-gray-400">
-                                <i class="fas fa-school text-5xl mb-4 opacity-50"></i>
-                                <h3 class="text-lg font-medium text-gray-600">Chưa có lớp học nào</h3>
-                                <p class="text-sm mt-1">Tạo lớp học mới để bắt đầu</p>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% include 'partials/pagination.html' %}
 </div>
 {% endblock %}

@@ -1,0 +1,93 @@
+<div x-data="{
+    open: false,
+    search: '',
+    selectedId: '{{ selected_id|default:'' }}',
+    selectedLabel: '{{ selected_label|default:placeholder }}',
+    options: [
+        {% for opt in options %}
+        { id: '{{ opt.id|escapejs }}', label: '{{ opt.label|escapejs }}' },
+        {% endfor %}
+    ],
+    get filteredOptions() {
+        if (!this.search) return this.options;
+        return this.options.filter(i => i.label.toLowerCase().includes(this.search.toLowerCase()));
+    },
+    select(id, label) {
+        this.selectedId = id;
+        this.selectedLabel = label;
+        this.open = false;
+        this.search = '';
+        this.$refs.hiddenInput.value = id;
+        this.$refs.hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+}" class="relative w-full searchable-select-container">
+    <input type="hidden" name="{{ name }}" x-ref="hiddenInput" :value="selectedId">
+    
+    <div class="relative">
+        {% if icon %}
+        <i class="{{ icon }} absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm z-10 pointer-events-none"></i>
+        {% endif %}
+        <button type="button" @click="open = !open" @click.away="open = false"
+                class="input-field !pl-8 text-sm !py-1.5 w-full text-left flex items-center justify-between transition-all bg-white border border-gray-300 rounded-lg shadow-sm hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                :class="open ? 'ring-2 ring-primary-500/20 border-primary-500' : ''">
+            <span class="truncate pr-4" x-text="selectedLabel"></span>
+            <i class="fas fa-chevron-down text-[10px] text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+        </button>
+    </div>
+
+    <div x-show="open" x-cloak
+         x-transition:enter="transition ease-out duration-100"
+         x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         class="absolute z-[100] mt-1 w-full bg-white border border-gray-200 shadow-xl rounded-xl overflow-hidden min-w-[260px] top-full left-0">
+        
+        <!-- Search Box -->
+        <div class="p-2.5 border-b border-gray-100 bg-gray-50/50">
+            <div class="relative">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[11px]"></i>
+                <input type="text" x-model="search" @click.stop x-ref="searchInput"
+                       @keydown.escape="open = false"
+                       class="w-full pl-8 pr-3 py-2 text-xs bg-white border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 outline-none transition-all placeholder:text-gray-400 shadow-sm"
+                       placeholder="Nhập tên để tìm nhanh...">
+            </div>
+        </div>
+
+        <div class="max-h-64 overflow-y-auto py-1.5 custom-scrollbar">
+            <!-- All/Reset Option -->
+            <button type="button" @click="select('', '{{ placeholder }}')"
+                    class="w-full text-left px-4 py-2 text-xs hover:bg-gray-50 flex items-center justify-between group transition-colors"
+                    :class="selectedId === '' ? 'bg-primary-50 text-primary-700 font-bold' : 'text-gray-600'">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-layer-group text-[10px] opacity-40"></i>
+                    <span>{{ placeholder }}</span>
+                </div>
+                <i class="fas fa-check text-[10px] text-primary-500" x-show="selectedId === ''"></i>
+            </button>
+            
+            <div class="px-4 py-2 mt-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-white/95 backdrop-blur-sm sticky top-0 z-10 border-b border-gray-50 mb-1 flex items-center gap-2">
+                <i class="fas fa-list-ul"></i>
+                <span>Kết quả tìm kiếm</span>
+            </div>
+
+            <template x-for="opt in filteredOptions" :key="opt.id">
+                <button type="button" @click="select(opt.id, opt.label)"
+                        class="w-full text-left px-4 py-2.5 text-xs hover:bg-gray-50 flex items-center justify-between group transition-colors border-l-2 border-transparent"
+                        :class="selectedId == opt.id ? 'bg-primary-50 text-primary-700 font-bold border-l-primary-500' : 'text-gray-600'">
+                    <span x-text="opt.label" class="truncate"></span>
+                    <i class="fas fa-check text-[10px] text-primary-500" x-show="selectedId == opt.id"></i>
+                </button>
+            </template>
+
+            <!-- Empty State -->
+            <template x-if="filteredOptions.length === 0">
+                <div class="px-4 py-10 text-center">
+                    <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-search text-gray-200 text-xl"></i>
+                    </div>
+                    <p class="text-xs text-gray-400 italic">Không tìm thấy "{{ search }}"</p>
+                    <button type="button" @click="search = ''" class="mt-2 text-[10px] text-primary-600 hover:underline">Xoá tìm kiếm</button>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>

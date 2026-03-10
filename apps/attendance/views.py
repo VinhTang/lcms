@@ -21,11 +21,11 @@ def session_list(request, class_id=None, class_code=None):
         
     sessions = class_obj.sessions.all().order_by('-scheduled_date', '-scheduled_start')
     
-    per_page = request.GET.get('per_page', 30)
+    per_page = request.GET.get('per_page', 20)
     try:
         per_page = int(per_page)
     except ValueError:
-        per_page = 30
+        per_page = 20
     
     paginator = Paginator(sessions, per_page)
     page_number = request.GET.get('page')
@@ -50,6 +50,10 @@ def session_create(request, class_id=None, class_code=None):
     
     if class_obj.status == 'completed':
         messages.error(request, f'Lớp {class_obj.class_name} đã kết thúc, không thể tạo thêm tiết học.')
+        return redirect('attendance:session_list', class_id=class_obj.id)
+    
+    if class_obj.status == 'pending':
+        messages.error(request, f'Lớp {class_obj.class_name} chưa khai giảng, không thể tạo tiết học.')
         return redirect('attendance:session_list', class_id=class_obj.id)
     
     if request.user.role not in ['admin', 'teacher', 'assistant']:
@@ -123,6 +127,9 @@ def open_session(request, session_id):
         
     if session.class_enrolled.status == 'completed':
         return JsonResponse({'error': 'Lớp học đã kết thúc, không thể nhận lớp (mở tiết)'}, status=400)
+    
+    if session.class_enrolled.status == 'pending':
+        return JsonResponse({'error': 'Lớp học chưa đến ngày khai giảng, không thể mở tiết học'}, status=400)
         
     now = timezone.now()
     scheduled_datetime = timezone.make_aware(datetime.combine(session.scheduled_date, session.scheduled_start))
@@ -269,25 +276,37 @@ def session_statistics(request):
         
     # Aggregate Stats
     total_sessions = qs.count()
+    ended_sessions = qs.count()  # This should be filtered
     ended_sessions = qs.filter(status='ended').count()
     in_progress_sessions = qs.filter(status='in_progress').count()
     not_started_sessions = qs.filter(status='not_started').count()
+
+    selected_teacher_obj = None
+    if teacher_id:
+        selected_teacher_obj = User.objects.filter(id=teacher_id).first()
+    
+    selected_class_obj = None
+    if class_id:
+        selected_class_obj = Class.objects.filter(id=class_id).first()
     
     # Sort for display
     sessions = qs.order_by('-scheduled_date', '-scheduled_start')
     
-    per_page = request.GET.get('per_page', 50)
+    per_page = request.GET.get('per_page', 20)
     try:
         per_page = int(per_page)
     except ValueError:
-        per_page = 50
+        per_page = 20
         
     paginator = Paginator(sessions, per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
     teachers = User.objects.filter(role__in=['teacher', 'assistant'], is_active=True)
+    teachers_options = [{'id': t.id, 'label': t.get_full_name() or t.username} for t in teachers]
+    
     classes = Class.objects.all()
+    classes_options = [{'id': c.id, 'label': f"{c.class_code} - {c.class_name}"} for c in classes]
     
     extra_query = ''
     if date_from: extra_query += f'&date_from={date_from}'
@@ -302,12 +321,14 @@ def session_statistics(request):
         'ended_sessions': ended_sessions,
         'in_progress_sessions': in_progress_sessions,
         'not_started_sessions': not_started_sessions,
-        'teachers': teachers,
-        'classes': classes,
+        'teachers': teachers_options,
+        'classes': classes_options,
         'date_from': date_from,
         'date_to': date_to,
         'selected_teacher': int(teacher_id) if teacher_id else '',
+        'selected_teacher_label': selected_teacher_obj.get_full_name() or selected_teacher_obj.username if selected_teacher_obj else "Tất cả giáo viên",
         'selected_class': int(class_id) if class_id else '',
+        'selected_class_label': f"{selected_class_obj.class_code} - {selected_class_obj.class_name}" if selected_class_obj else "Tất cả lớp",
         'extra_query': extra_query,
         'per_page': per_page
     }

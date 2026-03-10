@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db import models
-from .models import Class, Subject
+from django.db.models import Q
+from .models import Class, Subject, Enrollment
 from payments.models import Tuition
+from django.core.exceptions import ValidationError
 
 
 @login_required
@@ -13,37 +15,58 @@ def class_list(request):
         messages.error(request, 'Bạn không có quyền truy cập trang này.')
         return redirect('dashboard')
     
-    classes = Class.objects.all().select_related('subject', 'teacher')
+    # --- Section 1: Active & Pending Classes ---
+    active_base = Class.objects.filter(is_active=True).exclude(status='completed').select_related('subject', 'teacher')
     
-    search = request.GET.get('search', '')
-    if search:
-        classes = classes.filter(
-            models.Q(class_name__icontains=search) |
-            models.Q(class_code__icontains=search) |
-            models.Q(teacher__first_name__icontains=search) |
-            models.Q(teacher__last_name__icontains=search)
+    active_search = request.GET.get('active_search', '')
+    if active_search:
+        active_base = active_base.filter(
+            models.Q(class_name__icontains=active_search) |
+            models.Q(class_code__icontains=active_search) |
+            models.Q(teacher__first_name__icontains=active_search) |
+            models.Q(teacher__last_name__icontains=active_search)
         )
     
-    per_page = request.GET.get('per_page', 30)
-    try:
-        per_page = int(per_page)
-    except ValueError:
-        per_page = 30
+    active_status = request.GET.get('active_status', '')
+    if active_status:
+        active_base = active_base.filter(status=active_status)
+    
+    active_paginator = Paginator(active_base, 20)
+    active_page_num = request.GET.get('active_page')
+    active_page_obj = active_paginator.get_page(active_page_num)
+    
+    # --- Section 2: Completed Classes ---
+    completed_base = Class.objects.filter(is_active=True, status='completed').select_related('subject', 'teacher')
+    
+    completed_search = request.GET.get('completed_search', '')
+    if completed_search:
+        completed_base = completed_base.filter(
+            models.Q(class_name__icontains=completed_search) |
+            models.Q(class_code__icontains=completed_search) |
+            models.Q(teacher__first_name__icontains=completed_search) |
+            models.Q(teacher__last_name__icontains=completed_search)
+        )
+    
+    completed_paginator = Paginator(completed_base, 20)
+    completed_page_num = request.GET.get('completed_page')
+    completed_page_obj = completed_paginator.get_page(completed_page_num)
+    
+    context = {
+        'active_page_obj': active_page_obj,
+        'active_search': active_search,
+        'active_status': active_status,
         
-    paginator = Paginator(classes, per_page)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+        'completed_page_obj': completed_page_obj,
+        'completed_search': completed_search,
+    }
     
-    extra_query = ''
-    if search: extra_query += f'&search={search}'
-    extra_query += f'&per_page={per_page}'
+    # HTMX Partial Handling
+    if request.headers.get('HX-Target') == 'active-classes-container':
+        return render(request, 'classes/partials/active_classes_table.html', context)
+    if request.headers.get('HX-Target') == 'completed-classes-container':
+        return render(request, 'classes/partials/completed_classes_table.html', context)
     
-    return render(request, 'classes/list.html', {
-        'page_obj': page_obj,
-        'search': search,
-        'per_page': per_page,
-        'extra_query': extra_query,
-    })
+    return render(request, 'classes/list.html', context)
 
 
 @login_required
@@ -127,15 +150,24 @@ def class_create(request):
 def class_detail(request, class_id):
     class_obj = get_object_or_404(Class, id=class_id)
     # Filter for active enrollments AND active students
-    active_enrollments = class_obj.enrollments.filter(
+    active_qs = class_obj.enrollments.filter(
         status='active', 
         student__status='active'
-    ).select_related('student')
+    ).select_related('student').order_by('student__full_name')
     
-    return render(request, 'classes/detail.html', {
+    paginator = Paginator(active_qs, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
         'class_obj': class_obj,
-        'active_enrollments': active_enrollments
-    })
+        'page_obj': page_obj
+    }
+    
+    if request.headers.get('HX-Target') == 'class-enrollments-container':
+        return render(request, 'classes/partials/class_enrollments_table.html', context)
+        
+    return render(request, 'classes/detail.html', context)
 
 
 @login_required
@@ -145,6 +177,10 @@ def class_edit(request, class_id):
         return redirect('dashboard')
     
     class_obj = get_object_or_404(Class, id=class_id)
+    
+    if class_obj.status == 'completed':
+        messages.error(request, f'Lớp {class_obj.class_name} đã kết thúc, không thể chỉnh sửa.')
+        return redirect('classes:list')
     
     if request.method == 'POST':
         class_obj.class_name = request.POST.get('class_name', '').strip()
@@ -183,7 +219,11 @@ def class_edit(request, class_id):
         tuition_fee_raw = request.POST.get('tuition_fee', '').strip()
         class_obj.tuition_fee = int(tuition_fee_raw) if tuition_fee_raw else None
         
-        class_obj.save()
+        try:
+            class_obj.save()
+        except ValidationError as e:
+            messages.error(request, e.message if hasattr(e, 'message') else str(e))
+            return redirect('classes:edit', class_id=class_id)
         
         messages.success(request, f'Đã cập nhật lớp {class_obj.class_name}.')
         return redirect('classes:list')
@@ -207,10 +247,23 @@ def class_delete(request, class_id):
     
     class_obj = get_object_or_404(Class, id=class_id)
     
+    if class_obj.status == 'completed':
+        messages.error(request, f'Lớp {class_obj.class_name} đã kết thúc, không thể xóa.')
+        return redirect('classes:list')
+    
+    # Handle custom modal request (GET + HTMX)
+    if request.method == 'GET' and request.headers.get('HX-Request'):
+        return render(request, 'classes/partials/delete_modal.html', {'class_obj': class_obj})
+    
     if request.method == 'POST':
         class_name = class_obj.class_name
-        class_obj.soft_delete()
-        messages.success(request, f'Đã xóa/ngừng hoạt động lớp {class_name}.')
+        class_obj.delete()
+        
+        if request.headers.get('HX-Request') and not request.POST.get('from_modal'):
+            # This handles the case if triggered from table but somehow skips modal (unlikely now)
+            return HttpResponse("")
+            
+        messages.success(request, f'Đã xóa hoàn toàn lớp {class_name} và các dữ liệu liên quan.')
         return redirect('classes:list')
     
     return render(request, 'classes/confirm_delete.html', {'class_obj': class_obj})
@@ -302,8 +355,8 @@ def class_enroll_students(request, class_id):
                 defaults={'status': 'active', 'dropped_at': None}
             )
             
-            # Auto generate monthly tuition (even if class has no fee or 0 fee)
-            if created:
+            # Chỉ tạo học phí nếu lớp đang KHAI GIẢNG (status='active'), không tạo cho lớp chưa mở
+            if created and class_obj.status == 'active':
                 from django.utils import timezone
                 import datetime
                 import calendar
@@ -311,7 +364,7 @@ def class_enroll_students(request, class_id):
                 current_date = timezone.localtime(timezone.now()).date()
                 current_month_str = current_date.strftime('%Y-%m')
                 
-                # Default amount to 0 if None
+                # Calculate tuition details
                 tuition_amount = class_obj.tuition_fee if class_obj.tuition_fee is not None else 0
                 
                 if class_obj.end_date and class_obj.end_date.strftime('%Y-%m') == current_month_str:
@@ -320,6 +373,7 @@ def class_enroll_students(request, class_id):
                     _, last_day = calendar.monthrange(current_date.year, current_date.month)
                     due_date = current_date.replace(day=last_day)
                 
+                # Auto-create tuition record for the current month
                 Tuition.objects.get_or_create(
                     enrollment=enrollment,
                     tuition_type='monthly',
@@ -351,3 +405,51 @@ def class_enroll_students(request, class_id):
         'class_obj': class_obj,
         'available_students': available_students
     })
+
+
+@login_required
+def drop_student(request, enrollment_id):
+    if request.user.role != 'admin':
+        return JsonResponse({'error': 'Không có quyền'}, status=403)
+    
+    enrollment = get_object_or_404(Enrollment, id=enrollment_id)
+    
+    if request.method == 'GET' and request.headers.get('HX-Request'):
+        return render(request, 'classes/partials/confirm_drop_modal.html', {'enrollment': enrollment})
+        
+    if request.method == 'POST':
+        student_name = enrollment.student.full_name
+        class_name = enrollment.class_enrolled.class_name
+        
+        # 1. Update Enrollment Status
+        from django.utils import timezone
+        enrollment.status = 'dropped'
+        enrollment.dropped_at = timezone.now()
+        enrollment.save()
+        
+        # 2. Cleanup Tuition (Only current month if UNPAID)
+        from payments.models import Tuition
+        current_month = timezone.now().strftime('%Y-%m')
+        
+        Tuition.objects.filter(
+            enrollment=enrollment,
+            month=current_month,
+            paid=False
+        ).delete()
+        
+        messages.success(request, f'Đã gỡ học sinh {student_name} khỏi lớp {class_name}.')
+        
+        # Handle HTMX redirect
+        if request.headers.get('HX-Request'):
+            referer = request.POST.get('next_url') or request.META.get('HTTP_REFERER', '/')
+            response = JsonResponse({'status': 'success'})
+            response['HX-Redirect'] = referer
+            return response
+            
+        next_url = request.POST.get('next_url')
+        if next_url:
+            return redirect(next_url)
+            
+        return redirect('classes:detail', class_id=enrollment.class_enrolled.id)
+
+    return redirect('classes:detail', class_id=enrollment.class_enrolled.id)

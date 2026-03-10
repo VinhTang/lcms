@@ -1,0 +1,111 @@
+<div id="class-enrollments-container" class="card overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
+        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+            <i class="fas fa-users mr-2 text-primary-500"></i>Danh sách học sinh
+        </h3>
+        <div class="flex items-center gap-2">
+            {% if user.role == 'admin' and class_obj.status != 'completed' %}
+            <button hx-get="{% url 'classes:enroll_students' class_obj.id %}"
+                    hx-target="#history-modal-container"
+                    class="btn-primary px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors inline-flex items-center">
+                <i class="fas fa-user-plus mr-1"></i> Thêm học sinh
+            </button>
+            {% endif %}
+            <a href="{% url 'attendance:session_list' class_obj.id %}"
+               hx-get="{% url 'attendance:session_list' class_obj.id %}"
+               hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+               hx-push-url="true"
+               class="btn-secondary px-3 py-1.5 text-sm inline-flex items-center">
+                <i class="fas fa-calendar mr-1"></i> Tiết học
+            </a>
+        </div>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">STT</th>
+                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Họ tên</th>
+                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Domain</th>
+                    <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
+                    <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for enrollment in page_obj %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-1.5 text-sm text-gray-500">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                    <td class="px-4 py-1.5 font-medium text-gray-900">
+                        {{ enrollment.student.full_name }}
+                    </td>
+                    <td class="px-4 py-1.5">
+                        <a href="{% url 'students:detail' enrollment.student.id %}" hx-get="{% url 'students:detail' enrollment.student.id %}" hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML" hx-push-url="true" class="px-2 py-1 bg-gray-100 rounded text-sm text-gray-600 hover:bg-primary-100 hover:text-primary-600 transition-colors font-medium">{{ enrollment.student.domain }}</a>
+                    </td>
+                    <td class="px-4 py-1.5">
+                        <span class="px-2 py-0.5 rounded-full text-xs font-medium 
+                            {% if enrollment.status == 'active' %}bg-green-100 text-green-700
+                            {% elif enrollment.status == 'dropped' %}bg-red-100 text-red-700
+                            {% elif enrollment.status == 'completed' %}bg-blue-100 text-blue-700
+                            {% else %}bg-gray-100 text-gray-700{% endif %}">
+                            {{ enrollment.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-1.5 text-right">
+                        {% if user.role == 'admin' %}
+                        <button hx-get="{% url 'classes:drop_student' enrollment.id %}"
+                                hx-target="#history-modal-container"
+                                hx-swap="innerHTML"
+                                class="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors"
+                                title="Gỡ khỏi lớp">
+                            <i class="fas fa-trash-alt text-sm"></i>
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-gray-400">
+                        Chưa có học sinh
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="px-6 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+        <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+        </div>
+        <div class="flex gap-2">
+            {% if page_obj.has_previous %}
+            <button hx-get="{% url 'classes:detail' class_obj.id %}?page={{ page_obj.previous_page_number }}"
+                    hx-target="#class-enrollments-container"
+                    hx-swap="outerHTML"
+                    class="p-1.5 px-4 bg-white hover:bg-gray-100 text-gray-600 rounded border border-gray-200 text-xs font-bold transition-colors uppercase">
+                Trước
+            </button>
+            {% else %}
+            <button disabled class="p-1.5 px-4 bg-gray-50 text-gray-300 rounded border border-gray-200 text-xs font-bold cursor-not-allowed uppercase">
+                Trước
+            </button>
+            {% endif %}
+            
+            {% if page_obj.has_next %}
+            <button hx-get="{% url 'classes:detail' class_obj.id %}?page={{ page_obj.next_page_number }}"
+                    hx-target="#class-enrollments-container"
+                    hx-swap="outerHTML"
+                    class="p-1.5 px-4 bg-white hover:bg-gray-100 text-gray-600 rounded border border-gray-200 text-xs font-bold transition-colors uppercase">
+                Sau
+            </button>
+            {% else %}
+            <button disabled class="p-1.5 px-4 bg-gray-50 text-gray-300 rounded border border-gray-200 text-xs font-bold cursor-not-allowed uppercase">
+                Sau
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>

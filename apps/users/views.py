@@ -32,11 +32,11 @@ def user_list(request):
     if role_filter:
         users = users.filter(role=role_filter)
         
-    per_page = request.GET.get('per_page', 30)
+    per_page = request.GET.get('per_page', 20)
     try:
         per_page = int(per_page)
     except ValueError:
-        per_page = 30
+        per_page = 20
     
     paginator = Paginator(users, per_page)
     page_number = request.GET.get('page')

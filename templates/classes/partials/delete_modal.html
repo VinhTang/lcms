@@ -1,0 +1,71 @@
+<div id="delete-class-modal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm fade-in" 
+     x-data="{ show: true }" x-show="show" x-transition.opacity>
+    
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all border border-gray-100"
+         @click.away="show = false; setTimeout(() => htmx.find('#delete-class-modal').remove(), 300)">
+        
+        <!-- Header with Alert Icon -->
+        <div class="bg-red-50 p-6 flex flex-col items-center border-b border-red-100">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-red-700">Xác nhận xóa hoàn toàn</h3>
+            <p class="text-red-500 text-xs font-medium uppercase tracking-wider mt-1">Hành động không thể hoàn tác</p>
+        </div>
+
+        <!-- Body Content -->
+        <div class="p-6">
+            <div class="text-center mb-6">
+                <p class="text-gray-600 mb-2">Bạn đang yêu cầu xóa lớp học:</p>
+                <div class="bg-gray-50 rounded-2xl p-3 border border-gray-100 inline-block">
+                    <span class="block text-gray-800 font-bold text-lg">{{ class_obj.class_name }}</span>
+                    <span class="text-xs font-mono text-gray-500">{{ class_obj.class_code }}</span>
+                </div>
+            </div>
+
+            <!-- Impact Summary -->
+            <div class="space-y-3 mb-8">
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest pl-1">Dữ liệu sẽ bị xóa vĩnh viễn:</h4>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-xl border border-gray-100">
+                        <i class="fas fa-money-bill-wave text-amber-500 text-xs"></i>
+                        <span class="text-[12px] font-medium text-gray-700">Toàn bộ học phí</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-xl border border-gray-100">
+                        <i class="fas fa-calendar-check text-blue-500 text-xs"></i>
+                        <span class="text-[12px] font-medium text-gray-700">Dữ liệu điểm danh</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-xl border border-gray-100">
+                        <i class="fas fa-clock text-purple-500 text-xs"></i>
+                        <span class="text-[12px] font-medium text-gray-700">Các buổi học</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-xl border border-gray-100">
+                        <i class="fas fa-user-slash text-red-500 text-xs"></i>
+                        <span class="text-[12px] font-medium text-gray-700">Liên kết học sinh</span>
+                    </div>
+                </div>
+                <div class="mt-4 p-3 bg-green-50 rounded-xl border border-green-100 flex items-start gap-2">
+                    <i class="fas fa-shield-alt text-green-600 mt-0.5"></i>
+                    <p class="text-[11px] text-green-700"><strong>Lưu ý:</strong> Tài khoản Học sinh và Người dùng sẽ <strong>KHÔNG</strong> bị xóa.</p>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-col gap-3">
+                <button type="button"
+                        hx-post="{% url 'classes:delete' class_obj.id %}"
+                        hx-vals='{"from_modal": "true"}'
+                        hx-target="#main-content" hx-select="#main-content" hx-swap="outerHTML"
+                        @click="show = false"
+                        class="w-full py-3 bg-red-600 text-white rounded-xl font-bold shadow-lg shadow-red-200 hover:bg-red-700 transition-all active:scale-[0.98]">
+                    Xác nhận xóa ngay bây giờ
+                </button>
+                <button type="button" 
+                        @click="show = false; setTimeout(() => htmx.find('#delete-class-modal').remove(), 300)"
+                        class="w-full py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-all">
+                    Hủy bỏ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

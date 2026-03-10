@@ -24,13 +24,10 @@ def generate_daily_sessions_task():
         6: '0'   # Sunday -> 0
     }
     today_str = day_mapping_reverse[today.weekday()]
-    print(today.weekday())
-    print(today)
     classes = Class.objects.filter(
         start_date__lte=today,
         end_date__gte=today,
     )
-    print(classes)
     created_count = 0
     for cls in classes:
         if not cls.schedule_days:

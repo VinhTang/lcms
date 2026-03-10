@@ -33,11 +33,11 @@ def student_list(request):
     if status_filter:
         students = students.filter(status=status_filter)
         
-    per_page = request.GET.get('per_page', 30)
+    per_page = request.GET.get('per_page', 20)
     try:
         per_page = int(per_page)
     except ValueError:
-        per_page = 30
+        per_page = 20
     
     paginator = Paginator(students, per_page)
     page_number = request.GET.get('page')
@@ -126,21 +126,42 @@ def student_create(request):
 def student_detail(request, student_id):
     student = get_object_or_404(Student, id=student_id)
     
-    # Lấy danh sách lớp đang học
-    active_enrollments = student.enrollments.filter(status='active').select_related('class_enrolled__subject', 'class_enrolled__teacher').order_by('-enrolled_at')
-    # Lấy danh sách lớp đã nghỉ/kết thúc
-    completed_enrollments = student.enrollments.exclude(status='active').select_related('class_enrolled__subject', 'class_enrolled__teacher').order_by('-enrolled_at')
+    # --- Section 1: Active Enrollments ---
+    active_qs = student.enrollments.filter(status='active').select_related('class_enrolled__subject', 'class_enrolled__teacher').order_by('-enrolled_at')
+    active_paginator = Paginator(active_qs, 10)
+    active_page_num = request.GET.get('page_active')
+    active_page_obj = active_paginator.get_page(active_page_num)
     
-    # Lấy lịch sử học phí
+    # --- Section 2: Completed Enrollments ---
+    completed_qs = student.enrollments.exclude(status='active').select_related('class_enrolled__subject', 'class_enrolled__teacher').order_by('-enrolled_at')
+    completed_paginator = Paginator(completed_qs, 10)
+    completed_page_num = request.GET.get('page_completed')
+    completed_page_obj = completed_paginator.get_page(completed_page_num)
+    
+    # --- Section 3: Tuition History ---
     from payments.models import Tuition
-    tuitions = Tuition.objects.filter(enrollment__student=student).select_related('enrollment__class_enrolled').order_by('-created_at')
+    tuition_qs = Tuition.objects.filter(enrollment__student=student).select_related('enrollment__class_enrolled').order_by('-created_at')
+    tuition_paginator = Paginator(tuition_qs, 10)
+    tuition_page_num = request.GET.get('page_tuition')
+    tuition_page_obj = tuition_paginator.get_page(tuition_page_num)
 
     context = {
         'student': student,
-        'active_enrollments': active_enrollments,
-        'completed_enrollments': completed_enrollments,
-        'tuitions': tuitions,
+        'active_page_obj': active_page_obj,
+        'completed_page_obj': completed_page_obj,
+        'tuition_page_obj': tuition_page_obj,
     }
+
+    # HTMX Support for partial updates
+    if request.headers.get('HX-Request'):
+        target = request.headers.get('HX-Target')
+        if target == 'active-enrollments-container':
+            return render(request, 'students/partials/active_enrollments_table.html', context)
+        elif target == 'completed-enrollments-container':
+            return render(request, 'students/partials/completed_enrollments_table.html', context)
+        elif target == 'tuitions-container':
+            return render(request, 'students/partials/tuitions_table.html', context)
+
     return render(request, 'students/detail.html', context)
 
 

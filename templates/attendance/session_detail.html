@@ -38,6 +38,23 @@
                 </a>
             </p>
             <p class="text-gray-500 text-sm mt-1 font-medium">{{ session.scheduled_date|date:"d/m/Y" }} | {{ session.scheduled_start|time:"H:i" }} - {{ session.scheduled_end|time:"H:i" }}</p>
+            
+            {% if session.actual_start or session.actual_end %}
+            <div class="flex flex-wrap items-center gap-3 mt-2 text-xs font-mono">
+                {% if session.actual_start %}
+                <div class="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-100">
+                    <span class="text-[9px] uppercase font-bold text-blue-400">Bắt đầu:</span>
+                    <span>{{ session.actual_start|time:"H:i:s" }}</span>
+                </div>
+                {% endif %}
+                {% if session.actual_end %}
+                <div class="flex items-center gap-1.5 px-2 py-0.5 bg-red-50 text-red-700 rounded-md border border-red-100">
+                    <span class="text-[9px] uppercase font-bold text-red-400">Kết thúc:</span>
+                    <span>{{ session.actual_end|time:"H:i:s" }}</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
         </div>
         <a href="{% url 'attendance:session_list' session.class_enrolled.id %}"
            hx-get="{% url 'attendance:session_list' session.class_enrolled.id %}"
@@ -231,6 +248,28 @@
             </div>
         </div>
     </div>
+
+    <!-- Error Modal -->
+    <div x-show="errorModalOpen" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm" x-cloak>
+        <div @click.away="errorModalOpen = false" class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 overflow-hidden transform transition-all"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+            <div class="p-6">
+                <div class="flex items-center justify-center w-12 h-12 mx-auto rounded-full mb-4 bg-red-100 text-red-600">
+                    <i class="fas fa-times-circle text-xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 text-center">Thông báo lỗi</h3>
+                <p class="text-gray-600 mt-2 text-center text-sm font-medium" x-text="errorMessage"></p>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex justify-center rounded-b-2xl border-t border-gray-100">
+                <button @click="errorModalOpen = false" class="px-8 py-2 bg-red-600 text-white rounded-lg font-medium transition-colors hover:bg-red-700 w-full shadow-sm">Đóng</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -319,6 +358,10 @@ function sessionDiary() {
         confirmMessage: '',
         confirmActionUrl: '',
         confirmActionType: '', 
+        
+        // Error Modal State
+        errorModalOpen: false,
+        errorMessage: '',
         
         // Admin Edit State
         editReasonModalOpen: false,
@@ -409,8 +452,13 @@ function sessionDiary() {
                 if (data.status === 'success') {
                     location.reload();
                 } else {
-                    alert(data.error || 'Có lỗi xảy ra');
+                    this.errorMessage = data.error || 'Có lỗi xảy ra';
+                    this.errorModalOpen = true;
                 }
+            })
+            .catch(err => {
+                this.errorMessage = 'Lỗi kết nối. Vui lòng thử lại sau.';
+                this.errorModalOpen = true;
             });
         }
     };
