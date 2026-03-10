@@ -22,7 +22,6 @@ class User(AbstractUser):
     phone = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="teacher")
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="teacher")
     is_deleted = models.BooleanField(default=False)
     
     history = HistoricalRecords()

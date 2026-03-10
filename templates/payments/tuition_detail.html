@@ -3,7 +3,7 @@
 {% block title %}Chi tiết học phí - LCMS{% endblock %}
 
 {% block content %}
-<div class="fade-in">
+<div class="fade-in" x-data="{ showConfirmModal: false }">
     <!-- Breadcrumbs -->
     <nav class="flex mb-4 text-sm text-gray-500" aria-label="Breadcrumb">
         <ol class="inline-flex items-center space-x-1 md:space-x-3">
@@ -80,7 +80,7 @@
                     
                     {% if not tuition.paid %}
                     <div class="pt-6 mt-2 border-t border-gray-100">
-                        <button class="btn-primary w-full py-3 flex items-center justify-center gap-2 text-lg shadow-sm" onclick="markPaid()">
+                        <button class="btn-primary w-full py-3 flex items-center justify-center gap-2 text-lg shadow-sm" @click="showConfirmModal = true">
                             <i class="fas fa-check-circle"></i> Đánh dấu đã thanh toán
                         </button>
                     </div>
@@ -127,12 +127,67 @@
             </div>
         </div>
     </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div
+        x-show="showConfirmModal"
+        class="fixed inset-0 z-[100] overflow-y-auto"
+        x-cloak
+    >
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Overlay -->
+            <div
+                x-show="showConfirmModal"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 transition-opacity bg-gray-900/60 backdrop-blur-sm"
+                @click="showConfirmModal = false"
+            ></div>
+
+            <!-- Modal Panel -->
+            <div
+                x-show="showConfirmModal"
+                x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="inline-block w-full max-w-lg p-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-3xl sm:my-8"
+            >
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-hand-holding-usd text-3xl text-green-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Xác nhận thanh toán</h3>
+                    <p class="text-gray-500 mb-8 px-4">Xác nhận đánh dấu học phí này là đã thanh toán? Hành động này sẽ được lưu vào lịch sử hệ thống.</p>
+                    
+                    <div class="flex w-full gap-3">
+                        <button
+                            @click="showConfirmModal = false"
+                            class="flex-1 px-6 py-3 text-sm font-bold text-gray-500 bg-gray-100 rounded-2xl hover:bg-gray-200 transition-colors"
+                        >
+                            Hủy bỏ
+                        </button>
+                        <button
+                            @click="markPaid(); showConfirmModal = false"
+                            class="flex-1 px-6 py-3 text-sm font-bold text-white bg-green-600 rounded-2xl hover:bg-green-700 shadow-lg shadow-green-200 transition-all active:scale-95"
+                        >
+                            Xác nhận
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
 function markPaid() {
-    if (!confirm('Xác nhận đánh dấu học phí này là đã thanh toán?')) return;
-    
     fetch('{% url "payments:mark_paid" tuition.id %}', {
         method: 'POST',
         headers: {

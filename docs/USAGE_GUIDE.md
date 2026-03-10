@@ -23,15 +23,19 @@ Chào mừng bạn đến với hệ thống LCMS. Tài liệu này cung cấp c
 ## 2. Vận hành hệ thống
 
 ### Chạy Web Server
+
 ```bash
 python manage.py runserver
 ```
+
 Truy cập tại: `http://127.0.0.1:8000`
 
 ### Chạy các tiến trình ngầm (Daemon Jobs)
+
 Hệ thống sử dụng **Celery** để xử lý các tác vụ tự động (như tính học phí, điểm danh tự động). Bạn cần có **Redis** đang chạy.
 
 1.  **Chạy Celery Worker** (Để thực thi các task):
+
     ```bash
     celery -A lcms worker -l info
     ```
@@ -45,12 +49,12 @@ Hệ thống sử dụng **Celery** để xử lý các tác vụ tự động (
 
 Hệ thống đã cấu hình sẵn các job sau trong `lcms/celery.py`:
 
-| Tên Job | Tác vụ | Tần suất |
-| :--- | :--- | :--- |
-| `generate-daily-sessions` | Tự động tạo các buổi học cho ngày mới | Hàng ngày (01:00 AM) |
-| `auto-end-sessions` | Tự động kết thúc các buổi học đã hết giờ | Mỗi 5 phút |
-| `generate-monthly-tuitions`| Tự động sinh biên lai học phí hàng tháng | Hàng ngày (02:00 AM) |
-| `auto-update-class-status` | Cập nhật trạng thái lớp học (bắt đầu/kết thúc) | Hàng ngày (03:00 AM) |
+| Tên Job                     | Tác vụ                                         | Tần suất             |
+| :-------------------------- | :--------------------------------------------- | :------------------- |
+| `generate-daily-sessions`   | Tự động tạo các buổi học cho ngày mới          | Hàng ngày (01:00 AM) |
+| `auto-end-sessions`         | Tự động kết thúc các buổi học đã hết giờ       | Mỗi 5 phút           |
+| `generate-monthly-tuitions` | Tự động sinh biên lai học phí hàng tháng       | Hàng ngày (02:00 AM) |
+| `auto-update-class-status`  | Cập nhật trạng thái lớp học (bắt đầu/kết thúc) | Hàng ngày (03:00 AM) |
 
 ## 4. Các tính năng nổi bật
 
@@ -59,4 +63,5 @@ Hệ thống đã cấu hình sẵn các job sau trong `lcms/celery.py`:
 - **Điểm danh QR**: Quét mã QR của học sinh để ghi nhận điểm danh nhanh chóng.
 
 ---
-*Lưu ý: Đảm bảo Redis Server đã được cài đặt và đang chạy trước khi khởi động Celery.*
+
+_Lưu ý: Đảm bảo Redis Server đã được cài đặt và đang chạy trước khi khởi động Celery._
