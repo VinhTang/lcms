@@ -177,6 +177,36 @@ def save_session_notes(request, session_id):
     return JsonResponse({'status': 'success'})
 
 
+@login_required
+@require_POST
+def update_session_timing(request, session_id):
+    session = get_object_or_404(ClassSession, id=session_id)
+    
+    if request.user.role != 'admin':
+        return JsonResponse({'error': 'Chỉ Admin mới có quyền thay đổi thời gian tiết học.'}, status=403)
+        
+    scheduled_start = request.POST.get('scheduled_start')
+    scheduled_end = request.POST.get('scheduled_end')
+    
+    if not scheduled_start or not scheduled_end:
+        return JsonResponse({'error': 'Vui lòng nhập đầy đủ giờ bắt đầu và kết thúc.'}, status=400)
+    
+    try:
+        # Validate time format
+        datetime.strptime(scheduled_start, '%H:%M')
+        datetime.strptime(scheduled_end, '%H:%M')
+        
+        session.scheduled_start = scheduled_start
+        session.scheduled_end = scheduled_end
+        session.save(update_fields=['scheduled_start', 'scheduled_end'])
+        
+        return JsonResponse({
+            'status': 'success', 
+            'message': 'Đã cập nhật thời gian tiết học',
+            'new_timing': f'{scheduled_start} - {scheduled_end}'
+        })
+    except ValueError:
+        return JsonResponse({'error': 'Định dạng giờ không hợp lệ (HH:MM).'}, status=400)
 
 
 @login_required

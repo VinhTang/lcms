@@ -102,6 +102,58 @@
         --color-primary-900: 136 19 55;
       }
 
+      [data-theme="violet"] {
+        --color-primary-50: 245 243 255;
+        --color-primary-100: 237 233 254;
+        --color-primary-200: 221 214 254;
+        --color-primary-300: 196 181 253;
+        --color-primary-400: 167 139 250;
+        --color-primary-500: 139 92 246;
+        --color-primary-600: 124 58 237;
+        --color-primary-700: 109 40 217;
+        --color-primary-800: 91 33 182;
+        --color-primary-900: 76 29 149;
+      }
+
+      [data-theme="amber"] {
+        --color-primary-50: 255 251 235;
+        --color-primary-100: 254 243 199;
+        --color-primary-200: 253 230 138;
+        --color-primary-300: 252 211 77;
+        --color-primary-400: 251 191 36;
+        --color-primary-500: 245 158 11;
+        --color-primary-600: 217 119 6;
+        --color-primary-700: 180 83 9;
+        --color-primary-800: 146 64 14;
+        --color-primary-900: 120 53 15;
+      }
+
+      [data-theme="cyan"] {
+        --color-primary-50: 236 254 255;
+        --color-primary-100: 207 250 254;
+        --color-primary-200: 165 243 252;
+        --color-primary-300: 103 232 249;
+        --color-primary-400: 34 211 238;
+        --color-primary-500: 6 182 212;
+        --color-primary-600: 8 145 178;
+        --color-primary-700: 14 116 144;
+        --color-primary-800: 21 94 117;
+        --color-primary-900: 22 78 99;
+      }
+
+      [data-theme="dark"] {
+        --color-primary-50: 248 250 252;
+        --color-primary-100: 241 245 249;
+        --color-primary-200: 226 232 240;
+        --color-primary-300: 203 213 225;
+        --color-primary-400: 148 163 184;
+        --color-primary-500: 100 116 139;
+        --color-primary-600: 71 85 105;
+        --color-primary-700: 51 65 85;
+        --color-primary-800: 30 41 59;
+        --color-primary-900: 15 23 42;
+      }
+
       [x-cloak] {
         display: none !important;
       }
@@ -131,7 +183,7 @@
       }
 
       .sidebar-link {
-        @apply flex items-center gap-3 px-4 py-2.5 text-primary-100 bg-transparent rounded-xl transition-all duration-200 text-[13px] font-medium hover:bg-white/10 hover:text-white hover:shadow-sm;
+        @apply flex items-center gap-3 px-4 py-2.5 text-primary-100 bg-transparent rounded-xl transition-all duration-200 text-[13px] font-medium hover:bg-white/10 hover:text-white hover:shadow-sm whitespace-nowrap overflow-hidden;
       }
       .sidebar-link.active {
         @apply bg-white/20 text-white font-bold shadow-md ring-1 ring-white/30;
@@ -140,7 +192,7 @@
         @apply mb-4;
       }
       .sidebar-group-title {
-        @apply px-4 mb-1.5 text-[10px] font-bold text-primary-300 uppercase tracking-widest;
+        @apply px-4 mb-1.5 text-[10px] font-bold text-primary-300 uppercase tracking-widest transition-opacity duration-200;
       }
 
       .card {
@@ -182,19 +234,33 @@
     <div class="h-full flex overflow-hidden">
       <!-- Sidebar -->
       <aside
-        class="fixed inset-y-0 left-0 z-50 w-64 bg-primary-900 border-r border-primary-800 transform transition-transform duration-300 lg:translate-x-0 flex flex-col"
-        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+        class="fixed inset-y-0 left-0 z-50 bg-primary-900 border-r border-primary-800 transition-all duration-300 flex flex-col overflow-hidden"
+        :class="[
+            sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+            sidebarCollapsed ? 'lg:w-20' : 'lg:w-64 w-64'
+        ]"
       >
         <!-- Logo -->
         <div
-          class="h-16 flex items-center gap-3 px-6 border-b border-primary-800 bg-primary-900"
+          class="h-16 flex items-center px-4 border-b border-primary-800 bg-primary-900 shrink-0 transition-all duration-300 relative"
+          :class="sidebarCollapsed ? 'justify-center' : 'justify-between'"
         >
-          <div
-            class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md"
-          >
-            <i class="fas fa-graduation-cap text-primary-600 text-lg"></i>
+          <div class="flex items-center" :class="sidebarCollapsed ? 'justify-center' : 'gap-3'">
+            <div
+              class="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-md shrink-0"
+            >
+              <i class="fas fa-graduation-cap text-primary-600 text-sm"></i>
+            </div>
+            <span class="text-white text-lg font-bold tracking-tight transition-all duration-300 overflow-hidden"
+                  :class="sidebarCollapsed ? 'opacity-0 w-0' : 'opacity-100'">LCMS</span>
           </div>
-          <span class="text-white text-xl font-bold tracking-tight">LCMS</span>
+
+          <!-- Toggle Button (Top) -->
+          <button @click="toggleSidebar()" 
+                  class="hidden lg:flex w-8 h-8 items-center justify-center rounded-lg text-primary-300 hover:text-white hover:bg-white/10 transition-all"
+                  :title="sidebarCollapsed ? 'Mở rộng' : 'Thu nhỏ'">
+             <i class="fas transition-transform duration-300" :class="sidebarCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
+          </button>
         </div>
 
         <!-- Navigation -->
@@ -204,154 +270,176 @@
               <a
                 href="{% url 'dashboard' %}"
                 class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                title="Dashboard"
+                :class="sidebarCollapsed ? 'justify-center px-0' : ''"
                 hx-get="{% url 'dashboard' %}"
                 hx-target="#main-content"
                 hx-select="#main-content"
                 hx-swap="outerHTML"
                 hx-push-url="true"
               >
-                <i class="fas fa-home w-5"></i>
-                <span>Dashboard</span>
+                <i class="fas fa-home w-5 text-center"></i>
+                <span :class="sidebarCollapsed ? 'hidden' : ''">Dashboard</span>
               </a>
             </div>
           </div>
 
           {% if user.role == 'admin' %}
           <div class="sidebar-group">
-            <div class="sidebar-group-title">Quản lý hệ thống</div>
+            <div class="sidebar-group-title" :class="sidebarCollapsed ? 'opacity-0 h-0 overflow-hidden mb-0' : ''">Quản lý hệ thống</div>
             <div class="space-y-2.5">
               <a
                 href="{% url 'users:list' %}"
                 class="sidebar-link {% if 'users' in request.path %}active{% endif %}"
+                title="Người dùng"
+                :class="sidebarCollapsed ? 'justify-center px-0' : ''"
                 hx-get="{% url 'users:list' %}"
                 hx-target="#main-content"
                 hx-select="#main-content"
                 hx-swap="outerHTML"
                 hx-push-url="true"
               >
-                <i class="fas fa-users w-5"></i>
-                <span>Người dùng</span>
+                <i class="fas fa-users w-5 text-center"></i>
+                <span :class="sidebarCollapsed ? 'hidden' : ''">Người dùng</span>
               </a>
               <a
                 href="{% url 'students:list' %}"
                 class="sidebar-link {% if 'students' in request.path and 'my-children' not in request.path %}active{% endif %}"
+                title="Học sinh"
+                :class="sidebarCollapsed ? 'justify-center px-0' : ''"
                 hx-get="{% url 'students:list' %}"
                 hx-target="#main-content"
                 hx-select="#main-content"
                 hx-swap="outerHTML"
                 hx-push-url="true"
               >
-                <i class="fas fa-user-graduate w-5"></i>
-                <span>Học sinh</span>
+                <i class="fas fa-user-graduate w-5 text-center"></i>
+                <span :class="sidebarCollapsed ? 'hidden' : ''">Học sinh</span>
               </a>
               <a
                 href="{% url 'classes:list' %}"
                 class="sidebar-link {% if request.path == '/classes/' %}active{% endif %}"
+                title="Lớp học"
+                :class="sidebarCollapsed ? 'justify-center px-0' : ''"
                 hx-get="{% url 'classes:list' %}"
                 hx-target="#main-content"
                 hx-select="#main-content"
                 hx-swap="outerHTML"
                 hx-push-url="true"
               >
-                <i class="fas fa-school w-5"></i>
-                <span>Lớp học</span>
+                <i class="fas fa-school w-5 text-center"></i>
+                <span :class="sidebarCollapsed ? 'hidden' : ''">Lớp học</span>
               </a>
               <a
                 href="{% url 'payments:tuition_list' %}"
                 class="sidebar-link {% if 'tuitions' in request.path %}active{% endif %}"
+                title="Học phí"
+                :class="sidebarCollapsed ? 'justify-center px-0' : ''"
                 hx-get="{% url 'payments:tuition_list' %}"
                 hx-target="#main-content"
                 hx-select="#main-content"
                 hx-swap="outerHTML"
                 hx-push-url="true"
               >
-                <i class="fas fa-money-bill-wave w-5"></i>
-                <span>Học phí</span>
+                <i class="fas fa-money-bill-wave w-5 text-center"></i>
+                <span :class="sidebarCollapsed ? 'hidden' : ''">Học phí</span>
               </a>
               <a
                 href="{% url 'attendance:session_statistics' %}"
                 class="sidebar-link {% if 'statistics' in request.path %}active{% endif %}"
+                title="Thống kê tiết học"
+                :class="sidebarCollapsed ? 'justify-center px-0' : ''"
                 hx-get="{% url 'attendance:session_statistics' %}"
                 hx-target="#main-content"
                 hx-select="#main-content"
                 hx-swap="outerHTML"
                 hx-push-url="true"
               >
-                <i class="fas fa-chart-bar w-5"></i>
-                <span>Thống kê tiết học</span>
+                <i class="fas fa-chart-bar w-5 text-center"></i>
+                <span :class="sidebarCollapsed ? 'hidden' : ''">Thống kê tiết học</span>
               </a>
               <a
                 href="{% url 'users:activity_logs' %}"
                 class="sidebar-link {% if 'activity-logs' in request.path %}active{% endif %}"
+                title="Lịch sử hoạt động"
+                :class="sidebarCollapsed ? 'justify-center px-0' : ''"
                 hx-get="{% url 'users:activity_logs' %}"
                 hx-target="#main-content"
                 hx-select="#main-content"
                 hx-swap="outerHTML"
                 hx-push-url="true"
               >
-                <i class="fas fa-history w-5"></i>
-                <span>Lịch sử hoạt động</span>
+                <i class="fas fa-history w-5 text-center"></i>
+                <span :class="sidebarCollapsed ? 'hidden' : ''">Lịch sử hoạt động</span>
               </a>
             </div>
           </div>
           {% endif %}
           {% if user.role == 'teacher' or user.role == 'assistant' %}
           <div class="sidebar-group">
-            <div class="sidebar-group-title">Chuyên môn</div>
+            <div class="sidebar-group-title" :class="sidebarCollapsed ? 'opacity-0 h-0 overflow-hidden mb-0' : ''">Chuyên môn</div>
             <div class="space-y-2.5">
               <a
                 href="{% url 'classes:my_classes' %}"
                 class="sidebar-link {% if 'my-classes' in request.path %}active{% endif %}"
+                title="Lớp của tôi"
+                :class="sidebarCollapsed ? 'justify-center px-0' : ''"
                 hx-get="{% url 'classes:my_classes' %}"
                 hx-target="#main-content"
                 hx-select="#main-content"
                 hx-swap="outerHTML"
                 hx-push-url="true"
               >
-                <i class="fas fa-chalkboard-teacher w-5"></i>
-                <span>Lớp của tôi</span>
+                <i class="fas fa-chalkboard-teacher w-5 text-center"></i>
+                <span :class="sidebarCollapsed ? 'hidden' : ''">Lớp của tôi</span>
               </a>
               <a
                 href="{% url 'attendance:my_sessions' %}"
                 class="sidebar-link {% if 'my-sessions' in request.path %}active{% endif %}"
+                title="Tiết học"
+                :class="sidebarCollapsed ? 'justify-center px-0' : ''"
                 hx-get="{% url 'attendance:my_sessions' %}"
                 hx-target="#main-content"
                 hx-select="#main-content"
                 hx-swap="outerHTML"
                 hx-push-url="true"
               >
-                <i class="fas fa-calendar-check w-5"></i>
-                <span>Tiết học</span>
+                <i class="fas fa-calendar-check w-5 text-center"></i>
+                <span :class="sidebarCollapsed ? 'hidden' : ''">Tiết học</span>
               </a>
             </div>
           </div>
           {% endif %} {% if user.role == 'parent' %}
           <div class="sidebar-group">
-            <div class="sidebar-group-title">Thông tin của con</div>
+            <div class="sidebar-group-title" :class="sidebarCollapsed ? 'opacity-0 h-0 overflow-hidden mb-0' : ''">Thông tin của con</div>
             <div class="space-y-2.5">
               <a
                 href="{% url 'students:my_children' %}"
                 class="sidebar-link {% if 'my-children' in request.path %}active{% endif %}"
+                title="Con của tôi"
+                :class="sidebarCollapsed ? 'justify-center px-0' : ''"
                 hx-get="{% url 'students:my_children' %}"
                 hx-target="#main-content"
                 hx-select="#main-content"
                 hx-swap="outerHTML"
                 hx-push-url="true"
               >
-                <i class="fas fa-child w-5"></i>
-                <span>Con của tôi</span>
+                <i class="fas fa-child w-5 text-center"></i>
+                <span :class="sidebarCollapsed ? 'hidden' : ''">Con của tôi</span>
               </a>
               <a
                 href="{% url 'payments:my_tuitions' %}"
                 class="sidebar-link {% if 'my-tuitions' in request.path %}active{% endif %}"
+                title="Học phí đóng"
+                :class="sidebarCollapsed ? 'justify-center px-0' : ''"
                 hx-get="{% url 'payments:my_tuitions' %}"
                 hx-target="#main-content"
                 hx-select="#main-content"
                 hx-swap="outerHTML"
                 hx-push-url="true"
               >
-                <i class="fas fa-money-bill-wave w-5"></i>
-                <span>Học phí đóng</span>
+                <i class="fas fa-money-bill-wave w-5 text-center"></i>
+                <span :class="sidebarCollapsed ? 'hidden' : ''">Học phí đóng</span>
               </a>
             </div>
           </div>
@@ -359,41 +447,47 @@
         </nav>
 
         <!-- User Info -->
-        <div
-          class="h-20 bg-primary-800 border-t border-primary-700 px-4 flex items-center gap-3"
-        >
+        <div class="mt-auto flex flex-col transition-all duration-300">
           <div
-            class="w-10 h-10 bg-white/20 text-white rounded-full flex items-center justify-center font-bold shadow-inner"
+            class="h-20 bg-primary-800 border-t border-primary-700 px-4 flex items-center gap-3 overflow-hidden relative shrink-0"
+            :class="sidebarCollapsed ? 'justify-center px-0' : ''"
           >
-            {{ user.first_name|default:user.username|make_list|first|upper }}
+            <div
+              class="w-10 h-10 bg-white/20 text-white rounded-full flex items-center justify-center font-bold shadow-inner shrink-0"
+              title="{{ user.get_full_name|default:user.username }}"
+            >
+              {{ user.first_name|default:user.username|make_list|first|upper }}
+            </div>
+            <div class="flex-1 min-w-0 transition-all duration-300" :class="sidebarCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'">
+              <p class="text-[13px] font-bold text-white truncate">
+                {{ user.get_full_name|default:user.username }}
+              </p>
+              <p class="text-[11px] text-primary-200 truncate">
+                {% if user.role == 'admin' %}Quản trị viên{% elif user.role == 'teacher' %}Giáo viên{% elif user.role == 'assistant' %}Trợ giảng{% else %}Phụ huynh{% endif %}
+              </p>
+            </div>
+            <div class="flex items-center gap-1 transition-all duration-300" :class="sidebarCollapsed ? 'absolute -top-10' : ''">
+                <a
+                  href="{% url 'password_change' %}"
+                  hx-get="{% url 'password_change' %}"
+                  hx-target="#main-content"
+                  hx-select="#main-content"
+                  hx-swap="outerHTML"
+                  hx-push-url="true"
+                  class="w-8 h-8 flex items-center justify-center rounded-lg text-primary-200 hover:text-white hover:bg-white/10 transition-colors"
+                  title="Đổi mật khẩu"
+                >
+                  <i class="fas fa-key"></i>
+                </a>
+                <a
+                  href="{% url 'logout' %}"
+                  class="w-8 h-8 flex items-center justify-center rounded-lg text-primary-200 hover:text-white hover:bg-white/10 transition-colors"
+                  title="Đăng xuất"
+                >
+                  <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
           </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-[13px] font-bold text-white truncate">
-              {{ user.get_full_name|default:user.username }}
-            </p>
-            <p class="text-[11px] text-primary-200 truncate">
-              {% if user.role == 'admin' %}Quản trị viên{% elif user.role == 'teacher' %}Giáo viên{% elif user.role == 'assistant' %}Trợ giảng{% else %}Phụ huynh{% endif %}
-            </p>
-          </div>
-          <a
-            href="{% url 'password_change' %}"
-            hx-get="{% url 'password_change' %}"
-            hx-target="#main-content"
-            hx-select="#main-content"
-            hx-swap="outerHTML"
-            hx-push-url="true"
-            class="w-8 h-8 flex items-center justify-center rounded-lg text-primary-200 hover:text-white hover:bg-white/10 transition-colors"
-            title="Đổi mật khẩu"
-          >
-            <i class="fas fa-key"></i>
-          </a>
-          <a
-            href="{% url 'logout' %}"
-            class="w-8 h-8 flex items-center justify-center rounded-lg text-primary-200 hover:text-white hover:bg-white/10 transition-colors"
-            title="Đăng xuất"
-          >
-            <i class="fas fa-sign-out-alt"></i>
-          </a>
         </div>
       </aside>
 
@@ -405,7 +499,8 @@
       ></div>
 
       <!-- Main Content -->
-      <div class="flex-1 lg:ml-64 flex flex-col h-screen overflow-hidden">
+      <div class="flex-1 transition-all duration-300 flex flex-col h-screen overflow-hidden"
+           :class="sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'">
         <!-- Top Header -->
         <header
           class="h-16 bg-primary-600 border-b border-primary-700 flex items-center justify-between px-4 lg:px-8 shrink-0 z-30 shadow-md"
@@ -421,7 +516,8 @@
 
           <div class="flex items-center gap-4">
             <!-- Real-time Clock -->
-            <div class="hidden sm:flex items-center text-white/60 px-3 py-1.5 text-xs italic"
+            <div class="hidden sm:flex items-center text-white/60 px-3 py-1.5 text-xs italic transition-all duration-300"
+                 :class="sidebarCollapsed ? 'translate-x-0' : ''"
                  x-data="{ time: new Date() }"
                  x-init="setInterval(() => time = new Date(), 1000)">
                 <i class="far fa-clock mr-1.5"></i>
@@ -456,32 +552,46 @@
                   <button
                     @click="setTheme('blue')"
                     class="w-8 h-8 rounded-full bg-blue-500 ring-2 ring-offset-2 ring-transparent focus:ring-blue-500 hover:scale-110 transition-all"
+                    title="Xanh dương"
                   ></button>
                   <button
                     @click="setTheme('indigo')"
                     class="w-8 h-8 rounded-full bg-indigo-500 ring-2 ring-offset-2 ring-transparent focus:ring-indigo-500 hover:scale-110 transition-all"
+                    title="Chàm"
                   ></button>
                   <button
                     @click="setTheme('emerald')"
                     class="w-8 h-8 rounded-full bg-emerald-500 ring-2 ring-offset-2 ring-transparent focus:ring-emerald-500 hover:scale-110 transition-all"
+                    title="Ngọc lục bảo"
                   ></button>
                   <button
                     @click="setTheme('rose')"
                     class="w-8 h-8 rounded-full bg-rose-500 ring-2 ring-offset-2 ring-transparent focus:ring-rose-500 hover:scale-110 transition-all"
+                    title="Hồng"
+                  ></button>
+                  <button
+                    @click="setTheme('violet')"
+                    class="w-8 h-8 rounded-full bg-violet-500 ring-2 ring-offset-2 ring-transparent focus:ring-violet-500 hover:scale-111 transition-all shadow-[0_0_10px_rgba(139,92,246,0.5)]"
+                    title="Tím rực rỡ"
+                  ></button>
+                  <button
+                    @click="setTheme('amber')"
+                    class="w-8 h-8 rounded-full bg-amber-500 ring-2 ring-offset-2 ring-transparent focus:ring-amber-500 hover:scale-111 transition-all shadow-[0_0_10px_rgba(245,158,11,0.5)]"
+                    title="Hổ phách loe"
+                  ></button>
+                  <button
+                    @click="setTheme('cyan')"
+                    class="w-8 h-8 rounded-full bg-cyan-500 ring-2 ring-offset-2 ring-transparent focus:ring-cyan-500 hover:scale-111 transition-all shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                    title="Xanh lơ ban đêm"
+                  ></button>
+                  <button
+                    @click="setTheme('dark')"
+                    class="w-8 h-8 rounded-full bg-slate-800 ring-2 ring-offset-2 ring-transparent focus:ring-slate-800 hover:scale-111 transition-all shadow-[0_0_10px_rgba(30,41,59,0.5)]"
+                    title="Bóng đêm slate"
                   ></button>
                 </div>
               </div>
             </div>
-
-            <!-- Notifications -->
-            <button
-              class="relative w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors shadow-sm"
-            >
-              <i class="fas fa-bell text-[15px]"></i>
-              <span
-                class="absolute top-[6px] right-[6px] w-[8px] h-[8px] bg-red-400 border-2 border-primary-600 rounded-full"
-              ></span>
-            </button>
           </div>
         </header>
 
@@ -581,10 +691,15 @@
       function appData() {
         return {
           sidebarOpen: false,
+          sidebarCollapsed: localStorage.getItem("sidebar_collapsed") === "true",
           setTheme(color) {
             localStorage.setItem("lcms_theme", color);
             document.documentElement.setAttribute("data-theme", color);
           },
+          toggleSidebar() {
+            this.sidebarCollapsed = !this.sidebarCollapsed;
+            localStorage.setItem("sidebar_collapsed", this.sidebarCollapsed);
+          }
         };
       }
 

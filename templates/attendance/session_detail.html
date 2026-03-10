@@ -37,7 +37,14 @@
                     {{ session.class_enrolled.teacher.domain }}
                 </a>
             </p>
-            <p class="text-gray-500 text-sm mt-1 font-medium">{{ session.scheduled_date|date:"d/m/Y" }} | {{ session.scheduled_start|time:"H:i" }} - {{ session.scheduled_end|time:"H:i" }}</p>
+            <p class="text-gray-500 text-sm mt-1 font-medium flex items-center gap-2">
+                <span>{{ session.scheduled_date|date:"d/m/Y" }} | <span id="display-timing">{{ session.scheduled_start|time:"H:i" }} - {{ session.scheduled_end|time:"H:i" }}</span></span>
+                {% if request.user.role == 'admin' %}
+                <button @click="openEditTimingModal()" class="text-gray-400 hover:text-primary-600 transition-colors" title="Sửa thời gian">
+                    <i class="fas fa-edit"></i>
+                </button>
+                {% endif %}
+            </p>
             
             {% if session.actual_start or session.actual_end %}
             <div class="flex flex-wrap items-center gap-3 mt-2 text-xs font-mono">
@@ -270,6 +277,42 @@
             </div>
         </div>
     </div>
+
+    <!-- Edit Timing Modal -->
+    <div x-show="editTimingModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" x-cloak>
+        <div @click.away="editTimingModalOpen = false" class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden transform transition-all"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+            <div class="p-6">
+                <div class="flex items-center justify-center w-12 h-12 mx-auto rounded-full mb-4 bg-primary-100 text-primary-600">
+                    <i class="fas fa-clock text-xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 text-center">Điều chỉnh giờ học</h3>
+                <p class="text-gray-600 mt-2 text-center text-sm mb-6">Thay đổi giờ bắt đầu và kết thúc cho tiết học ngày {{ session.scheduled_date|date:"d/m/Y" }}.</p>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Giờ bắt đầu</label>
+                        <input type="time" x-model="newStartTime" class="input-field w-full">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Giờ kết thúc</label>
+                        <input type="time" x-model="newEndTime" class="input-field w-full">
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex justify-between gap-3 rounded-b-2xl border-t border-gray-100">
+                <button @click="editTimingModalOpen = false" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium transition-colors hover:bg-gray-50 flex-1">Hủy</button>
+                <button @click="submitEditTiming()" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors flex-1 shadow-sm">
+                    Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -370,6 +413,11 @@ function sessionDiary() {
         editTargetStatus: '',
         editOriginalElement: null,
 
+        // Timing Edit State
+        editTimingModalOpen: false,
+        newStartTime: '{{ session.scheduled_start|time:"H:i" }}',
+        newEndTime: '{{ session.scheduled_end|time:"H:i" }}',
+
         init() {
             window.addEventListener('open-admin-edit', (e) => {
                 this.editTargetId = e.detail.attendanceId;
@@ -422,6 +470,38 @@ function sessionDiary() {
                 row.style.opacity = '1';
                 alert('Lỗi mạng. Vui lòng thử lại.');
                 revertRadioGroup(this.editOriginalElement);
+            });
+        },
+        
+        openEditTimingModal() {
+            this.editTimingModalOpen = true;
+        },
+
+        submitEditTiming() {
+            const payload = new URLSearchParams();
+            payload.append('scheduled_start', this.newStartTime);
+            payload.append('scheduled_end', this.newEndTime);
+            
+            fetch("{% url 'attendance:update_session_timing' session.id %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: payload
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    this.editTimingModalOpen = false;
+                    document.getElementById('display-timing').textContent = data.new_timing;
+                    // Optional: show a success toast
+                } else {
+                    alert(data.error || 'Có lỗi xảy ra');
+                }
+            })
+            .catch(err => {
+                alert('Lỗi mạng. Vui lòng thử lại.');
             });
         },
         
