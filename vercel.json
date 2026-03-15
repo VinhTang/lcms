@@ -1,0 +1,8 @@
+{
+  "buildCommand": "pip install -r requirements.txt && python manage.py collectstatic --noinput",
+  "installCommand": "pip install -r requirements.txt",
+  "framework": null,
+  "outputDirectory": "staticfiles",
+  "startCommand": "gunicorn lcms.wsgi --worker-class=gevent --workers=2 --bind=0.0.0.0:$PORT",
+  "devCommand": "python manage.py runserver 0.0.0.0:$PORT"
+}

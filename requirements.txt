@@ -11,3 +11,4 @@ dj-database-url>=2.0.0
 celery>=5.3.6
 redis>=5.0.1
 python-dateutil>=2.8.2
+gevent>=23.0.0
