@@ -10,7 +10,6 @@ from django.shortcuts import render
 
 urlpatterns = [
     path("", RedirectView.as_view(url="/accounts/login/", permanent=False), name="home"),
-    path("admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),
     path("accounts/", include("allauth.urls")),
     path("users/", include("users.urls", namespace="users")),
@@ -23,6 +22,7 @@ urlpatterns = [
 # Error Page Testing Routes (Visible even in DEBUG=True)
 if settings.DEBUG:
     urlpatterns += [
+        path("admin/", admin.site.urls),
         path("test-404/", lambda r: render(r, "404.html"), name="test-404"),
         path("test-500/", lambda r: render(r, "500.html"), name="test-500"),
     ]
