@@ -30,5 +30,5 @@ if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # Custom Error Handlers
-handler404 = 'django.views.defaults.page_not_found'
-handler500 = 'django.views.defaults.server_error'
+handler404 = 'lcms.views.handler404'
+handler500 = 'lcms.views.handler500'
