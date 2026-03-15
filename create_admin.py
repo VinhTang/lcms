@@ -16,6 +16,7 @@ def create_initial_admin():
     if not User.objects.filter(email=email).exists():
         print(f"Creating superuser: {email}...")
         User.objects.create_superuser(
+            username=email,
             email=email,
             password=password,
             first_name=first_name,
