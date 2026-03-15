@@ -12,4 +12,3 @@ env/
 .dockerignore
 Dockerfile
 docker-compose.yml
-docker-entrypoint.sh

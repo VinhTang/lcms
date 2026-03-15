@@ -21,7 +21,6 @@ services:
   web:
     build: .
     volumes:
-      - .:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/media
     environment:
@@ -43,7 +42,6 @@ services:
     build: .
     command: celery -A lcms worker --loglevel=info
     volumes:
-      - .:/app
       - media_volume:/app/media
     environment:
       - DATABASE_URL=postgres://lcms_user:lcms_password@db:5432/lcms
@@ -57,8 +55,8 @@ services:
   celery_beat:
     build: .
     command: celery -A lcms beat --loglevel=info
-    volumes:
-      - .:/app
+    # volumes:
+    #   - .:/app
     environment:
       - DATABASE_URL=postgres://lcms_user:lcms_password@db:5432/lcms
       - REDIS_URL=redis://redis:6379/0
