@@ -9,11 +9,6 @@ class Tuition(models.Model):
         ("monthly", "Theo tháng"),
         ("course", "Theo khóa học"),
     ]
-    PAYMENT_METHOD_CHOICES = [
-        ("cash", "Tiền mặt"),
-        ("transfer", "Chuyển khoản"),
-        ("card", "Thẻ"),
-    ]
 
     enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name="tuitions")
     tuition_type = models.CharField(max_length=20, choices=TUITION_TYPE_CHOICES, default="monthly")
@@ -23,7 +18,7 @@ class Tuition(models.Model):
     due_date = models.DateField()
     paid = models.BooleanField(default=False)
     paid_at = models.DateTimeField(null=True, blank=True)
-    payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES, blank=True)
+
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -42,32 +37,22 @@ class Tuition(models.Model):
         except Exception:
             return f"Tuition #{self.pk}"
 
-    def mark_as_paid(self, payment_method=None):
+    def mark_as_paid(self):
         self.paid = True
         self.paid_at = timezone.now()
-        if payment_method:
-            self.payment_method = payment_method
         self.save()
 
         PaymentHistory.objects.create(
             tuition=self,
             amount=self.amount,
             paid_at=self.paid_at,
-            payment_method=self.payment_method
         )
 
 
 class PaymentHistory(models.Model):
-    PAYMENT_METHOD_CHOICES = [
-        ("cash", "Tiền mặt"),
-        ("transfer", "Chuyển khoản"),
-        ("card", "Thẻ"),
-    ]
-
     tuition = models.ForeignKey(Tuition, on_delete=models.CASCADE, related_name="payment_histories")
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     paid_at = models.DateTimeField()
-    payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES, blank=True)
     notes = models.TextField(blank=True)
 
     history = HistoricalRecords()

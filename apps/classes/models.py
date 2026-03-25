@@ -6,7 +6,6 @@ from simple_history.models import HistoricalRecords
 
 class Subject(models.Model):
     subject_name = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
 
     history = HistoricalRecords()

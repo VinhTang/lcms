@@ -155,8 +155,7 @@ def mark_paid(request, tuition_id):
     tuition = get_object_or_404(Tuition, id=tuition_id)
     
     if request.method == 'POST':
-        payment_method = request.POST.get('payment_method', '')
-        tuition.mark_as_paid(payment_method)
+        tuition.mark_as_paid()
         
         if request.headers.get('HX-Request'):
             referer = request.META.get('HTTP_REFERER', '/')

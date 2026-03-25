@@ -28,7 +28,6 @@
                         <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Lớp</th>
                         <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Tháng/Khóa</th>
                         <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Số tiền</th>
-                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">Phương thức</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -39,15 +38,6 @@
                         <td class="px-4 py-1.5 text-sm text-gray-600">{{ history.tuition.enrollment.class_enrolled.class_name }}</td>
                         <td class="px-4 py-1.5 text-sm text-gray-600">{{ history.tuition.month|default:history.tuition.course_name }}</td>
                         <td class="px-4 py-1.5 font-bold text-green-600">+{{ history.amount|floatformat:0 }} VND</td>
-                        <td class="px-4 py-1.5">
-                            {% if history.payment_method == 'cash' %}
-                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Tiền mặt</span>
-                            {% elif history.payment_method == 'transfer' %}
-                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">Chuyển khoản</span>
-                            {% else %}
-                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">Thẻ</span>
-                            {% endif %}
-                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

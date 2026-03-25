@@ -27,12 +27,15 @@
                 search: '',
                 selectedAll: false,
                 toggleAll() {
-                    const checkboxes = this.$el.querySelectorAll('.student-checkbox');
-                    checkboxes.forEach(cb => {
-                        const row = cb.closest('div.student-row');
-                        if (row && (!row.hasAttribute('style') || row.style.display !== 'none')) {
-                            cb.checked = this.selectedAll;
-                        }
+                    this.$nextTick(() => {
+                        const checkboxes = Array.from(this.$el.querySelectorAll('.student-checkbox'));
+                        checkboxes.forEach(cb => {
+                            const row = cb.closest('.student-row');
+                            // Only toggle checkboxes that are currently visible
+                            if (row && window.getComputedStyle(row).display !== 'none') {
+                                cb.checked = this.selectedAll;
+                            }
+                        });
                     });
                 }
             }">
@@ -61,7 +64,7 @@
                         <div class="max-h-72 overflow-y-auto divide-y divide-gray-100 bg-white">
                             {% for student in available_students %}
                             <div class="student-row px-4 py-2.5 flex items-center gap-3 hover:bg-gray-50 transition-colors"
-                                 x-show="!search || '{{ student.full_name|lower }}'.includes(search.toLowerCase())">
+                                 x-show="!search || '{{ student.full_name|lower|escapejs }}'.includes(search.toLowerCase())">
                                 <input type="checkbox" name="students" value="{{ student.id }}" class="student-checkbox rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-4 h-4 cursor-pointer">
                                 <div class="flex gap-2">
                                     <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold text-xs uppercase">{{ student.full_name|slice:":1" }}</div>
